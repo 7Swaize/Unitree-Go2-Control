@@ -83,7 +83,7 @@ class InputSignalCallbackManager:
     def __init__(self) -> None:
         self.callbacks: Dict[InputSignal, List[SignalCallbackInfo]] = {}
         self.callback_info_factory = CallbackInfoFactory[ControllerState]()
-        self._previous_state = ControllerState()
+        self.previous_state = ControllerState()
 
     def register_signal_callback(
             self,
@@ -122,6 +122,77 @@ class InputSignalCallbackManager:
 
             if not self.callbacks[signal]:
                 del self.callbacks[signal]
+
+    def determine_callbacks_to_call(self, controller_state: ControllerState) -> List[SignalCallbackInfo]:
+        to_call = []
+
+        for signal, callbacks in self.callbacks.items():
+            for callback_info in callbacks:
+                if not callback_info.enabled:
+                    continue
+            
+                if self.should_trigger_callback(signal, callback_info, controller_state):
+                    to_call.append(callback_info)
+
+        self.previous_state = ControllerState(**controller_state.__dict__) #see what this actually does
+        return to_call
+    
+    def should_trigger_callback(
+            self,
+            signal: InputSignal,
+            callback_info: SignalCallbackInfo,
+            current_state: ControllerState
+    ) -> bool:
+        if signal == InputSignal.ANY_CHANGE:
+            return current_state.changed
+        
+        if signal == InputSignal.ANY_BUTTON:
+            return self.any_button_changed(current_state)
+            
+        if signal == InputSignal.ANY_ANALOG:
+            return self.any_analog_changed(current_state)
+        
+        if signal == InputSignal.LEFT_STICK:
+            return self.stick_changed('l', current_state, callback_info.threshold)
+            
+        if signal == InputSignal.RIGHT_STICK:
+            return self.stick_changed('r', current_state, callback_info.threshold)
+        
+        signal_attr = signal.value
+        if not hasattr(current_state, signal_attr):
+            return False
+            
+        current_value = getattr(current_state, signal_attr)
+        previous_value = getattr(self.previous_state, signal_attr, 0.0)
+        
+        # For analog inputs
+        if self.is_analog_input(signal):
+            return self.check_analog_trigger(
+                current_value, previous_value, callback_info
+            )
+        
+        # For digital inputs (buttons)
+        return self.check_digital_trigger(
+            current_value, previous_value, callback_info
+        )
+    
+    def any_button_changed(self, currrent_state: ControllerState) -> bool:
+        return True
+    
+    def any_analog_changed(self, current_state: ControllerState) -> bool:
+        return True
+    
+    def stick_changed(self, stick: str, current_state: ControllerState, threshold: float) -> bool:
+        return True
+    
+    def is_analog_input(self, signal: InputSignal) -> bool:
+        return True
+    
+    def check_analog_trigger(self, current: float, previous: float, callback_info: SignalCallbackInfo) -> bool:
+        return True
+    
+    def check_digital_trigger(self, current: float, previous: float, callback_info: SignalCallbackInfo) -> bool:
+        return True
 
 
 class CallbackManager:
