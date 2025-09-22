@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional, Set
 from enum import Enum
 
-from test_scripts.controller_interface import ControllerState
+from test_scripts.input_handle import ControllerState
 
 class State(ABC):
     @abstractmethod
