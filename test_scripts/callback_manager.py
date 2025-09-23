@@ -1,11 +1,17 @@
-from enum import Enum
-from test_scripts.input_handle import ControllerState
-
 import threading
+
+from test_scripts.input_handle import ControllerState, UnitreeRemoteControllerInputParser
+
+from enum import Enum
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, List, Optional, TypeVar, cast
+from typing import Any, Dict, List, Optional, TypeVar, cast
 from dataclasses import dataclass
+
+from unitree_sdk2py.idl.default import unitree_go_msg_dds__LowState_ # specific to using Go2
+from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_ # specific to using Go2
+from unitree_sdk2py.core.channel import ChannelSubscriber
+
 
 T = TypeVar("T")
 
@@ -37,15 +43,10 @@ class InputSignal(Enum):
     F1 = "f1"
     F3 = "f3"
     
-    ANY_BUTTON = "any_button"
-    ANY_ANALOG = "any_analog"
-    ANY_CHANGE = "any_change"
-    
 @dataclass
 class CallbackInfo[T]:
     callback: Callable[[T], None]
     name: Optional[str]
-    enabled: bool
 
 @dataclass
 class SignalCallbackInfo[T](CallbackInfo[T]):
@@ -57,7 +58,6 @@ class CallbackInfoFactory[T]:
         self,
         callback: Callable[[T], None],
         name: Optional[str] = None,
-        enabled: bool = True,
         signal: Optional[InputSignal] = None,
         threshold: float = 0.1,
     ) -> CallbackInfo[T]:
@@ -67,38 +67,36 @@ class CallbackInfoFactory[T]:
             return SignalCallbackInfo(
                 callback=callback,
                 name=resolved_name,
-                enabled=enabled,
                 signal=signal,
-                threshold=threshold,
+                threshold=threshold
             )
 
         return CallbackInfo(
             callback=callback,
-            name=resolved_name,
-            enabled=enabled
+            name=resolved_name
         )   
 
-
+# if callbacks are complex (AI calculations, for example), callback execution can be offloaded to a worker thread as outlined here: https://docs.python.org/3/library/concurrent.futures.html
 class InputSignalCallbackManager:
     def __init__(self) -> None:
         self.callbacks: Dict[InputSignal, List[SignalCallbackInfo]] = {}
         self.callback_info_factory = CallbackInfoFactory[ControllerState]()
         self.previous_state = ControllerState()
-
+    
     def register_signal_callback(
             self,
             callback: Callable[[ControllerState], None],
             signal: InputSignal,
             name: Optional[str] = None,
-            threshold: float = 0.1
-    ) -> None:
+            threshold: float = 0.1,
+    ) -> SignalCallbackInfo:
         callback_info = cast(
             SignalCallbackInfo, 
             self.callback_info_factory.create(
                 callback=callback,
                 name=name,
                 signal=signal,
-                threshold=threshold
+                threshold=threshold,
             )
         )
 
@@ -106,6 +104,8 @@ class InputSignalCallbackManager:
             self.callbacks[signal] = []
 
         self.callbacks[signal].append(callback_info)
+
+        return callback_info
 
     def unregister_signal_callback(
             self,
@@ -127,31 +127,35 @@ class InputSignalCallbackManager:
         to_call = []
 
         for signal, callbacks in self.callbacks.items():
-            for callback_info in callbacks:
-                if not callback_info.enabled:
-                    continue
-            
+            for callback_info in callbacks:           
                 if self.should_trigger_callback(signal, callback_info, controller_state):
                     to_call.append(callback_info)
 
-        self.previous_state = ControllerState(**controller_state.__dict__) #see what this actually does
+        self.previous_state = ControllerState(**controller_state.__dict__) # see what this actually does
         return to_call
     
+    def handle_callbacks(self, controller_state: ControllerState):
+        if not controller_state.changed:
+            return
+
+        to_call = self.determine_callbacks_to_call(controller_state)
+
+        for callback_info in to_call:
+            self._execute_callback_sync(callback_info, controller_state)
+                
+
+    def _execute_callback_sync(self, callback_info: CallbackInfo, controller_state: ControllerState) -> None:
+        try:
+            callback_info.callback(controller_state)
+        except Exception as e:
+            print(f"Callback {callback_info.name} failed: {e}")
+
     def should_trigger_callback(
             self,
             signal: InputSignal,
             callback_info: SignalCallbackInfo,
             current_state: ControllerState
-    ) -> bool:
-        if signal == InputSignal.ANY_CHANGE:
-            return current_state.changed
-        
-        if signal == InputSignal.ANY_BUTTON:
-            return self.any_button_changed(current_state)
-            
-        if signal == InputSignal.ANY_ANALOG:
-            return self.any_analog_changed(current_state)
-        
+    ) -> bool:        
         if signal == InputSignal.LEFT_STICK:
             return self.stick_changed('l', current_state, callback_info.threshold)
             
@@ -176,72 +180,75 @@ class InputSignalCallbackManager:
             current_value, previous_value, callback_info
         )
     
-    def any_button_changed(self, currrent_state: ControllerState) -> bool:
-        return True
-    
-    def any_analog_changed(self, current_state: ControllerState) -> bool:
-        return True
-    
     def stick_changed(self, stick: str, current_state: ControllerState, threshold: float) -> bool:
-        return True
+        x_attr = f"{stick}x"
+        y_attr = f"{stick}y"
+        
+        current_x = getattr(current_state, x_attr, 0.0)
+        current_y = getattr(current_state, y_attr, 0.0)
+        previous_x = getattr(self.previous_state, x_attr, 0.0)
+        previous_y = getattr(self.previous_state, y_attr, 0.0)
+        
+        # vector magnitude of x and y components
+        distance = ((current_x - previous_x) ** 2 + (current_y - previous_y) ** 2) ** 0.5
+        return distance > threshold
     
     def is_analog_input(self, signal: InputSignal) -> bool:
-        return True
+        analog_signals = {
+            InputSignal.LEFT_STICK_X,
+            InputSignal.LEFT_STICK_Y,
+            InputSignal.RIGHT_STICK_X, 
+            InputSignal.RIGHT_STICK_Y,
+            InputSignal.LEFT_TRIGGER,
+            InputSignal.RIGHT_TRIGGER
+        }
+
+        return signal in analog_signals
     
     def check_analog_trigger(self, current: float, previous: float, callback_info: SignalCallbackInfo) -> bool:
-        return True
+        return abs(current - previous) > callback_info.threshold
     
     def check_digital_trigger(self, current: float, previous: float, callback_info: SignalCallbackInfo) -> bool:
-        return True
-
-
-class CallbackManager:
-    def __init__(self) -> None:
-        self.callbacks: Dict[int, CallbackInfo] = {}
-        self.callback_info_factory = CallbackInfoFactory()
-        self._execution_lock = threading.Lock()
-        self._execution_pool = ThreadPoolExecutor(max_workers=4)
-
-    def register_callback(self, callback_info: CallbackInfo) -> None:
-        self.callbacks[id(callback_info.callback)] = callback_info
-
-    def unregister_callback(self, callback: Callable[[ControllerState], None]):
-        self.callbacks.pop(id(callback), None)
-
-    def enable_callback(self, callback: Callable[[ControllerState], None], enabled: bool = True):
-        cb_info = self.callbacks.get(id(callback))
-        if cb_info:
-            cb_info.enabled = enabled
-
-    def clear_callbacks(self):
+        return previous == 0.0 and current == 1.0
+    
+    def shutdown(self):
         self.callbacks.clear()
+        
 
-    def handle_callbacks(self, controller_state: ControllerState):
-        if not controller_state.changed:
-            return
+class InputHandler:
+    def __init__(self) -> None:
+        self.input_parser = UnitreeRemoteControllerInputParser()
+        self.callback_manager = InputSignalCallbackManager()
 
-        to_call = self.determine_callbacks_to_call(controller_state)
+        self.lowstate_subscriber = ChannelSubscriber("rt/lf/lowstate", LowState_)
+        self.lowstate_subscriber.Init(self.process_input, 10)
 
-        with self._execution_lock:
-            for callback_info in to_call:
-                self._execution_pool.submit(
-                    self._execute_callback_sync,
-                    callback_info,
-                    controller_state
-                )
+    def register_callback(
+        self,
+        signal: InputSignal,
+        callback: Callable[[ControllerState], None],
+        name: Optional[str] = None,
+        threshold: float = 0.1,
+        *args: Any,
+        **kwargs: Any
+    ) -> SignalCallbackInfo:
+        return self.callback_manager.register_signal_callback(
+            signal=signal,
+            callback=callback,
+            name=name,
+            threshold=threshold,
+        )
+    
+    def unregister_callback(self, signal: InputSignal, callback: Callable[[ControllerState], None]) -> None:
+        self.callback_manager.unregister_signal_callback(signal, callback)
 
-    def _execute_callback_sync(self, callback_info: CallbackInfo, controller_state: ControllerState) -> None:
-        try:
-            callback_info.callback(controller_state)
-        except Exception as e:
-            print(f"Callback {callback_info.name} failed: {e}")
+    def process_input(self, msg: LowState_) -> ControllerState:
+        controller_state = self.input_parser.parse(msg.wireless_remote)
+        self.callback_manager.handle_callbacks(controller_state)
+        return controller_state
+    
+    def shutdown(self) -> None:
+        self.lowstate_subscriber.Close() # cleanup resources and unsubscribe from Lowstate_ topic
+        self.callback_manager.shutdown()
 
 
-    def determine_callbacks_to_call(self, controller_state: ControllerState) -> List[CallbackInfo]:
-        to_call = []
-
-        for callback in self.callbacks.values():
-            if callback.enabled:
-                to_call.append(callback)
-
-        return to_call

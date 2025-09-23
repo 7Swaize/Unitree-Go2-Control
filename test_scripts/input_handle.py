@@ -1,15 +1,6 @@
 
 import struct
-
-from unitree_sdk2py.idl.default import unitree_go_msg_dds__LowState_ # specific to using Go2
-from unitree_sdk2py.core.channel import ChannelFactoryInitialize
-from unitree_sdk2py.go2.sport.sport_client import SportClient
-
 from dataclasses import dataclass
-from collections.abc import Callable
-from typing import List, Optional
-from abc import ABC, abstractmethod
-from enum import Enum, auto
 
 
 @dataclass
@@ -44,7 +35,6 @@ class ControllerState:
 class UnitreeRemoteControllerInputParser:
     def __init__(self) -> None:
         self._state = ControllerState()
-        self._previous_state = ControllerState()
 
     def _parse_buttons(self, data1: int, data2: int) -> None:
         mapping1 = {
@@ -74,19 +64,11 @@ class UnitreeRemoteControllerInputParser:
         ly_offset = 20
         self.Ly = struct.unpack('<f', data[ly_offset:ly_offset + 4])[0]
 
-    def parse(self, remote_data: bytes) -> ControllerState:
+    # remote_data is some type that is an array of 8-bit-seqs
+    def parse(self, remote_data) -> ControllerState:
         self._previous_state = ControllerState(**self._state.__dict__)
         
         self._parse_analog(remote_data)
         self._parse_buttons(remote_data[2], remote_data[3])
-          
-        self._state.changed = self._detect_changes()
-
-        return self._state
     
-    def _detect_changes(self) -> bool:
-        current_dict = {k: v for k, v in self._state.__dict__.items() 
-                       if k not in ['timestamp', 'changed']}
-        previous_dict = {k: v for k, v in self._previous_state.__dict__.items() 
-                        if k not in ['timestamp', 'changed']}
-        return current_dict != previous_dict
+        return self._state
