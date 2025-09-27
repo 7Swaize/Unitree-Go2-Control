@@ -229,8 +229,6 @@ class InputHandler:
         callback: Callable[[ControllerState], None],
         name: Optional[str] = None,
         threshold: float = 0.1,
-        *args: Any,
-        **kwargs: Any
     ) -> SignalCallbackInfo:
         return self.callback_manager.register_signal_callback(
             signal=signal,
