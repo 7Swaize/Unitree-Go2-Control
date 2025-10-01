@@ -42,8 +42,7 @@ class Main:
         self.input_handler.shutdown()
 
     def on_button_A(self, state: ControllerState):
-        global a_pressed
-        a_pressed = True
+        self.a_key_pressed = True
     
 
 if __name__ == "__main__":
