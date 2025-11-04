@@ -268,6 +268,7 @@ def scan_for_aruko_marker(functionality_wrapper: DogFunctionalityWrapper,
                           window_title,
                           search_range,
                           search_delta,
+                          on_complete,
                           max_sweeps=3):
     print("Scanning for Marker")
 
@@ -313,11 +314,13 @@ def scan_for_aruko_marker(functionality_wrapper: DogFunctionalityWrapper,
             direction *= -1  # reverse sweep direction
             sweep_limit = search_range
 
+    functionality_wrapper.stop_dog()
+    on_complete()
+
     return fiducial_found, marker_id
 
 
-
-def walk_to_aruko_marker(functionality_wrapper: DogFunctionalityWrapper, window_title):
+def walk_to_aruko_marker(functionality_wrapper: DogFunctionalityWrapper, window_title, on_complete):
     print("Moving to Marker")
 
     arrived = False
@@ -326,7 +329,7 @@ def walk_to_aruko_marker(functionality_wrapper: DogFunctionalityWrapper, window_
     forward_step = 1
     rotate_step = 3
     h_offset_threshold = 30 # i just played around with this number; in the future we would need a system to calculate this
-    fiducial_area_threshold = 60000 # i just played around with this number; in the future we would need a system to calculate this
+    fiducial_area_threshold = 80000 # i just played around with this number; in the future we would need a system to calculate this
 
     while not arrived:
         if functionality_wrapper.stop_event.is_set():
@@ -338,30 +341,64 @@ def walk_to_aruko_marker(functionality_wrapper: DogFunctionalityWrapper, window_
 
         corners, ids, _ = get_aruko_marker(image)
         marker_id, bounds, fiducial_center, h_offset, fiducial_area = extract_data_from_marker(image, corners, ids)
+           
+        is_centered = correct_alignment_to_marker(
+            functionality_wrapper, marker_id, h_offset, h_offset_threshold, rotate_step
+        )
 
-        if marker_id == -1:
-            break  # no marker detected
+        if is_centered:
+            arrived = approach_marker(
+                functionality_wrapper, fiducial_area, fiducial_area_threshold, forward_step
+            )
 
-        if h_offset < -h_offset_threshold:
-            functionality_wrapper.rotate_dog(rotate_step)
-        elif h_offset > h_offset_threshold:
-            functionality_wrapper.rotate_dog(-rotate_step)
-
-        if fiducial_area < fiducial_area_threshold:
-            functionality_wrapper.shift_dog(forward_step)
-        else:
-            arrived = True
-
-        cv2.putText(image, f"ID: {marker_id}", (5, 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+        cv2.putText(image, f"ID: {marker_id}", (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+        cv2.putText(image, f"Offset: {h_offset}", (5, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        cv2.putText(image, f"Area: {fiducial_area}", (5, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         cv2.imshow(window_title, image)
 
         if cv2.waitKey(1) & 0xFF == 27:
             break
 
+    functionality_wrapper.stop_dog()
+    on_complete()
+
     return arrived, marker_id
 
 
-def respond_to_aruko_id(functionality_wrapper: DogFunctionalityWrapper, marker_id):
+def correct_alignment_to_marker(functionality_wrapper: DogFunctionalityWrapper,
+                                 marker_id,
+                                 h_offset, 
+                                 h_offset_threshold,
+                                 rotate_step):
+    if marker_id == -1:
+        print("[Correct Alignment] Marker Lost.")
+        return False
+    
+    if abs(h_offset) <= h_offset_threshold:
+        return True
+
+    elif h_offset < -h_offset_threshold:
+        functionality_wrapper.rotate_dog(rotate_step)
+
+    elif h_offset > h_offset_threshold:
+        functionality_wrapper.rotate_dog(-rotate_step)
+
+    return False
+
+
+def approach_marker(functionality_wrapper: DogFunctionalityWrapper,
+                    fiducial_area, 
+                    fiducial_area_threshold,
+                    forward_step):     
+    if fiducial_area < fiducial_area_threshold:
+        functionality_wrapper.shift_dog(forward_step)
+        return False
+    else:
+        functionality_wrapper.stop_dog()
+        return True
+
+
+def respond_to_aruko_id(functionality_wrapper: DogFunctionalityWrapper, marker_id, on_complete):
     print("Responding to Aruko Marker")
     
     if (marker_id == MarkerMappings.STOP_MARKER.value):
@@ -371,6 +408,8 @@ def respond_to_aruko_id(functionality_wrapper: DogFunctionalityWrapper, marker_i
         
 
     time.sleep(2)
+    on_complete()
+
     return False
 
 
@@ -386,19 +425,76 @@ def mainMove():
     search_delta = 1
     has_arrived = False
 
-    while True:
-        fiducial_found, marker_id = scan_for_aruko_marker(functionality_wrapper, window_title, search_range, search_delta, max_sweeps=3) # scans for 3 sweeps. if it doesnt find anything it quits
+    last_marker_id = -1
+    command_running = False
 
-        if fiducial_found:
-            has_arrived, marker_id = walk_to_aruko_marker(functionality_wrapper, window_title)
-            print(marker_id)
+    print()
+    print("Controls:")
+    print("  [s] - Scan for marker")
+    print("  [w] - Walk to marker")
+    print("  [r] - Respond to marker")
+    print("  [q] - Quit")
+    print()
+    
+    def command_done():
+        nonlocal command_running
+        command_running = False
+
+    while True:
+        if not command_running:
+            code, image = functionality_wrapper.get_image()
+            if code != 0 or image is None:
+                continue
+
+            cv2.imshow(window_title, image)
+            cv2.waitKey(1)
+    
+        key = input("Enter command (s/w/r/q): ").strip().lower()
+
+        if key == 's':
+            command_running = True
+            fiducial_found, marker_id = scan_for_aruko_marker(
+                functionality_wrapper,
+                window_title,
+                search_range,
+                search_delta,
+                # Callback for when command is completed. This is only temporary (for simplicity).
+                # When I refactor this into a state machine or command pattern, it will be much cleaner. 
+                command_done, 
+                max_sweeps=3
+            )
+
+            if fiducial_found:
+                print(f"[Scan] Marker {marker_id} found.")
+                last_marker_id = marker_id
+            else:
+                print("[Scan] No marker detected.")
+
+        elif key =='w':
+            command_running = True
+            has_arrived, marker_id = walk_to_aruko_marker(functionality_wrapper, window_title, command_done)
 
             if has_arrived:
-                should_exit = respond_to_aruko_id(functionality_wrapper, marker_id)
-                if should_exit:
-                    break
-        else:
+                print(f"[Walk] Arrived at marker {marker_id}.")
+                last_marker_id = marker_id
+
+        elif key == 'r':
+            if last_marker_id == -1:
+                print("[Respond] No marker available. Try scanning first.")
+                continue
+
+            print(f"[Respond] Responding to marker {last_marker_id}.")
+
+            command_running = True
+            should_exit = respond_to_aruko_id(functionality_wrapper, last_marker_id, command_done)
+
+            if should_exit:
+                break
+
+        elif key == "q":
+            print("Exiting program...")
             break
+
 
     cv2.destroyAllWindows()
    
