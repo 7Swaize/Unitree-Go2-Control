@@ -87,7 +87,7 @@ class MarkerMappings(Enum):
     RIGHT_MARKER = 1
     LEFT_MARKER = 2
 
-# add a gaurd clause in all off the dog methods to make sure no significantly high value is passed in
+
 class DogFunctionalityWrapper:
     """Wrapper for Unitree dog functionality with fallback to webcam simulation."""
     
