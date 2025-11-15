@@ -1,3 +1,5 @@
+import os
+import signal
 import struct
 import sys
 import threading
@@ -10,6 +12,7 @@ from enum import Enum
 
 import cv2
 import numpy as np
+
 
 
 class DogFunctionalityWrapper:
@@ -110,7 +113,6 @@ class DogFunctionalityWrapper:
 
     def cleanup(self):
         """Clean up resources."""
-
         self.stop_event.clear()
         if not self.use_unitree_sdk_methods:
             self.cap.release()
@@ -143,13 +145,13 @@ class DogFunctionalityWrapper:
                         except Exception as e:
                             print(f"[StopMonitor] Error during cleanup: {e}")
 
-                    sys.exit(0)
+                    print("[Stop Monitor] Killing Program...")
+                    time.sleep(1)
+
+                    os.kill(os.getpid(), signal.SIGINT)
+                    return
 
                 time.sleep(0.1)
-
-        def cleanup(self):
-            if (self.monitor_thread):
-                self.monitor_thread.join()
 
 
 class UnitreeRemoteController:

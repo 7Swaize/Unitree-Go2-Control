@@ -252,97 +252,11 @@ class RespondToMarkerState(DogStateAbstract):
 def cleanup(functionality_wrapper: DogFunctionalityWrapper):
     cv2.destroyAllWindows()
     functionality_wrapper.stop_dog()
-    time.sleep(0.5)
+    time.sleep(1)
     functionality_wrapper.cleanup()
 
 
-## MOVE
-def main_move_test_input():
-    input("Press Enter to continue...")
-
-    functionality_wrapper = DogFunctionalityWrapper()
-    stop_monitor = DogFunctionalityWrapper.StopMonitor(functionality_wrapper.stop_event, cleanup)
-    stop_monitor.start()
-
-    window_title = "Aruko Detection"
-    cv2.namedWindow(window_title, cv2.WINDOW_NORMAL)
-
-    # Configuration
-    search_range = 70
-    search_delta = 1
-    max_sweeps = 3
-    last_marker_id = -1
-    command_running = False
-
-    scan_state = ScanForMarkerState(functionality_wrapper, window_title, search_range, search_delta, max_sweeps)
-    walk_state = WalkToMarkerState(functionality_wrapper, window_title)
-    respond_state = RespondToMarkerState(functionality_wrapper, window_title)
-
-    print()
-    print("Controls:")
-    print("  [s] - Scan for marker")
-    print("  [w] - Walk to marker")
-    print("  [r] - Respond to marker")
-    print("  [q] - Quit")
-    print()
-    
-    try:
-        while True:
-            if not command_running:
-                code, image = functionality_wrapper.get_image()
-                if code == 0 and image is not None:
-                    cv2.putText(image, "Waiting for command...", (5, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-                    cv2.imshow(window_title, image)
-                    cv2.waitKey(1)
-        
-            key = input("Enter command (s/w/r/q): ").strip().lower()
-
-            if key == 's':
-                command_running = True
-                fiducial_found, marker_id = scan_state.execute()
-                
-                if fiducial_found:
-                    last_marker_id = marker_id
-                
-                command_running = False
-
-            elif key == 'w':
-                # Commented out for now. In an actual implementation (without test components) we would include this.
-                # if last_marker_id == -1:
-                    # continue
-                    
-                command_running = True
-                has_arrived, marker_id = walk_state.execute()
-                
-                if has_arrived:
-                    last_marker_id = marker_id
-                
-                command_running = False
-
-            elif key == 'r':
-                if last_marker_id == -1:
-                    continue
-
-                command_running = True
-                respond_state.set_marker_id(last_marker_id)
-                should_exit = respond_state.execute()
-                command_running = False
-                
-                if should_exit:
-                    break
-
-            elif key == "q":
-                break
-            
-    finally:
-        cv2.destroyAllWindows()
-        functionality_wrapper.stop_dog()
-        time.sleep(0.5)
-        functionality_wrapper.cleanup()
-
-
-def main_move_continous():
+def main_move():
     input("Press Enter to start autonomous movement...")
 
 
@@ -387,9 +301,12 @@ def main_move_continous():
 
     except KeyboardInterrupt:
         functionality_wrapper.stop_event.set() 
-        time.sleep(1)  
+
+    except Exception as e:
+        print(f"Unhandled error: {e}")
+        functionality_wrapper.stop_event.set()
 
 
 
 if __name__ == "__main__":
-    main_move_continous()
+    main_move()
