@@ -1,8 +1,6 @@
 *
 
 !.gitignore
-!src/
-!src/**
 !test_scripts/
 !test_scripts/**
 
