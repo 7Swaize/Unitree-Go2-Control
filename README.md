@@ -2,6 +2,8 @@
 
 Autonomous navigation system for Unitree Go2 quadruped robot using ArUco marker detection. Robot scans for markers, walks toward them, and executes commands based on marker IDs.
 
+Designed for future students to build on, enabling practical use of the robot for AI or computer vision projects.
+
 ## What It Does
 
 - Scans environment for ArUco markers (sweeping head motion)
