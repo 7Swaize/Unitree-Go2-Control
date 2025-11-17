@@ -264,26 +264,19 @@ class Main:
                 should_exit = respond_state.execute()
 
                 if should_exit:
-                    self.functionality_wrapper.safe_shutdown() 
-                    time.sleep(1) 
-                    break
+                    break # maybe time.sleep(1) before this?
 
         except KeyboardInterrupt:
-            self.functionality_wrapper.safe_shutdown() 
-
+            print(f"Keyboard Interrupt detected")
         except Exception as e:
             print(f"Unhandled error: {e}")
-            self.functionality_wrapper.safe_shutdown() 
+        finally:
+            self.functionality_wrapper.safe_shutdown()
 
 
-    def shutdown_callback(self, _):
+    def shutdown_callback(self):
         cv2.destroyAllWindows()
-        print("[Shutdown] Killing Program...")
         time.sleep(1)
-
-        os.kill(os.getpid(), signal.SIGINT)
-
-
 
 
 if __name__ == "__main__":

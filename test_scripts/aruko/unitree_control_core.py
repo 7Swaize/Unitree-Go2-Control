@@ -3,6 +3,7 @@ import inspect
 import struct
 import sys
 import textwrap
+import threading
 import time
 from abc import ABC, ABCMeta, abstractmethod
 from enum import Enum
@@ -91,13 +92,14 @@ class InputSignal(Enum):
 class DogFunctionalityWrapper:
     """Wrapper for Unitree dog functionality with fallback to webcam simulation."""
     
-    def __init__(self, shutdown_callback: Callable[[ControllerState], None]):
+    def __init__(self, shutdown_callback: Callable[[], None]):
         self._use_unitree_sdk_methods = False
         self._max_rotation_amount = 5
         self._max_movement_amount = 5
 
-        self._root_cleanup_callback: Callable[[ControllerState], None] = shutdown_callback
-        self.shutdown_flag = False
+        self._root_cleanup_callback: Callable[[], None] = shutdown_callback
+        self._shutdown_event = threading.Event()
+        self._shutdown_lock = threading.Lock()
 
         try:
             from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_
@@ -121,7 +123,7 @@ class DogFunctionalityWrapper:
 
             print("[Init] Connecting stop key override")
             self.input_handler = _InputHandler(ChannelSubscriber, LowState_)
-            self.input_handler.register_callback(InputSignal.BUTTON_A, shutdown_callback, "on_emergency_stop")
+            self.input_handler.register_callback(InputSignal.BUTTON_A, lambda _: self._shutdown_event.set(), "on_emergency_stop")
 
             print("[Init] Standing up and stopping movement")
             self._sport_client.StandUp()
@@ -188,13 +190,20 @@ class DogFunctionalityWrapper:
 
     def safe_shutdown(self):
         print("\n[Shutdown] Starting Safe Shutdown...")
-        if self._root_cleanup_callback:
+
+        with self._shutdown_lock:
+            if not self._shutdown_event.is_set():
+                self._shutdown_event.set()
             try:
-                self._root_cleanup_callback(ControllerState()) # default controller state
-            except Exception as e:
-                print(f"[Wrapper] root cleanup callback failed: {e}")
-                
-        self.cleanup()
+                if self._root_cleanup_callback:
+                    try:
+                        self._root_cleanup_callback()
+                    except Exception as e:
+                        print(f"[Wrapper] root cleanup callback failed: {e}")
+
+                self.cleanup()
+            finally:
+                print("[Shutdown] Safe shutdown complete.")
         
 
     def cleanup(self):
@@ -478,7 +487,7 @@ class DogStateAbstract(ABC, metaclass=_CancellableMeta):
         self.should_cancel = False
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> Any: # might have preserve var args in source gen?
+    def execute(self, *args, **kwargs) -> Any: # might have to preserve var args in source gen?
         pass
 
     def on_enter(self):
@@ -490,7 +499,10 @@ class DogStateAbstract(ABC, metaclass=_CancellableMeta):
 
     @final
     def check_shutdown(self):
-        if self.functionality_wrapper is not None and self.functionality_wrapper.shutdown_flag == True:
+        if self.functionality_wrapper is None:
+            return
+        
+        if self.functionality_wrapper._shutdown_event.is_set():
             raise InterruptedError()
 
     def cancel(self):
