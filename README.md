@@ -1,6 +1,6 @@
 # Unitree Go2 ArUco Navigation
 
-Autonomous navigation system for Unitree Go2 quadruped robot using ArUco marker detection. Robot scans for markers, walks toward them, and executes commands based on marker IDs.
+Navigation system for Unitree Go2 quadruped robot using ArUco marker detection. Robot scans for markers, walks toward them, and executes commands based on marker IDs.
 
 Designed for future students to build on, enabling practical use of the robot for AI or computer vision projects.
 
@@ -8,7 +8,7 @@ Designed for future students to build on, enabling practical use of the robot fo
 
 - Scans environment for ArUco markers (sweeping head motion)
 - Walks toward detected markers with real-time alignment
-- Executes commands: STOP (marker 0), TURN_RIGHT (marker 1), TURN_LEFT (marker 2)
+- Executes commands: STOP (marker 0), TURN_RIGHT (marker 1), TURN_LEFT (marker 2), etc.
 - Falls back to webcam simulation if Unitree SDK unavailable
 
 ## Core Components
@@ -33,16 +33,6 @@ All states inherit from `DogStateAbstract` with metaclass that injects `check_sh
 ## Controller Integration
 
 `_InputHandler` parses Unitree wireless remote data (analog sticks, buttons). `_InputSignalCallbackManager` handles threshold-based triggering for analog inputs and edge detection for digital buttons. A button mapped to emergency shutdown.
-
-## Tunable Parameters
-
-- **Scan**: `search_range` (degrees), `search_delta` (rotation step), `max_sweeps`
-- **Walk**: `h_offset_threshold` (centering tolerance in pixels), `fiducial_area_threshold` (stop distance), `forward_step`, `rotate_step`
-- **Respond**: `rotation_amount` for 90° turns (empirically set to 150 steps)
-
-## Safety
-
-Emergency stop via remote controller A button or Ctrl+C. Calls `safe_shutdown()` which stops movement, stands down robot, and releases resources. Metaclass-injected shutdown checks ensure loops terminate cleanly.
 
 ## Fallback Mode
 
