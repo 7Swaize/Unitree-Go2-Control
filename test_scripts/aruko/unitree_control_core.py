@@ -14,6 +14,9 @@ from typing import Any, Dict, List, Optional, final
 
 import cv2
 import numpy as np
+import pytesseract
+import pyttsx3
+
 
 # Look into this later: https://www.reddit.com/r/Python/comments/9e2d79/evil_python_trick_block_another_module_from_being
 # It outlines blocking import of modules using sys.modules dict.
@@ -88,6 +91,7 @@ class InputSignal(Enum):
     F3 = "f3"
 
 
+# refactor into fascade pattern at some point -> this wrapper is bloated with responsiblity and possibly unclear for student 
 @final
 class DogFunctionalityWrapper:
     """Wrapper for Unitree dog functionality with fallback to webcam simulation."""
@@ -115,6 +119,9 @@ class DogFunctionalityWrapper:
                 ChannelFactoryInitialize(0, sys.argv[1])
             else:
                 ChannelFactoryInitialize(0)
+
+            self._ocr_handler = _OCRHandler()
+            self._audio_handler = _AudioHandler()
 
             print("[Init] Creating SportClient")
             self._sport_client = SportClient()
@@ -159,6 +166,14 @@ class DogFunctionalityWrapper:
             return -1, None
         
         return 0, image
+
+    
+    def read_text_from_image(self, image: np.ndarray) -> tuple[str, np.ndarray]:
+        return self._ocr_handler.extract_text_from_image(image)
+        
+    
+    def play_audio_from_text(self, text: str, blocking=False):
+        self._audio_handler.play_audio(text, blocking)
 
 
     def rotate_dog(self, amount):
@@ -523,3 +538,55 @@ class DogStateAbstract(ABC, metaclass=_CancellableMeta):
 
     def cancel(self):
         self.should_cancel = True
+
+
+class _OCRHandler:
+    def __init__(self):
+        pass
+
+    # followed this exactly: https://medium.com/@EnginDenizTangut/from-image-to-voice-building-an-ocr-tts-app-with-python-opencv-tesseract-5f5db8ea3b7b
+    def extract_text_from_image(self, image: np.ndarray) -> tuple[str, np.ndarray]:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        image = cv2.medianBlur(image, 3) # kernal to remove noise
+
+        thresh = cv2.adaptiveThreshold(
+            image, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY, 31, 10
+        )
+
+        kernel = np.ones((2,2), np.uint8)
+        image = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+        image = cv2.GaussianBlur(image, (5, 5), 0)
+        _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        custom_config = r'--oem 3 --psm 6'
+        text = pytesseract.image_to_string(image, lang='eng', config=custom_config)
+        image = self._highlight_detected_result(image)
+
+        return (text, image)
+    
+    
+    def _highlight_detected_result(self, image: np.ndarray):
+        ocr_data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
+
+        for i in range(len(ocr_data['text'])):
+            if int(ocr_data['conf'][i]) > 60:
+                x, y, w, h = (ocr_data["left"][i], ocr_data['top'][i], ocr_data['width'][i], ocr_data['height'][i])
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        return image
+    
+
+class _AudioHandler:
+    def __init__(self):
+        self.engine = pyttsx3.init()
+
+    def play_audio(self, text: str, blocking=False):
+        self.engine.say(text)
+        
+        if blocking:
+            self.engine.runAndWait()
+        else:
+            threading.Thread(target=self.engine.runAndWait, daemon=True).start()
