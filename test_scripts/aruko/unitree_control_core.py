@@ -180,6 +180,22 @@ class DogFunctionalityWrapper:
             self._sport_client.Move(vx, vy, vz)
 
 
+    def stand_down_dog(self):
+        """Lay down dog."""
+        print("[Dog] Standing Down")
+        
+        if self._use_unitree_sdk_methods:
+            self._sport_client.StandDown()
+
+    
+    def stand_up_dog(self):
+            """Stand up dog."""
+            print("[Dog] Standing Up")
+            
+            if self._use_unitree_sdk_methods:
+                self._sport_client.StandUp()
+
+
     def stop_dog(self):
         """Stop all dog movement."""
         print("[Dog] Stopping")
@@ -503,7 +519,7 @@ class DogStateAbstract(ABC, metaclass=_CancellableMeta):
             return
         
         if self.functionality_wrapper._shutdown_event.is_set():
-            raise InterruptedError()
+            raise KeyboardInterrupt()
 
     def cancel(self):
         self.should_cancel = True

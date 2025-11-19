@@ -11,9 +11,10 @@ from enum import Enum
 
 class MarkerMappings(Enum):
     """Mapping of marker IDs to commands."""
-    STOP_MARKER = 0
-    RIGHT_MARKER = 1
-    LEFT_MARKER = 2
+    STOP = 0
+    RIGHT_90_DEGREES = 1
+    LEFT_90_DEGREES = 2
+    ROTATE_180_DEGREES = 3
 
 
 class ScanForMarkerState(DogStateAbstract):
@@ -90,19 +91,20 @@ class ScanForMarkerState(DogStateAbstract):
 class WalkToMarkerState(DogStateAbstract):
     """State for walking toward a detected marker."""
     
-    def __init__(self, functionality_wrapper, window_title):
+    def __init__(self, functionality_wrapper, window_title, forward_step_amount=2, rotate_step_amount=1):
         super().__init__(functionality_wrapper)
+
         self.window_title = window_title
+        self.foward_step_amount = forward_step_amount
+        self.rotate_step_amount = rotate_step_amount
 
     def execute(self):
         """Execute walking behavior."""
         arrived = False
         marker_id = -1
 
-        forward_step = 1
-        rotate_step = 1
         h_offset_threshold = 50 # i just played around with this number; in the future we would need a system to calculate this
-        fiducial_area_threshold = 80000 # i just played around with this number; in the future we would need a system to calculate this
+        fiducial_area_threshold = 90000 # i just played around with this number; in the future we would need a system to calculate this
 
         print("[Walk] Starting approach to marker")
 
@@ -115,12 +117,12 @@ class WalkToMarkerState(DogStateAbstract):
             marker_id, bounds, fiducial_center, h_offset, fiducial_area = extract_data_from_marker(image, corners, ids)
             
             is_centered = self.correct_alignment_to_marker(
-                marker_id, h_offset, h_offset_threshold, rotate_step
+                marker_id, h_offset, h_offset_threshold, self.rotate_step_amount
             )
 
             if is_centered:
                 arrived = self.approach_marker(
-                    fiducial_area, fiducial_area_threshold, forward_step
+                    fiducial_area, fiducial_area_threshold, self.foward_step_amount
                 )
 
             self.update_visuals(image, marker_id, h_offset, fiducial_area, is_centered)
@@ -148,15 +150,31 @@ class WalkToMarkerState(DogStateAbstract):
 
         return False
 
-    def approach_marker(self, fiducial_area, fiducial_area_threshold, forward_step):
+
+    def approach_marker(self, fiducial_area, fiducial_area_threshold, base_forward_step):
         """Move forward toward the marker."""
-        if fiducial_area < fiducial_area_threshold:
-            self.functionality_wrapper.shift_dog(forward_step)
-            return False
-        else:
+        if fiducial_area >= fiducial_area_threshold:
             self.functionality_wrapper.stop_dog()
             return True
         
+
+        slowdown_start = fiducial_area_threshold * 60 # starts to slow down at 60% of threshold reached
+
+        if fiducial_area >= slowdown_start:
+            # logarithmic slowdown scale I just took from someone online
+            progress = min(1.0, max(0.0,
+                (fiducial_area - slowdown_start) / (fiducial_area_threshold - slowdown_start)
+            ))
+
+            scale = max(0.1, math.log1p((1 - progress) * 4) / math.log1p(4))
+            step = base_forward_step * scale
+        else:
+            step = base_forward_step
+
+        self.functionality_wrapper.shift_dog(step)
+        return False
+        
+
     def update_visuals(self, image, marker_id, h_offset, fiducial_area, is_centered):
         if marker_id != -1:
             cv2.putText(image, f"ID: {marker_id}", (5, 30),
@@ -190,18 +208,18 @@ class RespondToMarkerState(DogStateAbstract):
         """Execute response behavior based on marker ID."""
         print(f"[Respond] Responding to marker {self.marker_id}")
     
-        if self.marker_id == MarkerMappings.STOP_MARKER.value:
+        if self.marker_id == MarkerMappings.STOP.value:
             print("[Respond] STOP command received")
             self.functionality_wrapper.stop_dog()
             time.sleep(0.5)
-            self.functionality_wrapper._sport_client.StandDown()
+            self.functionality_wrapper.stand_down_dog()
             return True
         
-        elif self.marker_id in (MarkerMappings.LEFT_MARKER.value, MarkerMappings.RIGHT_MARKER.value):
-            rotation_amount = 150 # this is 90 degrees somehow
+        elif self.marker_id in (MarkerMappings.LEFT_90_DEGREES.value, MarkerMappings.RIGHT_90_DEGREES.value):
+            rotation_amount = 160 # this is 90 degrees somehow
             step_amount = 1
 
-            if self.marker_id == MarkerMappings.RIGHT_MARKER.value:
+            if self.marker_id == MarkerMappings.RIGHT_90_DEGREES.value:
                 step_amount = step_amount * 1
             else:
                 step_amount = step_amount * -1
@@ -213,6 +231,15 @@ class RespondToMarkerState(DogStateAbstract):
         
             self.functionality_wrapper.stop_dog()
             time.sleep(1)
+
+        elif self.marker_id == MarkerMappings.ROTATE_180_DEGREES.value:
+            rotation_amount = 320
+            step_amount = 1
+
+
+            for _ in range(rotation_amount):
+                self.functionality_wrapper.rotate_dog(step_amount)
+                time.sleep(0.02) # <-- Allow movement to persist (tune as needed)
             
         return False
         
@@ -228,7 +255,7 @@ class RespondToMarkerState(DogStateAbstract):
 class Main:
     def __init__(self):
         self.functionality_wrapper = DogFunctionalityWrapper(self.shutdown_callback)
-        
+
 
     def main_move(self):
         input("Press Enter to start autonomous movement...")
@@ -237,7 +264,7 @@ class Main:
         cv2.namedWindow(window_title, cv2.WINDOW_NORMAL)
 
         search_range = 70
-        search_delta = 0.5
+        search_delta = 1.3
         max_sweeps = 3
 
         scan_state = ScanForMarkerState(self.functionality_wrapper, window_title, search_range, search_delta, max_sweeps)
