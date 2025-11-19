@@ -15,6 +15,7 @@ class MarkerMappings(Enum):
     RIGHT_90_DEGREES = 1
     LEFT_90_DEGREES = 2
     ROTATE_180_DEGREES = 3
+    PLAY_AUDIO = 4
 
 
 class ScanForMarkerState(DogStateAbstract):
@@ -240,6 +241,9 @@ class RespondToMarkerState(DogStateAbstract):
             for _ in range(rotation_amount):
                 self.functionality_wrapper.rotate_dog(step_amount)
                 time.sleep(0.02) # <-- Allow movement to persist (tune as needed)
+
+        elif self.marker_id == MarkerMappings.PLAY_AUDIO.value:
+            self.functionality_wrapper.play_audio_from_text("Hello I am a Robot Dog!")
             
         return False
         
