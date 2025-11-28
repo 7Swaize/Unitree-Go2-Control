@@ -5,7 +5,7 @@ from aruko_helpers import * #
 
 from enum import Enum
 
-from unitree_control.aruko.unitree_control_core_v2 import UnitreeGo2Controller
+from unitree_control.core.unitree_control_core_v2 import UnitreeGo2Controller
 from unitree_control.states.dog_state_abstract import DogStateAbstract
 
 

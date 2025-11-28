@@ -3,6 +3,7 @@ from unitree_control.controller_input_control.callback_manager import _InputSign
 from unitree_control.controller_input_control.controller_state import ControllerState
 from unitree_control.controller_input_control.input_signal import InputSignal
 from unitree_control.core.control_modules import DogModule
+from unitree_control.dds.dds_constants import DDS_TOPICS
 
 
 class InputModule(DogModule):
@@ -27,7 +28,7 @@ class InputModule(DogModule):
         self._ControllerState = ControllerState
         self._InputSignal = InputSignal
 
-        self._lowstate_subscriber = ChannelSubscriber("rt/lf/lowstate", LowState_)
+        self._lowstate_subscriber = ChannelSubscriber(DDS_TOPICS['LOW_STATE'], LowState_)
         self._lowstate_subscriber.Init(self._process_input, 10)
 
     def register_callback(
