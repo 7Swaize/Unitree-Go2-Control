@@ -41,7 +41,6 @@ LOOP_SEARCH_RADIUS = 10.0  # meters: only search earlier keyframes within this d
 # optimization
 OPTIMIZE_EVERY_N_KEYFRAMES = 10
 
-
 _DATATYPES = {
     1: ('b', 1),  # INT8
     2: ('B', 1),  # UINT8
@@ -52,6 +51,7 @@ _DATATYPES = {
     7: ('f', 4),  # FLOAT32
     8: ('d', 8),  # FLOAT64
 }
+
 
 def _get_struct_fmt(is_bigendian: bool, fields, field_names=None):
     fmt = '>' if is_bigendian else '<'
@@ -111,7 +111,7 @@ def _read_points(cloud, field_names=None, skip_nans=True) -> Generator[Tuple[Any
 
 
 
-class PointCloudDecoder:
+class _PointCloudDecoder:
     def __init__(self) -> None:
         pass
 
@@ -140,7 +140,7 @@ class PointCloudDecoder:
             
 
 
-class HeightMapDecoder:
+class _HeightMapDecoder:
     def __init__(self) -> None:
         pass
 
@@ -169,7 +169,7 @@ Keyframe = collections.namedtuple('Keyframe', ['idx', 'time', 'pose', 'pcd', 'pc
 # RANSAC + FPFH https://medium.com/@amnahhmohammed/gentle-introduction-to-point-cloud-registration-using-open3d-pt-2-18df4cb8b16c
 # RANSAC: https://www.thinkautonomous.ai/blog/ransac-algorithm/
 # ICP: https://www.youtube.com/watch?v=4uWSo8v3iQA
-class PoseGraphSLAM:
+class _PoseGraphSLAM:
     def __init__(self) -> None:
         self.keyframes: List[Keyframe] = []
         self.pose_graph = o3d.pipelines.registration.PoseGraph()
@@ -263,9 +263,9 @@ def ransac_initial_alignment(source_down, target_down, source_fpfh, target_fpfh)
     return result
 
 
-class LIDARSLAM:
+class _LIDARSLAM:
     def __init__(self):
-        self.pg = PoseGraphSLAM()
+        self.pg = _PoseGraphSLAM()
         self.last_keyframe_pose = np.eye(4)
         self.last_keyframe_time = 0.0
         self.keyframe_idx = 0
@@ -418,9 +418,9 @@ class LIDARModule(DogModule):
         self._point_cloud_listeners: List[Callable[[np.ndarray, Optional[np.ndarray]], None]] = []
         self._heightmap_listeners: List[Callable[[np.ndarray], None]] = []
 
-        self._point_cloud_decoder = PointCloudDecoder()
-        self._heightmap_decoder = HeightMapDecoder()
-        self._slam = LIDARSLAM()
+        self._point_cloud_decoder = _PointCloudDecoder()
+        self._heightmap_decoder = _HeightMapDecoder()
+        self._slam = _LIDARSLAM()
         
         self._point_cloud_dds_subscriber = ChannelSubscriber(DDS_TOPICS["ODOMETRY_LIDAR"], PointCloud2_)
         self._point_cloud_dds_subscriber.Init(self._point_cloud_callback, 10)

@@ -7,8 +7,6 @@ from unitree_control.core.hardware_control import HardwareInterface, SimulatedHa
 
 
 # TTS: https://medium.com/@vndee.huynh/build-your-own-voice-assistant-and-run-it-locally-whisper-ollama-bark-c80e6f815cba
-# Video Streaming: https://medium.com/@prasadparit006/python-project-building-a-simple-video-streaming-server-using-opencv-c8a9d9ba86d2
-
 # Digging into Dog: https://www.darknavy.org/darknavy_insight/the_jailbroken_unitree_robot_dog
 
 # Github Repo Searcher: https://github.com/search?type=Code
@@ -69,6 +67,7 @@ class UnitreeGo2Controller:
 
         if self.use_sdk:
             self._add_module(ModuleType.INPUT, use_sdk=self.use_sdk)
+            self._add_module(ModuleType.LIDAR, use_sdk=self.use_sdk, visualize_lidar=True)
 
 
     def _add_module(self, module_type: ModuleType, **kwargs) -> None:

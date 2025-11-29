@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<!-- AI Generated because I don't know HTML -->
+<body>
+    <h1>GO2 WebRTC Stream</h1>
+    <video id="video" autoplay playsinline style="width:90%;"></video>
+
+    <script>
+    async function start() {
+      const pc = new RTCPeerConnection();
+
+      pc.ontrack = e => {
+        document.getElementById('video').srcObject = e.streams[0];
+      };
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      const resp = await fetch("/offer", {
+        method: "POST",
+        body: JSON.stringify(pc.localDescription),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const answer = await resp.json();
+      await pc.setRemoteDescription(answer);
+    }
+
+    start();
+    </script>
+</body>
+
+</html>

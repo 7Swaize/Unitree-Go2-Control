@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, final
 
-from unitree_control.core.unitree_control_core_v2 import UnitreeGo2Controller
+from unitree_control.core.unitree_control_core import UnitreeGo2Controller
 from unitree_control.states.validation import _CancellableMeta
 
 

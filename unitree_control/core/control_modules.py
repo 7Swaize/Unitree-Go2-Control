@@ -5,6 +5,7 @@ from typing import Dict, Generic, Optional, Type, TypeVar
 
 from unitree_control.audio_control.audio_module import AudioModule
 from unitree_control.controller_input_control.input_module import InputModule
+from unitree_control.lidar_control.decoder import LIDARModule
 from unitree_control.movement.movement_module import MovementModule
 from unitree_control.ocr_control.ocr_module import OCRModule
 from unitree_control.video_control.video_module import VideoModule
@@ -41,8 +42,7 @@ class ModuleType(Enum):
     OCR = auto()
     AUDIO = auto()
     LIDAR = auto()
-    GPS = auto()
-    IMU = auto()
+
 
 @dataclass
 class ModuleDescriptor(Generic[T]):
@@ -127,6 +127,13 @@ def register_all_default_modules():
         InputModule,
         "Controller Input",
         requires_sdk=True  
+    ))
+
+    ModuleRegistry.register(ModuleDescriptor(
+        ModuleType.LIDAR,
+        LIDARModule,
+        "LIDAR Capture",
+        requires_sdk=True
     ))
 
 
