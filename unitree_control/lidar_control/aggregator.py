@@ -25,13 +25,13 @@ MIN_POINTS_KEYFRAME = 200   # minimum points to accept a keyframe
 
 # registration params
 ICP_MAX_DIST = 1.0
-ICP_ITER = 50
+ICP_ITER = 50 
 
 # FPFH (for loop detection)
 FPFH_RADIUS_NORMAL = 0.5
 FPFH_RADIUS_FEATURE = 1.0
 RANSAC_DISTANCE_THRESHOLD = 1.5
-RANSAC_NUM_ITER = 400000
+RANSAC_NUM_ITER = 100000 # maybe 400000? -> more accurate global reg. but more time
 RANSAC_CONFIDENCE = 0.999
 
 # loop closure scanning window and frequency
@@ -176,7 +176,7 @@ class PoseGraphSLAM:
         self.optimized = False
     
 
-    def add_keyframe(self, kf: Keyframe, edge_to_prev:Optional[o3d.pipelines.registration.PoseGraphEdge]=None):
+    def add_keyframe(self, kf: Keyframe, edge_to_prev: Optional[o3d.pipelines.registration.PoseGraphEdge]=None):
         if not self.keyframes:
             # add first node at identity
             node = o3d.pipelines.registration.PoseGraphNode(np.linalg.inv(kf.pose))
@@ -210,9 +210,7 @@ class PoseGraphSLAM:
         self.optimized = True
 
 
-# -----------------------------
 # Feature helpers (FPFH)
-# -----------------------------
 def preprocess_point_cloud(pcd: o3d.geometry.PointCloud):
     pcd_down = pcd.voxel_down_sample(SCAN_DOWNSAMPLE)
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=FPFH_RADIUS_NORMAL, max_nn=30)) 
@@ -230,15 +228,14 @@ def compute_fpfh(pcd, radius):
     )
 
 
-# -----------------------------
 # Registration helpers
-# -----------------------------
 def run_icp(source_down, target_down, init=np.eye(4), max_dist=ICP_MAX_DIST):
     # ensure normals
     if not target_down.has_normals():
         estimate_normals(target_down, FPFH_RADIUS_NORMAL)
     if not source_down.has_normals():
         estimate_normals(source_down, FPFH_RADIUS_NORMAL)
+
     reg = o3d.pipelines.registration.registration_icp(
         source_down, target_down, max_dist, init,
         o3d.pipelines.registration.TransformationEstimationPointToPlane(),
@@ -247,6 +244,9 @@ def run_icp(source_down, target_down, init=np.eye(4), max_dist=ICP_MAX_DIST):
 
     return reg
 
+
+# Theres a faster (more mathematical) based approach to RANSAC using features, which is outlined in the docs.
+# I could try this later, but it's not good given the fact that Loop Closure expects robust, accurate points.
 def ransac_initial_alignment(source_down, target_down, source_fpfh, target_fpfh):
     # Use RANSAC to get coarse transform candidate
     distance = RANSAC_DISTANCE_THRESHOLD
@@ -380,9 +380,6 @@ class LIDARSLAM:
             else:
                 self.vis.update_geometry(self.global_map)
 
-            self.vis.poll_events()
-            self.vis.update_renderer()
-
 
     def run_visualization_loop(self):
         """Main visualizer loop (runs in main thread)"""
@@ -394,6 +391,7 @@ class LIDARSLAM:
                 self.vis.poll_events()
                 self.vis.update_renderer()
                 time.sleep(0.05)
+
         except KeyboardInterrupt:
             print("Visualizer interrupted.")
         finally:
@@ -455,6 +453,7 @@ class LIDARModule(DogModule):
                 colors = np.stack([colors, colors, colors], axis=1)
                 pcd.colors = o3d.utility.Vector3dVector(colors)
 
+            # intensity not needed for icp
             self._slam.try_add_keyframe(pcd, intensity=intensity, timestamp=time.time())
 
     
