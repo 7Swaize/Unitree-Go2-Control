@@ -13,7 +13,7 @@ from unitree_control.lidar_control.decoder import LIDARModule
 
 # Github Repo Searcher: https://github.com/search?type=Code
 
-# Some very interesting turtorial with the Go2: https://hackmd.io/@c12hQ00ySVi6JYIERU7bCg/ByAOr12qJg
+# Some very interesting turtorial with the G02: https://hackmd.io/@c12hQ00ySVi6JYIERU7bCg/ByAOr12qJg
 
 
 class UnitreeGo2Controller:
@@ -44,9 +44,11 @@ class UnitreeGo2Controller:
 
 
     def _detect_sdk(self) -> bool:
+        """Auto-detect if Unitree SDK is available"""
         try:
             import unitree_sdk2py
             return True
+        
         except ImportError:
             return False
         
