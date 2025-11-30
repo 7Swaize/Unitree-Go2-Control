@@ -1,3 +1,8 @@
+import os, sys
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, ROOT)
+
+
 import time
 import cv2
 
@@ -7,7 +12,6 @@ from enum import Enum
 
 from unitree_control.core.unitree_control_core import UnitreeGo2Controller
 from unitree_control.states.dog_state_abstract import DogStateAbstract
-
 
 class MarkerMappings(Enum):
     """Mapping of marker IDs to commands."""
@@ -195,8 +199,8 @@ class WalkToMarkerState(DogStateAbstract):
 class RespondToMarkerState(DogStateAbstract):
     """State for responding to marker commands."""
     
-    def __init__(self, functionality_wrapper, window_title, marker_id=-1):
-        super().__init__(functionality_wrapper)
+    def __init__(self, unitree_controller, window_title, marker_id=-1):
+        super().__init__(unitree_controller)
         self.window_title = window_title
         self.marker_id = marker_id
 
@@ -254,8 +258,24 @@ class RespondToMarkerState(DogStateAbstract):
 
 class Main:
     def __init__(self):
-        self.unitree_controller = UnitreeGo2Controller(use_sdk=True)
+        self.unitree_controller = UnitreeGo2Controller(use_sdk=False)
         self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
+
+
+    def test_web_streaming(self):
+        self.unitree_controller.video.start_stream_server()
+        self.unitree_controller.video.get_stream_server_local_ip()
+        try:
+            while True:
+                code, frame = self.unitree_controller.video.get_image()
+                if code != 0 or frame is None:
+                    continue
+                
+                self.unitree_controller.video.send_frame(frame)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.unitree_controller.safe_shutdown()
 
 
     def main_move(self):
@@ -309,4 +329,4 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    main.main_move()
+    main.test_web_streaming()

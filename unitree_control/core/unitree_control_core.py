@@ -2,14 +2,18 @@ from typing import Callable, List, Optional, Dict
 import threading
 
 from unitree_control.controller_input_control.input_signal import InputSignal
-from unitree_control.core.control_modules import AudioModule, DogModule, InputModule, ModuleRegistry, ModuleType, MovementModule, OCRModule, VideoModule
+from unitree_control.core.base_module import DogModule
+from unitree_control.core.module_registry import AudioModule, InputModule, ModuleRegistry, ModuleType, MovementModule, OCRModule, VideoModule
 from unitree_control.core.hardware_control import HardwareInterface, SimulatedHardware, UnitreeSDKHardware
+from unitree_control.lidar_control.decoder import LIDARModule
 
 
 # TTS: https://medium.com/@vndee.huynh/build-your-own-voice-assistant-and-run-it-locally-whisper-ollama-bark-c80e6f815cba
 # Digging into Dog: https://www.darknavy.org/darknavy_insight/the_jailbroken_unitree_robot_dog
 
 # Github Repo Searcher: https://github.com/search?type=Code
+
+# Some very interesting turtorial with the Go2: https://hackmd.io/@c12hQ00ySVi6JYIERU7bCg/ByAOr12qJg
 
 
 class UnitreeGo2Controller:
@@ -40,11 +44,9 @@ class UnitreeGo2Controller:
 
 
     def _detect_sdk(self) -> bool:
-        """Auto-detect if Unitree SDK is available"""
         try:
             import unitree_sdk2py
             return True
-        
         except ImportError:
             return False
         
@@ -52,11 +54,12 @@ class UnitreeGo2Controller:
     def _initialize_all(self):
         self.hardware.initialize()
 
-        self.input.register_callback(
-            InputSignal.BUTTON_A,
-            lambda _: self._shutdown_event.set(),
-            "emergency_stop"
-        )
+        if self.use_sdk:
+            self.input.register_callback(
+                InputSignal.BUTTON_A,
+                lambda _: self._shutdown_event.set(),
+                "emergency_stop"
+            )
 
 
     def _register_all_modules(self):
@@ -67,7 +70,7 @@ class UnitreeGo2Controller:
 
         if self.use_sdk:
             self._add_module(ModuleType.INPUT, use_sdk=self.use_sdk)
-            self._add_module(ModuleType.LIDAR, use_sdk=self.use_sdk, visualize_lidar=True)
+            self._add_module(ModuleType.LIDAR, use_sdk=self.use_sdk, visualize_lidar=False)
 
 
     def _add_module(self, module_type: ModuleType, **kwargs) -> None:
@@ -98,7 +101,7 @@ class UnitreeGo2Controller:
         return module_type in self._modules
     
     
-    def list_available_modules(self) -> list[ModuleType]:
+    def get_available_modules(self) -> list[ModuleType]:
         """List all modules available for the current mode (SDK/simulation)"""
         return ModuleRegistry.get_list_available(self.use_sdk)
     
@@ -143,6 +146,14 @@ class UnitreeGo2Controller:
         
         return module
     
+    @property
+    def lidar(self) -> LIDARModule:
+        module = self._modules.get(ModuleType.LIDAR)
+        if not isinstance(module, LIDARModule):
+            raise RuntimeError("LIDAR module not loaded")
+        
+        return module
+    
 
     def register_cleanup_callback(self, callback: Callable[[], None]):
         """Register a callback to run during shutdown"""
@@ -157,6 +168,12 @@ class UnitreeGo2Controller:
         with self._shutdown_lock:
             if not self._shutdown_event.is_set():
                 self._shutdown_event.set()
+
+            for module_type, module in self._modules.items():
+                try:
+                    module.shutdown()
+                except Exception as e:
+                    print(f"[Controller] Failed to shutdown {module_type.name}: {e}")
             
             for callback in self._cleanup_callbacks:
                 try:
@@ -164,19 +181,13 @@ class UnitreeGo2Controller:
                 except Exception as e:
                     print(f"[Controller] Cleanup callback failed: {e}")
             
-            for module_type, module in self._modules.items():
-                try:
-                    print(f"[Controller] Shutting down {module_type.name} module")
-                    module.shutdown()
-                except Exception as e:
-                    print(f"[Controller] Failed to shutdown {module_type.name}: {e}")
-            
             try:
                 self.hardware.shutdown()
             except Exception as e:
                 print(f"[Controller] Hardware shutdown failed: {e}")
             
             print("[Controller] Shutdown complete")
+
 
     def is_shutdown_requested(self) -> bool:
         """Check if shutdown has been requested"""

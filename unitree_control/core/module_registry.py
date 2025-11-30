@@ -1,8 +1,8 @@
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Dict, Generic, Optional, Type, TypeVar
 
+from unitree_control.core.base_module import DogModule
 from unitree_control.audio_control.audio_module import AudioModule
 from unitree_control.controller_input_control.input_module import InputModule
 from unitree_control.lidar_control.decoder import LIDARModule
@@ -10,27 +10,6 @@ from unitree_control.movement.movement_module import MovementModule
 from unitree_control.ocr_control.ocr_module import OCRModule
 from unitree_control.video_control.video_module import VideoModule
 
-
-class DogModule(ABC):
-    """Base class for all dog functionality modules"""
-    
-    def __init__(self, name: str):
-        self.name = name
-        self._initialized = False
-    
-    @abstractmethod
-    def initialize(self) -> None:
-        """Initialize the module"""
-        pass
-    
-    @abstractmethod
-    def shutdown(self) -> None:
-        """Clean shutdown of the module"""
-        pass
-    
-    def is_initialized(self) -> bool:
-        return self._initialized
-    
 
 T = TypeVar('T', bound=DogModule)
 

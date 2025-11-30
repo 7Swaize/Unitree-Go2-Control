@@ -1,4 +1,4 @@
-from unitree_control.core.control_modules import DogModule
+from unitree_control.core.base_module import DogModule
 from unitree_control.core.hardware_control import HardwareInterface
 
 

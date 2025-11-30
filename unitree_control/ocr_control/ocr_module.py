@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pytesseract
 
-from unitree_control.core.control_modules import DogModule
+from unitree_control.core.base_module import DogModule
 
 
 class OCRModule(DogModule):

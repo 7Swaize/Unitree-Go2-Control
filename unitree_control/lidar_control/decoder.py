@@ -8,7 +8,7 @@ from typing import Any, Callable, Generator, List, Optional, Tuple
 import numpy as np
 import open3d as o3d
 
-from unitree_control.core.control_modules import DogModule
+from unitree_control.core.base_module import DogModule
 from unitree_control.dds.dds_constants import DDS_TOPICS
 
 
@@ -400,7 +400,7 @@ class _LIDARSLAM:
 
 
 class LIDARModule(DogModule):
-    def __init__(self, use_sdk: bool = True, visualize_lidar: bool = True):
+    def __init__(self, use_sdk: bool = True, visualize_lidar: bool = False):
         super().__init__("LIDAR")
         self.use_sdk = use_sdk
         self._visualize_lidar = visualize_lidar
@@ -420,13 +420,15 @@ class LIDARModule(DogModule):
 
         self._point_cloud_decoder = _PointCloudDecoder()
         self._heightmap_decoder = _HeightMapDecoder()
-        self._slam = _LIDARSLAM()
         
         self._point_cloud_dds_subscriber = ChannelSubscriber(DDS_TOPICS["ODOMETRY_LIDAR"], PointCloud2_)
         self._point_cloud_dds_subscriber.Init(self._point_cloud_callback, 10)
 
         self._heightmap_dds_subscriber = ChannelSubscriber(DDS_TOPICS["HEIGHT_MAP_ARRAY"], HeightMap_)
         self._heightmap_dds_subscriber.Init(self._heightmap_callback, 10)
+
+        if self._visualize_lidar:
+            self._slam = _LIDARSLAM()
         
     
     def _point_cloud_callback(self, cloud):
@@ -468,7 +470,18 @@ class LIDARModule(DogModule):
             except Exception as e:
                 print(f"Error in heightmap listener: {e}")
 
-        
+    
+    def start_lidar_visualization(self):
+        """
+        Turns on Open3D rendering for LIDAR visualization.
+        """
+        if self._visualize_lidar:
+            print("[SLAM] Already visualizing LIDAR.")
+            return
+
+        self._slam = _LIDARSLAM()
+        self._visualize_lidar = True
+
 
     def register_point_cloud_listener(self, callback: Callable[[np.ndarray, Optional[np.ndarray]], None]) -> None:
         """

@@ -3,7 +3,7 @@ from typing import Optional
 import cv2
 import numpy as np
 
-from unitree_control.core.control_modules import DogModule
+from unitree_control.core.base_module import DogModule
 from unitree_control.video_control.streamer import WebRTCStreamer
 
 
@@ -28,6 +28,7 @@ class VideoModule(DogModule):
             self._video_client = VideoClient()
             self._video_client.SetTimeout(3.0)
             self._video_client.Init()
+
         else:
             print("[Video] Initializing webcam")
             self._webcam = cv2.VideoCapture(0)
@@ -36,7 +37,10 @@ class VideoModule(DogModule):
                 raise RuntimeError("Failed to open webcam")
         
         self._streamer = WebRTCStreamer()
+        self._streaming = False
+        
         self._initialized = True
+
 
     def get_image(self) -> tuple[int, Optional[np.ndarray]]:
         """Get image from video source. A code of 0 means success. A code of -1 means there was an internal failure."""
@@ -59,16 +63,33 @@ class VideoModule(DogModule):
         return -1, None
     
 
+    def start_stream_server(self):
+        if self._streaming:
+            print("[Video] Stream Server already started.")
+            return
+        
+        self._streamer.start_in_thread()
+        self._streaming = True
+
     def send_frame(self, frame: np.ndarray):
-        self._streamer._send(frame)
+        if not self._streaming:
+            print("[Video] Stream server not started. Please start the stream server before sending frames.")
+            return
+
+        self._streamer.send(frame)
 
     def get_stream_server_local_ip(self):
-        return self._streamer._get_local_ip_address()
-    
+        if not self._streaming:
+            print("[Video] Stream server not started. Please start the stream server before getting its local IP")
+            return
+        
+        return self._streamer.get_local_ip_address()
+
 
     def shutdown(self) -> None:
         if self._webcam:
             self._webcam.release()
 
+        self._streamer._shutdown()
         self._initialized = False
 

@@ -2,7 +2,7 @@ from typing import Callable, Optional
 from unitree_control.controller_input_control.callback_manager import _InputSignalCallbackManager, _UnitreeRemoteControllerInputParser
 from unitree_control.controller_input_control.controller_state import ControllerState
 from unitree_control.controller_input_control.input_signal import InputSignal
-from unitree_control.core.control_modules import DogModule
+from unitree_control.core.base_module import DogModule
 from unitree_control.dds.dds_constants import DDS_TOPICS
 
 
