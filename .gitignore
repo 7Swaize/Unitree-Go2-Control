@@ -4,4 +4,6 @@
 !unitree_control/
 !unitree_control/**
 
+
 .vscode/
+**/__pycache__
