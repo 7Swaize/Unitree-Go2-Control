@@ -1,13 +1,17 @@
+import os, sys
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, ROOT)
+
+
 import time
 import cv2
-import os
-import signal
 
 from aruko_helpers import *
-from unitree_control_core import * # enforce students importing with *
 
 from enum import Enum
 
+from unitree_control.core.unitree_control_core import UnitreeGo2Controller
+from unitree_control.states.dog_state_abstract import DogStateAbstract
 
 class MarkerMappings(Enum):
     """Mapping of marker IDs to commands."""
@@ -41,7 +45,7 @@ class ScanForMarkerState(DogStateAbstract):
         print(f"[Scan] Starting scan (range={self.search_range}, sweeps={self.max_sweeps})")
 
         while not fiducial_found and sweeps_done < self.max_sweeps:
-            code, image = self.functionality_wrapper.get_image()
+            code, image = self.unitree_controller.video.get_image()
             if code != 0 or image is None:
                 continue
 
@@ -53,7 +57,7 @@ class ScanForMarkerState(DogStateAbstract):
             if cv2.waitKey(1) & 0xFF == 27:
                 break
 
-            self.functionality_wrapper.rotate_dog(direction * self.search_delta)
+            self.unitree_controller.movement.rotate(direction * self.search_delta)
             current_angle += direction * self.search_delta
             next_angle = current_angle + direction * self.search_delta
 
@@ -64,7 +68,7 @@ class ScanForMarkerState(DogStateAbstract):
                 direction *= -1  # Reverse sweep direction
                 sweep_limit = self.search_range
                 
-        self.functionality_wrapper.stop_dog()
+        self.unitree_controller.movement.stop()
         
         if fiducial_found:
             print(f"[Scan] Marker {marker_id} found!")
@@ -110,7 +114,7 @@ class WalkToMarkerState(DogStateAbstract):
         print("[Walk] Starting approach to marker")
 
         while not arrived:
-            code, image = self.functionality_wrapper.get_image()
+            code, image = self.unitree_controller.video.get_image()
             if code != 0 or image is None:
                 continue
 
@@ -133,7 +137,7 @@ class WalkToMarkerState(DogStateAbstract):
         if arrived:
             print(f"[Walk] Arrived at marker {marker_id}")
 
-        self.functionality_wrapper.stop_dog()
+        self.unitree_controller.movement.stop()
         return arrived, marker_id
     
 
@@ -145,9 +149,9 @@ class WalkToMarkerState(DogStateAbstract):
         if abs(h_offset) <= h_offset_threshold:
             return True
         elif h_offset < -h_offset_threshold:
-            self.functionality_wrapper.rotate_dog(-rotate_step)
+            self.unitree_controller.movement.rotate(-rotate_step)
         elif h_offset > h_offset_threshold:
-            self.functionality_wrapper.rotate_dog(rotate_step)
+            self.unitree_controller.movement.rotate(rotate_step)
 
         return False
 
@@ -155,7 +159,7 @@ class WalkToMarkerState(DogStateAbstract):
     def approach_marker(self, fiducial_area, fiducial_area_threshold, base_forward_step):
         """Move forward toward the marker."""
         if fiducial_area >= fiducial_area_threshold:
-            self.functionality_wrapper.stop_dog()
+            self.unitree_controller.movement.stop()
             return True
         
 
@@ -172,7 +176,7 @@ class WalkToMarkerState(DogStateAbstract):
         else:
             step = base_forward_step
 
-        self.functionality_wrapper.shift_dog(step)
+        self.unitree_controller.movement.move(step)
         return False
         
 
@@ -196,8 +200,8 @@ class WalkToMarkerState(DogStateAbstract):
 class RespondToMarkerState(DogStateAbstract):
     """State for responding to marker commands."""
     
-    def __init__(self, functionality_wrapper, window_title, marker_id=-1):
-        super().__init__(functionality_wrapper)
+    def __init__(self, unitree_controller, window_title, marker_id=-1):
+        super().__init__(unitree_controller)
         self.window_title = window_title
         self.marker_id = marker_id
 
@@ -211,9 +215,9 @@ class RespondToMarkerState(DogStateAbstract):
     
         if self.marker_id == MarkerMappings.STOP.value:
             print("[Respond] STOP command received")
-            self.functionality_wrapper.stop_dog()
+            self.unitree_controller.movement.stop()
             time.sleep(0.5)
-            self.functionality_wrapper.stand_down_dog()
+            self.unitree_controller.movement.stand_down()
             return True
         
         elif self.marker_id in (MarkerMappings.LEFT_90_DEGREES.value, MarkerMappings.RIGHT_90_DEGREES.value):
@@ -226,11 +230,11 @@ class RespondToMarkerState(DogStateAbstract):
                 step_amount = step_amount * -1
 
             for _ in range(rotation_amount):
-                self.functionality_wrapper.rotate_dog(step_amount)
+                self.unitree_controller.movement.rotate(step_amount)
                 time.sleep(0.02)  # <-- Allow movement to persist (tune as needed)
 
         
-            self.functionality_wrapper.stop_dog()
+            self.unitree_controller.movement.stop()
             time.sleep(1)
 
         elif self.marker_id == MarkerMappings.ROTATE_180_DEGREES.value:
@@ -239,7 +243,7 @@ class RespondToMarkerState(DogStateAbstract):
 
 
             for _ in range(rotation_amount):
-                self.functionality_wrapper.rotate_dog(step_amount)
+                self.unitree_controller.movement.rotate(step_amount)
                 time.sleep(0.02) # <-- Allow movement to persist (tune as needed)
 
         elif self.marker_id == MarkerMappings.PLAY_AUDIO.value:
@@ -248,7 +252,7 @@ class RespondToMarkerState(DogStateAbstract):
         return False
         
     def update_visuals(self):
-        code, image = self.functionality_wrapper.get_image()
+        code, image = self.unitree_controller.video.get_image()
         if code != 0 or image is None:
             return
         
@@ -258,7 +262,24 @@ class RespondToMarkerState(DogStateAbstract):
 
 class Main:
     def __init__(self):
-        self.functionality_wrapper = DogFunctionalityWrapper(self.shutdown_callback)
+        self.unitree_controller = UnitreeGo2Controller(use_sdk=False)
+        self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
+
+
+    def test_web_streaming(self):
+        self.unitree_controller.video.start_stream_server()
+        self.unitree_controller.video.get_stream_server_local_ip()
+        try:
+            while True:
+                code, frame = self.unitree_controller.video.get_image()
+                if code != 0 or frame is None:
+                    continue
+                
+                self.unitree_controller.video.send_frame(frame)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.unitree_controller.safe_shutdown()
 
 
     def main_move(self):
@@ -271,9 +292,9 @@ class Main:
         search_delta = 1.3
         max_sweeps = 3
 
-        scan_state = ScanForMarkerState(self.functionality_wrapper, window_title, search_range, search_delta, max_sweeps)
-        walk_state = WalkToMarkerState(self.functionality_wrapper, window_title)
-        respond_state = RespondToMarkerState(self.functionality_wrapper, window_title)
+        scan_state = ScanForMarkerState(self.unitree_controller, window_title, search_range, search_delta, max_sweeps)
+        walk_state = WalkToMarkerState(self.unitree_controller, window_title)
+        respond_state = RespondToMarkerState(self.unitree_controller, window_title)
 
         print("\n[Autonomous Mode] Starting continuous operation.")
         print("  - Press Ctrl+C or trigger remote A button to stop.\n")
@@ -302,7 +323,7 @@ class Main:
         except Exception as e:
             print(f"Unhandled error: {e}")
         finally:
-            self.functionality_wrapper.safe_shutdown()
+            self.unitree_controller.safe_shutdown()
 
 
     def shutdown_callback(self):
@@ -312,4 +333,4 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    main.main_move()
+    main.test_web_streaming()
