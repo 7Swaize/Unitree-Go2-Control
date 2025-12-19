@@ -1,9 +1,16 @@
 *
 
 !.gitignore
+
 !unitree_control/
 !unitree_control/**
 
+# editor configs
+unitree_control/.vscode/
 
-.vscode/
-**/__pycache__
+# python junk
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd

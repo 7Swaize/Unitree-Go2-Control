@@ -54,6 +54,8 @@ class WebRTCStreamer:
         self._pcs = set()
         self._last_send_time = time.time()
 
+        self._loop = None
+
 
     def start_in_thread(self):
         """Start the WebRTC server in a background thread"""

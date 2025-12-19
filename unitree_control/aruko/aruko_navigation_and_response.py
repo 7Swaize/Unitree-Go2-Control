@@ -1,7 +1,9 @@
-import os, sys
+import os
+import sys
+
+# Add parent directory to Python path to allow imports
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
-
 
 import time
 import cv2
@@ -247,7 +249,7 @@ class RespondToMarkerState(DogStateAbstract):
                 time.sleep(0.02) # <-- Allow movement to persist (tune as needed)
 
         elif self.marker_id == MarkerMappings.PLAY_AUDIO.value:
-            self.functionality_wrapper.play_audio_from_text("Hello I am a Robot Dog!")
+            pass
             
         return False
         
