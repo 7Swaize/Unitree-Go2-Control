@@ -6,6 +6,8 @@ import cv2
 import numpy as np
 import pyrealsense2 as rs
 
+from unitree_control.video_control.frame_buffer import FrameBuffer
+
 
 class CameraSource(ABC):
     @abstractmethod
@@ -26,10 +28,9 @@ class SDKCameraSource(CameraSource):
         self._video_client = None
 
         self._thread = None
-        self._lock = threading.Lock()
         self._stop_event = threading.Event()
 
-        self._latest_frame = None
+        self._frame_buffer = FrameBuffer()
 
     def initialize(self) -> None:
         self._thread = threading.Thread(target=self._capture_thread, daemon=True)
@@ -50,22 +51,22 @@ class SDKCameraSource(CameraSource):
                 image_data = np.frombuffer(bytes(data), dtype=np.uint8)
                 image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
                 
-                with self._lock:
-                    self._latest_frame = image
+                self._frame_buffer.put(image)
 
             except Exception as e:
                 print(f"[SDKCamera] Error in thread: {e}")
                 continue
 
     def get_frames(self) -> Tuple[int, Optional[np.ndarray]]:
-        with self._lock:
-            if self._latest_frame is None:
-                return -1, None
-            
-            return 0, self._latest_frame.copy()
-
+        latest_frame = self._frame_buffer.get()
+        if latest_frame is None:
+            return -1, None
+        
+        return 0, latest_frame.copy()
+        
     def shutdown(self) -> None:
         self._stop_event.set()
+        self._frame_buffer.clear()
         
         if self._thread:
             self._thread.join()
@@ -78,10 +79,9 @@ class OpenCVCameraSource(CameraSource):
         self._camera_index = camera_index
 
         self._thread = None
-        self._lock = threading.Lock()
         self._stop_event = threading.Event()
 
-        self._latest_frame = None
+        self._frame_buffer = FrameBuffer()
 
     def initialize(self) -> None:
         self._thread = threading.Thread(target=self._capture_thread, daemon=True)
@@ -99,8 +99,7 @@ class OpenCVCameraSource(CameraSource):
                 if not ret:
                     continue
 
-                with self._lock:
-                    self._latest_frame = frame
+                self._frame_buffer.put(frame)
 
             except Exception as e:
                 print(f"[OpenCVCamera] Error in thread: {e}")
@@ -109,14 +108,16 @@ class OpenCVCameraSource(CameraSource):
         self._capture.release()
 
     def get_frames(self) -> Tuple[int, Optional[np.ndarray]]:
-        with self._lock:
-            if self._latest_frame is None:
-                return -1, None
-            
-            return 0, self._latest_frame.copy()
+        latest_frame = self._frame_buffer.get()
+        
+        if latest_frame is None:
+            return -1, None
+        
+        return 0, latest_frame.copy()
     
     def shutdown(self) -> None:
         self._stop_event.set()
+        self._frame_buffer.clear()
         
         if self._thread:
             self._thread.join()
@@ -137,11 +138,11 @@ class RealSenseDepthCamera(CameraSource):
         self._align = None
 
         self._thread = None
-        self._lock = threading.Lock()
+        self._lock = threading.Lock() # need lock because there are 2 frame buffers
         self._stop_event = threading.Event()
 
-        self._latest_color = None
-        self._latest_depth = None
+        self._color_frame_buffer = FrameBuffer()
+        self._depth_frame_buffer = FrameBuffer()
 
     def initialize(self) -> None:
         self._thread = threading.Thread(target=self._rs_thread, daemon=True)
@@ -169,8 +170,8 @@ class RealSenseDepthCamera(CameraSource):
                     continue
 
                 with self._lock:
-                    self._latest_color = np.asanyarray(color_frame.get_data())
-                    self._latest_depth = np.asanyarray(depth_frame.get_data())
+                    self._color_frame_buffer.put(np.asanyarray(color_frame.get_data()))
+                    self._depth_frame_buffer.put(np.asanyarray(depth_frame.get_data()))
 
             except Exception as e:
                 print(f"[RealSense] Error in thread: {e}")
@@ -181,15 +182,21 @@ class RealSenseDepthCamera(CameraSource):
 
     def get_frames(self) -> Tuple[int, Optional[Tuple[np.ndarray, np.ndarray]]]:
         with self._lock:
-            if self._latest_color is None or self._latest_depth is None:
+            latest_color = self._color_frame_buffer.get()
+            latest_depth = self._depth_frame_buffer.get()
+
+            if latest_color is None or latest_depth is None:
                 return -1, None
         
-            return 0, (self._latest_color.copy(), self._latest_depth.copy())
+            return 0, (latest_color.copy(), latest_depth.copy())
 
 
     def shutdown(self) -> None:
         self._stop_event.set()
+        self._color_frame_buffer.clear()
+        self._depth_frame_buffer.clear()
 
         if self._thread:
             self._thread.join()
             self._thread = None
+

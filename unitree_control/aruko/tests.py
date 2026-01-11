@@ -7,7 +7,6 @@ sys.path.insert(0, ROOT)
 from unitree_control.core.unitree_control_core import UnitreeGo2Controller
 from unitree_control.core.module_registry import ModuleType
 from unitree_control.video_control.video_module import VideoModule
-from unitree_control.video_control.camera_source import RealSenseDepthCamera
 
 import time
 import cv2
