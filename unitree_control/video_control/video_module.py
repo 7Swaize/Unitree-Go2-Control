@@ -67,7 +67,7 @@ class VideoModule(DogModule):
         return self._streamer.get_local_ip_address()
 
     def shutdown(self) -> None:
-        if not self.initialized:
+        if not self._initialized:
             return
         
         self._camera_source.shutdown()
