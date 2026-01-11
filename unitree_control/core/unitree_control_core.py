@@ -15,6 +15,8 @@ from unitree_control.lidar_control.decoder import LIDARModule
 
 # Some very interesting turtorial with the G02: https://hackmd.io/@c12hQ00ySVi6JYIERU7bCg/ByAOr12qJg
 
+# Update to JetPack 6.x on Dog's Jetson: https://theroboverse.com/unitree-go2-edu-jetpack-6-2-1-update/
+
 
 class UnitreeGo2Controller:
     """    
@@ -38,14 +40,13 @@ class UnitreeGo2Controller:
         self._hardware.initialize()
 
         self._modules: Dict[ModuleType, DogModule] = {}
-        self._register_all_modules()
-        self._initialize_all()
+        self._register_default_modules()
+        self._initialize_default()
 
         print(f"[Controller] Initialized in {'SDK' if use_sdk else 'SIMULATION'} mode\n")
 
 
     def _detect_sdk(self) -> bool:
-        """Auto-detect if Unitree SDK is available"""
         try:
             import unitree_sdk2py
             return True
@@ -54,7 +55,7 @@ class UnitreeGo2Controller:
             return False
         
 
-    def _initialize_all(self):
+    def _initialize_default(self):
         self._hardware.initialize()
 
         if self.use_sdk:
@@ -65,18 +66,14 @@ class UnitreeGo2Controller:
             )
 
 
-    def _register_all_modules(self):
-        self._add_module(ModuleType.VIDEO, use_sdk=self.use_sdk)
-        self._add_module(ModuleType.MOVEMENT, hardware=self._hardware)
-        self._add_module(ModuleType.OCR)
-        self._add_module(ModuleType.AUDIO)
+    def _register_default_modules(self):
+        self.add_module(ModuleType.MOVEMENT, hardware=self._hardware)
 
         if self.use_sdk:
-            self._add_module(ModuleType.INPUT, use_sdk=self.use_sdk)
-            # self._add_module(ModuleType.LIDAR, use_sdk=self.use_sdk, visualize_lidar=False)
+            self.add_module(ModuleType.INPUT, use_sdk=self.use_sdk)
 
 
-    def _add_module(self, module_type: ModuleType, **kwargs) -> None:
+    def add_module(self, module_type: ModuleType, **kwargs) -> None:
         """
         Add a new module to the controller using enum type.
         

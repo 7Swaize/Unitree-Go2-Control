@@ -1,5 +1,6 @@
 import math
 import cv2
+import numpy as np
 
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_7X7_100)
 parameters = cv2.aruco.DetectorParameters()
@@ -91,3 +92,12 @@ def extract_data_from_marker_by_id(image, corners, ids, target_marker_id):
             return target_marker_id, bounds, fiducial_center, h_offset, fiducial_area
     
     return -1, [(0, 0)], (0, 0), 0, 0
+
+
+def draw_marker_bounds(image, bounds, color=(0, 255, 0), thickness=2):
+    if bounds is None or len(bounds) != 4:
+        return
+    
+    pts = np.array(bounds, dtype=np.int32).reshape((-1, 1, 2))
+    cv2.polylines(image, [pts], isClosed=True, color=color, thickness=thickness)
+        

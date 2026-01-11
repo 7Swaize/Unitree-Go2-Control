@@ -351,7 +351,6 @@ class WebRTCStreamer:
         local_ip = self.get_local_ip_address()
         print(f"[WebRTC] Server started successfully!")
         print(f" Local Network: http://{local_ip}:{self._port}")
-
         while True:
             await asyncio.sleep(3600)
 
