@@ -18,16 +18,16 @@ class VideoModule(DogModule):
 
         self.initialize()
 
-    @classmethod
-    def create_sdk_camera(cls) -> CameraSource:
+    @staticmethod
+    def create_sdk_camera() -> CameraSource:
         return SDKCameraSource()
     
-    @classmethod
-    def create_opencv_camera(cls, camera_index: int = 0) -> CameraSource:
+    @staticmethod
+    def create_opencv_camera(camera_index: int = 0) -> CameraSource:
         return OpenCVCameraSource(camera_index)
     
-    @classmethod
-    def create_depth_camera(cls) -> CameraSource:
+    @staticmethod
+    def create_depth_camera() -> CameraSource:
         return RealSenseDepthCamera()
 
     def initialize(self) -> None:
@@ -46,25 +46,29 @@ class VideoModule(DogModule):
 
     def start_stream_server(self) -> None:
         if self._streaming:
-            print("[Video] Stream Server already started.")
-            return
+            raise RuntimeError("[Video] Stream server already started.")
         
         self._streamer.start_in_thread()
         self._streaming = True
 
     def send_frame(self, frame: np.ndarray) -> None:
         if not self._streaming:
-            print("[Video] Stream server not started. Please start the stream server before sending frames.")
-            return
+            raise RuntimeError("[Video] Stream server not started. Please start the stream server before sending frames.")
 
         self._streamer.send(frame)
 
-    def get_stream_server_local_ip(self) -> Optional[str]:
+    def get_stream_server_local_ip(self) -> str:
         if not self._streaming:
-            print("[Video] Stream server not started. Please start the stream server before getting its local IP")
-            return None
+            raise RuntimeError("[Video] Stream server not started. Please start the stream server before getting its local IP")
         
         return self._streamer.get_local_ip_address()
+    
+    def get_stream_server_port(self) -> int:
+        if not self._streaming:
+            raise RuntimeError("[Video] Stream server not started. Please start the stream server before getting its port")
+        
+        return self._streamer.get_port()
+        
 
     def shutdown(self) -> None:
         if not self._initialized:

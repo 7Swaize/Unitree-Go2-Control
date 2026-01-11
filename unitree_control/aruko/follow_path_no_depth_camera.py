@@ -320,7 +320,7 @@ class Main:
         self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=VideoModule.create_sdk_camera())
 
         self.unitree_controller.video.start_stream_server()
-        self.unitree_controller.video.get_stream_server_local_ip()
+        print(f"WebRTC streaming at: http://{self.unitree_controller.video.get_stream_server_local_ip()}:{self.unitree_controller.video.get_stream_server_port()}")
 
     def main_move(self):
         input("Press Enter to start autonomous movement...")

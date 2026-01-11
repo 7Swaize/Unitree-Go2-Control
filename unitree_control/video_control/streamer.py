@@ -58,15 +58,14 @@ class WebRTCStreamer:
 
 
     def start_in_thread(self):
-        """Start the WebRTC server in a background thread"""
-        def run():
+        """Start the WebRTC server in a background thread"""  
+        def _init_event_loop():
             self._loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self._loop)
             self._loop.run_until_complete(self._run_server())
-        
-        self._server_thread = threading.Thread(target=run, daemon=True)
+
+        self._server_thread = threading.Thread(target=_init_event_loop, daemon=True)
         self._server_thread.start()
-        time.sleep(0.5)
 
 
     def send(self, frame):
@@ -99,7 +98,12 @@ class WebRTCStreamer:
         finally:
             if s:
                 s.close()
+        
         return ip
+    
+
+    def get_port(self):
+        return self._port
     
 
     async def _offer(self, request):     
@@ -342,19 +346,24 @@ class WebRTCStreamer:
         app.router.add_post("/offer", self._offer)
         app.router.add_get("/", self._serve_html)
 
-        runner = web.AppRunner(app)
-        await runner.setup()
-        site = web.TCPSite(runner, self._host, self._port)
+        self._runner = web.AppRunner(app)
+        await self._runner.setup()
         
-        await site.start()
+        self._site = web.TCPSite(self._runner, self._host, self._port)
+        await self._site.start()
 
-        local_ip = self.get_local_ip_address()
-        print(f"[WebRTC] Server started successfully!")
-        print(f" Local Network: http://{local_ip}:{self._port}")
         while True:
             await asyncio.sleep(3600)
 
 
-    # VERY IMPORTANT TO IMPLEMENT THIS SOON
     def _shutdown(self):
-        pass
+        async def _async_shutdown():
+            futures = [pc.close() for pc in self._pcs]
+            await asyncio.gather(*futures)
+            self._pcs.clear()
+
+            if hasattr(self, '_runner'):
+                await self._runner.cleanup()
+
+        if self._loop is not None and self._loop.is_running():
+            asyncio.run_coroutine_threadsafe(_async_shutdown(), self._loop)
