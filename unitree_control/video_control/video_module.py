@@ -4,7 +4,7 @@ import numpy as np
 
 from unitree_control.core.base_module import DogModule
 from unitree_control.video_control.streamer import WebRTCStreamer
-from unitree_control.video_control.camera_source import CameraSource, RealSenseDepthCamera, SDKCameraSource, OpenCVCameraSource
+from unitree_control.video_control.camera_source import CameraSource
 
 
 class VideoModule(DogModule):
@@ -17,18 +17,7 @@ class VideoModule(DogModule):
         self._streaming = False
 
         self.initialize()
-
-    @staticmethod
-    def create_sdk_camera() -> CameraSource:
-        return SDKCameraSource()
-    
-    @staticmethod
-    def create_opencv_camera(camera_index: int = 0) -> CameraSource:
-        return OpenCVCameraSource(camera_index)
-    
-    @staticmethod
-    def create_depth_camera() -> CameraSource:
-        return RealSenseDepthCamera()
+        
 
     def initialize(self) -> None:
         if self._initialized:

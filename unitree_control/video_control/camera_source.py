@@ -23,6 +23,20 @@ class CameraSource(ABC):
         pass
 
 
+class CameraSourceFactory:  
+    @staticmethod
+    def create_sdk_camera() -> CameraSource:
+        return SDKCameraSource()
+    
+    @staticmethod
+    def create_opencv_camera(camera_index: int = 0) -> CameraSource:
+        return OpenCVCameraSource(camera_index)
+    
+    @staticmethod
+    def create_depth_camera() -> CameraSource:
+        return RealSenseDepthCamera()
+    
+
 class SDKCameraSource(CameraSource):
     def __init__(self):
         self._video_client = None

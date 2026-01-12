@@ -13,7 +13,7 @@ from aruko_helpers import *
 from unitree_control.core.unitree_control_core import UnitreeGo2Controller
 from unitree_control.core.module_registry import ModuleType
 from unitree_control.states.dog_state_abstract import DogStateAbstract
-from unitree_control.video_control.video_module import VideoModule
+from unitree_control.video_control.camera_source import CameraSourceFactory
 
 
 class MarkerMappings(Enum):
@@ -317,7 +317,7 @@ class Main:
         self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
 
         self.unitree_controller.add_module(ModuleType.AUDIO)
-        self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=VideoModule.create_sdk_camera())
+        self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_sdk_camera())
 
         self.unitree_controller.video.start_stream_server()
         print(f"WebRTC streaming at: http://{self.unitree_controller.video.get_stream_server_local_ip()}:{self.unitree_controller.video.get_stream_server_port()}")
