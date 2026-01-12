@@ -44,7 +44,7 @@ class OCRModule(DogModule):
         return (text, image)
     
 
-    def _highlight_detected_result(self, image: np.ndarray):
+    def _highlight_detected_result(self, image: np.ndarray) -> np.ndarray:
         ocr_data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
 
         for i in range(len(ocr_data['text'])):

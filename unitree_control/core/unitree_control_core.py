@@ -112,6 +112,9 @@ class UnitreeGo2Controller:
         if not isinstance(module, VideoModule):
             raise RuntimeError("Video module not loaded")
         
+        if self.is_shutdown_requested():
+            raise RuntimeError("Cannot access Video module after shutdown has been requested")
+        
         return module
     
     @property
@@ -120,6 +123,9 @@ class UnitreeGo2Controller:
         if not isinstance(module, MovementModule):
             raise RuntimeError("Movement module not loaded")
         
+        if self.is_shutdown_requested():
+            raise RuntimeError("Cannot access Movement module after shutdown has been requested")
+
         return module
     
     @property
@@ -127,6 +133,9 @@ class UnitreeGo2Controller:
         module = self._modules.get(ModuleType.OCR)
         if not isinstance(module, OCRModule):
             raise RuntimeError("OCR module not loaded")
+        
+        if self.is_shutdown_requested():
+            raise RuntimeError("Cannot access OCR module after shutdown has been requested")
         
         return module
     
@@ -136,6 +145,9 @@ class UnitreeGo2Controller:
         if not isinstance(module, AudioModule):
             raise RuntimeError("Audio module not loaded")
         
+        if self.is_shutdown_requested():
+            raise RuntimeError("Cannot access Audio module after shutdown has been requested")
+        
         return module
     
     @property
@@ -144,6 +156,9 @@ class UnitreeGo2Controller:
         if not isinstance(module, InputModule):
             raise RuntimeError("Input module not loaded")
         
+        if self.is_shutdown_requested():
+            raise RuntimeError("Cannot access Input module after shutdown has been requested")
+
         return module
     
     @property
@@ -151,6 +166,9 @@ class UnitreeGo2Controller:
         module = self._modules.get(ModuleType.LIDAR)
         if not isinstance(module, LIDARModule):
             raise RuntimeError("LIDAR module not loaded")
+        
+        if self.is_shutdown_requested():
+            raise RuntimeError("Cannot access LIDAR module after shutdown has been requested")
         
         return module
     
