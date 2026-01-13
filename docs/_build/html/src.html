@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>src package &#8212; Unitree-Go2-Control 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="src.aruko package" href="src.aruko.html" />
+    <link rel="prev" title="src" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="src-package">
+<h1>src package<a class="headerlink" href="#src-package" title="Link to this heading">¶</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src.aruko.html">src.aruko package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.aruko.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.aruko.html#module-src.aruko.aruko_helpers">src.aruko.aruko_helpers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.compute_fiducial_center_point"><code class="docutils literal notranslate"><span class="pre">compute_fiducial_center_point()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.determine_horizontal_offset"><code class="docutils literal notranslate"><span class="pre">determine_horizontal_offset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.dist_between_points"><code class="docutils literal notranslate"><span class="pre">dist_between_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.draw_marker_bounds"><code class="docutils literal notranslate"><span class="pre">draw_marker_bounds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.extract_corners_points"><code class="docutils literal notranslate"><span class="pre">extract_corners_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.extract_data_from_marker"><code class="docutils literal notranslate"><span class="pre">extract_data_from_marker()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.extract_data_from_marker_by_id"><code class="docutils literal notranslate"><span class="pre">extract_data_from_marker_by_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.get_aruko_marker"><code class="docutils literal notranslate"><span class="pre">get_aruko_marker()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.aruko_helpers.get_fiducial_area_from_corners"><code class="docutils literal notranslate"><span class="pre">get_fiducial_area_from_corners()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.aruko.html#src-aruko-follow-path-original-module">src.aruko.follow_path_original module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.aruko.html#src-aruko-follow-path-simple-module">src.aruko.follow_path_simple module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.aruko.html#module-src.aruko.tests">src.aruko.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.aruko.html#src.aruko.tests.Tests"><code class="docutils literal notranslate"><span class="pre">Tests</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.aruko.html#src.aruko.tests.Tests.shutdown_callback"><code class="docutils literal notranslate"><span class="pre">Tests.shutdown_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.aruko.html#src.aruko.tests.Tests.test_audio"><code class="docutils literal notranslate"><span class="pre">Tests.test_audio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.aruko.html#src.aruko.tests.Tests.test_depth_camera"><code class="docutils literal notranslate"><span class="pre">Tests.test_depth_camera()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.aruko.html#src.aruko.tests.Tests.test_streaming"><code class="docutils literal notranslate"><span class="pre">Tests.test_streaming()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.aruko.html#module-src.aruko">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.audio_control.html">src.audio_control package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.audio_control.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.audio_control.html#module-src.audio_control.audio_module">src.audio_control.audio_module module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.audio_control.html#src.audio_control.audio_module.AudioModule"><code class="docutils literal notranslate"><span class="pre">AudioModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.audio_control.html#src.audio_control.audio_module.AudioModule.initialize"><code class="docutils literal notranslate"><span class="pre">AudioModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.audio_control.html#src.audio_control.audio_module.AudioModule.play_audio"><code class="docutils literal notranslate"><span class="pre">AudioModule.play_audio()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.audio_control.html#src.audio_control.audio_module.AudioModule.shutdown"><code class="docutils literal notranslate"><span class="pre">AudioModule.shutdown()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.audio_control.html#module-src.audio_control">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.controller_input_control.html">src.controller_input_control package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.controller_input_control.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.controller_input_control.html#module-src.controller_input_control.callback_manager">src.controller_input_control.callback_manager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.controller_input_control.html#module-src.controller_input_control.controller_state">src.controller_input_control.controller_state module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState"><code class="docutils literal notranslate"><span class="pre">ControllerState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.a"><code class="docutils literal notranslate"><span class="pre">ControllerState.a</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.b"><code class="docutils literal notranslate"><span class="pre">ControllerState.b</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.changed"><code class="docutils literal notranslate"><span class="pre">ControllerState.changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.down"><code class="docutils literal notranslate"><span class="pre">ControllerState.down</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.f1"><code class="docutils literal notranslate"><span class="pre">ControllerState.f1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.f3"><code class="docutils literal notranslate"><span class="pre">ControllerState.f3</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.l1"><code class="docutils literal notranslate"><span class="pre">ControllerState.l1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.l2"><code class="docutils literal notranslate"><span class="pre">ControllerState.l2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.left"><code class="docutils literal notranslate"><span class="pre">ControllerState.left</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.lx"><code class="docutils literal notranslate"><span class="pre">ControllerState.lx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.ly"><code class="docutils literal notranslate"><span class="pre">ControllerState.ly</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.r1"><code class="docutils literal notranslate"><span class="pre">ControllerState.r1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.r2"><code class="docutils literal notranslate"><span class="pre">ControllerState.r2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.right"><code class="docutils literal notranslate"><span class="pre">ControllerState.right</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.rx"><code class="docutils literal notranslate"><span class="pre">ControllerState.rx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.ry"><code class="docutils literal notranslate"><span class="pre">ControllerState.ry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.select"><code class="docutils literal notranslate"><span class="pre">ControllerState.select</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.start"><code class="docutils literal notranslate"><span class="pre">ControllerState.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.up"><code class="docutils literal notranslate"><span class="pre">ControllerState.up</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.x"><code class="docutils literal notranslate"><span class="pre">ControllerState.x</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.controller_state.ControllerState.y"><code class="docutils literal notranslate"><span class="pre">ControllerState.y</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.controller_input_control.html#module-src.controller_input_control.input_module">src.controller_input_control.input_module module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_module.InputModule"><code class="docutils literal notranslate"><span class="pre">InputModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_module.InputModule.initialize"><code class="docutils literal notranslate"><span class="pre">InputModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_module.InputModule.register_callback"><code class="docutils literal notranslate"><span class="pre">InputModule.register_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_module.InputModule.shutdown"><code class="docutils literal notranslate"><span class="pre">InputModule.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_module.InputModule.unregister_callback"><code class="docutils literal notranslate"><span class="pre">InputModule.unregister_callback()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.controller_input_control.html#module-src.controller_input_control.input_signal">src.controller_input_control.input_signal module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal"><code class="docutils literal notranslate"><span class="pre">InputSignal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.BUTTON_A"><code class="docutils literal notranslate"><span class="pre">InputSignal.BUTTON_A</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.BUTTON_B"><code class="docutils literal notranslate"><span class="pre">InputSignal.BUTTON_B</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.BUTTON_X"><code class="docutils literal notranslate"><span class="pre">InputSignal.BUTTON_X</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.BUTTON_Y"><code class="docutils literal notranslate"><span class="pre">InputSignal.BUTTON_Y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.DPAD_DOWN"><code class="docutils literal notranslate"><span class="pre">InputSignal.DPAD_DOWN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.DPAD_LEFT"><code class="docutils literal notranslate"><span class="pre">InputSignal.DPAD_LEFT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.DPAD_RIGHT"><code class="docutils literal notranslate"><span class="pre">InputSignal.DPAD_RIGHT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.DPAD_UP"><code class="docutils literal notranslate"><span class="pre">InputSignal.DPAD_UP</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.F1"><code class="docutils literal notranslate"><span class="pre">InputSignal.F1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.F3"><code class="docutils literal notranslate"><span class="pre">InputSignal.F3</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.LEFT_BUMPER"><code class="docutils literal notranslate"><span class="pre">InputSignal.LEFT_BUMPER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.LEFT_STICK"><code class="docutils literal notranslate"><span class="pre">InputSignal.LEFT_STICK</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.LEFT_STICK_X"><code class="docutils literal notranslate"><span class="pre">InputSignal.LEFT_STICK_X</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.LEFT_STICK_Y"><code class="docutils literal notranslate"><span class="pre">InputSignal.LEFT_STICK_Y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.LEFT_TRIGGER"><code class="docutils literal notranslate"><span class="pre">InputSignal.LEFT_TRIGGER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.RIGHT_BUMPER"><code class="docutils literal notranslate"><span class="pre">InputSignal.RIGHT_BUMPER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.RIGHT_STICK"><code class="docutils literal notranslate"><span class="pre">InputSignal.RIGHT_STICK</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.RIGHT_STICK_X"><code class="docutils literal notranslate"><span class="pre">InputSignal.RIGHT_STICK_X</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.RIGHT_STICK_Y"><code class="docutils literal notranslate"><span class="pre">InputSignal.RIGHT_STICK_Y</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.RIGHT_TRIGGER"><code class="docutils literal notranslate"><span class="pre">InputSignal.RIGHT_TRIGGER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.SELECT"><code class="docutils literal notranslate"><span class="pre">InputSignal.SELECT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.controller_input_control.html#src.controller_input_control.input_signal.InputSignal.START"><code class="docutils literal notranslate"><span class="pre">InputSignal.START</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.controller_input_control.html#module-src.controller_input_control">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.core.html">src.core package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.core.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.core.html#module-src.core.base_module">src.core.base_module module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.base_module.DogModule"><code class="docutils literal notranslate"><span class="pre">DogModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.base_module.DogModule.initialize"><code class="docutils literal notranslate"><span class="pre">DogModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.base_module.DogModule.is_initialized"><code class="docutils literal notranslate"><span class="pre">DogModule.is_initialized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.base_module.DogModule.shutdown"><code class="docutils literal notranslate"><span class="pre">DogModule.shutdown()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.core.html#module-src.core.hardware_control">src.core.hardware_control module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface"><code class="docutils literal notranslate"><span class="pre">HardwareInterface</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.initialize"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.move"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.rotate"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.shutdown"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.stand_down"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.stand_down()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.stand_up"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.stand_up()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.HardwareInterface.stop_move"><code class="docutils literal notranslate"><span class="pre">HardwareInterface.stop_move()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.initialize"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.move"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.rotate"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.shutdown"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.stand_down"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.stand_down()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.stand_up"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.stand_up()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.SimulatedHardware.stop_move"><code class="docutils literal notranslate"><span class="pre">SimulatedHardware.stop_move()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.initialize"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.move"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.rotate"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.shutdown"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.stand_down"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.stand_down()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.stand_up"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.stand_up()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.hardware_control.UnitreeSDKHardware.stop_move"><code class="docutils literal notranslate"><span class="pre">UnitreeSDKHardware.stop_move()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.core.html#module-src.core.module_registry">src.core.module_registry module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleDescriptor"><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleDescriptor.create_instance"><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.create_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleDescriptor.display_name"><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.display_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleDescriptor.module_class"><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.module_class</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleDescriptor.module_type"><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.module_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleDescriptor.requires_sdk"><code class="docutils literal notranslate"><span class="pre">ModuleDescriptor.requires_sdk</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleRegistry"><code class="docutils literal notranslate"><span class="pre">ModuleRegistry</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleRegistry.get_class"><code class="docutils literal notranslate"><span class="pre">ModuleRegistry.get_class()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleRegistry.get_descriptor"><code class="docutils literal notranslate"><span class="pre">ModuleRegistry.get_descriptor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleRegistry.get_list_available"><code class="docutils literal notranslate"><span class="pre">ModuleRegistry.get_list_available()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleRegistry.is_registered"><code class="docutils literal notranslate"><span class="pre">ModuleRegistry.is_registered()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleRegistry.register"><code class="docutils literal notranslate"><span class="pre">ModuleRegistry.register()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType"><code class="docutils literal notranslate"><span class="pre">ModuleType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType.AUDIO"><code class="docutils literal notranslate"><span class="pre">ModuleType.AUDIO</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType.INPUT"><code class="docutils literal notranslate"><span class="pre">ModuleType.INPUT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType.LIDAR"><code class="docutils literal notranslate"><span class="pre">ModuleType.LIDAR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType.MOVEMENT"><code class="docutils literal notranslate"><span class="pre">ModuleType.MOVEMENT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType.OCR"><code class="docutils literal notranslate"><span class="pre">ModuleType.OCR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.module_registry.ModuleType.VIDEO"><code class="docutils literal notranslate"><span class="pre">ModuleType.VIDEO</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.module_registry.register_all_default_modules"><code class="docutils literal notranslate"><span class="pre">register_all_default_modules()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.core.html#module-src.core.unitree_control_core">src.core.unitree_control_core module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.add_module"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.add_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.audio"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.audio</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.get_available_modules"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.get_available_modules()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.has_module"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.has_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.input"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.input</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.is_shutdown_requested"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.is_shutdown_requested()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.lidar"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.lidar</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.movement"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.movement</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.ocr"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.ocr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.register_cleanup_callback"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.register_cleanup_callback()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.safe_shutdown"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.safe_shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.core.html#src.core.unitree_control_core.UnitreeGo2Controller.video"><code class="docutils literal notranslate"><span class="pre">UnitreeGo2Controller.video</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.core.html#module-src.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.dds.html">src.dds package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.dds.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.dds.html#module-src.dds.dds_constants">src.dds.dds_constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.dds.html#module-src.dds">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.lidar_control.html">src.lidar_control package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.lidar_control.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.lidar_control.html#module-src.lidar_control.decoder">src.lidar_control.decoder module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe"><code class="docutils literal notranslate"><span class="pre">Keyframe</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe.fpfh"><code class="docutils literal notranslate"><span class="pre">Keyframe.fpfh</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe.idx"><code class="docutils literal notranslate"><span class="pre">Keyframe.idx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe.pcd"><code class="docutils literal notranslate"><span class="pre">Keyframe.pcd</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe.pcd_down"><code class="docutils literal notranslate"><span class="pre">Keyframe.pcd_down</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe.pose"><code class="docutils literal notranslate"><span class="pre">Keyframe.pose</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.Keyframe.time"><code class="docutils literal notranslate"><span class="pre">Keyframe.time</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule"><code class="docutils literal notranslate"><span class="pre">LIDARModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.clear_all_listeners"><code class="docutils literal notranslate"><span class="pre">LIDARModule.clear_all_listeners()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.initialize"><code class="docutils literal notranslate"><span class="pre">LIDARModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.register_heightmap_listener"><code class="docutils literal notranslate"><span class="pre">LIDARModule.register_heightmap_listener()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.register_point_cloud_listener"><code class="docutils literal notranslate"><span class="pre">LIDARModule.register_point_cloud_listener()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.shutdown"><code class="docutils literal notranslate"><span class="pre">LIDARModule.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.start_lidar_visualization"><code class="docutils literal notranslate"><span class="pre">LIDARModule.start_lidar_visualization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.unregister_heightmap_listener"><code class="docutils literal notranslate"><span class="pre">LIDARModule.unregister_heightmap_listener()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.LIDARModule.unregister_point_cloud_listener"><code class="docutils literal notranslate"><span class="pre">LIDARModule.unregister_point_cloud_listener()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.compute_fpfh"><code class="docutils literal notranslate"><span class="pre">compute_fpfh()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.estimate_normals"><code class="docutils literal notranslate"><span class="pre">estimate_normals()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.preprocess_point_cloud"><code class="docutils literal notranslate"><span class="pre">preprocess_point_cloud()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.ransac_initial_alignment"><code class="docutils literal notranslate"><span class="pre">ransac_initial_alignment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.lidar_control.html#src.lidar_control.decoder.run_icp"><code class="docutils literal notranslate"><span class="pre">run_icp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.lidar_control.html#module-src.lidar_control">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.movement.html">src.movement package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.movement.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.movement.html#module-src.movement.movement_module">src.movement.movement_module module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule"><code class="docutils literal notranslate"><span class="pre">MovementModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.initialize"><code class="docutils literal notranslate"><span class="pre">MovementModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.move"><code class="docutils literal notranslate"><span class="pre">MovementModule.move()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.rotate"><code class="docutils literal notranslate"><span class="pre">MovementModule.rotate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.shutdown"><code class="docutils literal notranslate"><span class="pre">MovementModule.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.stand_down"><code class="docutils literal notranslate"><span class="pre">MovementModule.stand_down()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.stand_up"><code class="docutils literal notranslate"><span class="pre">MovementModule.stand_up()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.movement.html#src.movement.movement_module.MovementModule.stop"><code class="docutils literal notranslate"><span class="pre">MovementModule.stop()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.movement.html#module-src.movement">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.ocr_control.html">src.ocr_control package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.ocr_control.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.ocr_control.html#module-src.ocr_control.ocr_module">src.ocr_control.ocr_module module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.ocr_control.html#src.ocr_control.ocr_module.OCRModule"><code class="docutils literal notranslate"><span class="pre">OCRModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.ocr_control.html#src.ocr_control.ocr_module.OCRModule.extract_text_from_image"><code class="docutils literal notranslate"><span class="pre">OCRModule.extract_text_from_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.ocr_control.html#src.ocr_control.ocr_module.OCRModule.initialize"><code class="docutils literal notranslate"><span class="pre">OCRModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.ocr_control.html#src.ocr_control.ocr_module.OCRModule.shutdown"><code class="docutils literal notranslate"><span class="pre">OCRModule.shutdown()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.ocr_control.html#module-src.ocr_control">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.states.html">src.states package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.states.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.states.html#module-src.states.dog_state_abstract">src.states.dog_state_abstract module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.states.html#src.states.dog_state_abstract.DogStateAbstract"><code class="docutils literal notranslate"><span class="pre">DogStateAbstract</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.states.html#src.states.dog_state_abstract.DogStateAbstract.cancel"><code class="docutils literal notranslate"><span class="pre">DogStateAbstract.cancel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.states.html#src.states.dog_state_abstract.DogStateAbstract.check_shutdown"><code class="docutils literal notranslate"><span class="pre">DogStateAbstract.check_shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.states.html#src.states.dog_state_abstract.DogStateAbstract.execute"><code class="docutils literal notranslate"><span class="pre">DogStateAbstract.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.states.html#src.states.dog_state_abstract.DogStateAbstract.on_enter"><code class="docutils literal notranslate"><span class="pre">DogStateAbstract.on_enter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.states.html#src.states.dog_state_abstract.DogStateAbstract.on_exit"><code class="docutils literal notranslate"><span class="pre">DogStateAbstract.on_exit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.states.html#module-src.states.validation">src.states.validation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.states.html#module-src.states">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src.video_control.html">src.video_control package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src.video_control.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.video_control.html#module-src.video_control.camera_source">src.video_control.camera_source module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSource"><code class="docutils literal notranslate"><span class="pre">CameraSource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSource.get_frames"><code class="docutils literal notranslate"><span class="pre">CameraSource.get_frames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSource.initialize"><code class="docutils literal notranslate"><span class="pre">CameraSource.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSource.shutdown"><code class="docutils literal notranslate"><span class="pre">CameraSource.shutdown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSourceFactory"><code class="docutils literal notranslate"><span class="pre">CameraSourceFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSourceFactory.create_depth_camera"><code class="docutils literal notranslate"><span class="pre">CameraSourceFactory.create_depth_camera()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSourceFactory.create_opencv_camera"><code class="docutils literal notranslate"><span class="pre">CameraSourceFactory.create_opencv_camera()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.CameraSourceFactory.create_sdk_camera"><code class="docutils literal notranslate"><span class="pre">CameraSourceFactory.create_sdk_camera()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.OpenCVCameraSource"><code class="docutils literal notranslate"><span class="pre">OpenCVCameraSource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.OpenCVCameraSource.get_frames"><code class="docutils literal notranslate"><span class="pre">OpenCVCameraSource.get_frames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.OpenCVCameraSource.initialize"><code class="docutils literal notranslate"><span class="pre">OpenCVCameraSource.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.OpenCVCameraSource.shutdown"><code class="docutils literal notranslate"><span class="pre">OpenCVCameraSource.shutdown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera"><code class="docutils literal notranslate"><span class="pre">RealSenseDepthCamera</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera.get_frames"><code class="docutils literal notranslate"><span class="pre">RealSenseDepthCamera.get_frames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera.initialize"><code class="docutils literal notranslate"><span class="pre">RealSenseDepthCamera.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera.shutdown"><code class="docutils literal notranslate"><span class="pre">RealSenseDepthCamera.shutdown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.SDKCameraSource"><code class="docutils literal notranslate"><span class="pre">SDKCameraSource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.SDKCameraSource.get_frames"><code class="docutils literal notranslate"><span class="pre">SDKCameraSource.get_frames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.SDKCameraSource.initialize"><code class="docutils literal notranslate"><span class="pre">SDKCameraSource.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.camera_source.SDKCameraSource.shutdown"><code class="docutils literal notranslate"><span class="pre">SDKCameraSource.shutdown()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.video_control.html#module-src.video_control.frame_buffer">src.video_control.frame_buffer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.frame_buffer.FrameBuffer"><code class="docutils literal notranslate"><span class="pre">FrameBuffer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.frame_buffer.FrameBuffer.clear"><code class="docutils literal notranslate"><span class="pre">FrameBuffer.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.frame_buffer.FrameBuffer.get"><code class="docutils literal notranslate"><span class="pre">FrameBuffer.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.frame_buffer.FrameBuffer.get_batch"><code class="docutils literal notranslate"><span class="pre">FrameBuffer.get_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.frame_buffer.FrameBuffer.put"><code class="docutils literal notranslate"><span class="pre">FrameBuffer.put()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.video_control.html#module-src.video_control.streamer">src.video_control.streamer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.OpenCVStreamTrack"><code class="docutils literal notranslate"><span class="pre">OpenCVStreamTrack</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.OpenCVStreamTrack.recv"><code class="docutils literal notranslate"><span class="pre">OpenCVStreamTrack.recv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.WebRTCStreamer"><code class="docutils literal notranslate"><span class="pre">WebRTCStreamer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.WebRTCStreamer.get_local_ip_address"><code class="docutils literal notranslate"><span class="pre">WebRTCStreamer.get_local_ip_address()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.WebRTCStreamer.get_port"><code class="docutils literal notranslate"><span class="pre">WebRTCStreamer.get_port()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.WebRTCStreamer.send"><code class="docutils literal notranslate"><span class="pre">WebRTCStreamer.send()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.streamer.WebRTCStreamer.start_in_thread"><code class="docutils literal notranslate"><span class="pre">WebRTCStreamer.start_in_thread()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.video_control.html#module-src.video_control.video_module">src.video_control.video_module module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule"><code class="docutils literal notranslate"><span class="pre">VideoModule</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.get_frames"><code class="docutils literal notranslate"><span class="pre">VideoModule.get_frames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.get_stream_server_local_ip"><code class="docutils literal notranslate"><span class="pre">VideoModule.get_stream_server_local_ip()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.get_stream_server_port"><code class="docutils literal notranslate"><span class="pre">VideoModule.get_stream_server_port()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.initialize"><code class="docutils literal notranslate"><span class="pre">VideoModule.initialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.send_frame"><code class="docutils literal notranslate"><span class="pre">VideoModule.send_frame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.shutdown"><code class="docutils literal notranslate"><span class="pre">VideoModule.shutdown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="src.video_control.html#src.video_control.video_module.VideoModule.start_stream_server"><code class="docutils literal notranslate"><span class="pre">VideoModule.start_stream_server()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.video_control.html#module-src.video_control">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-src">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-src" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Unitree-Go2-Control</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">src package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">src</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">src</a></li>
+      <li>Next: <a href="src.aruko.html" title="next chapter">src.aruko package</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sachit Raheja.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/src.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

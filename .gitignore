@@ -5,6 +5,9 @@
 !src/
 !src/**
 
+!docs/
+!docs/**
+
 # editor configs
 src/.vscode/
 

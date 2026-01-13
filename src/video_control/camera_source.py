@@ -9,18 +9,67 @@ import pyrealsense2 as rs
 from src.video_control.frame_buffer import FrameBuffer
 
 
+from abc import ABC, abstractmethod
+from typing import Tuple, Any, Optional
+
 class CameraSource(ABC):
+    """
+    Abstract base class representing a camera source.
+
+    This class defines the interface that all concrete camera sources must implement.
+    A camera source is responsible for initialization, providing frames, and proper shutdown.
+    """
+
     @abstractmethod
     def initialize(self) -> None:
+        """
+        Initialize the camera source.
+
+        This method should set up any resources required for capturing frames, such as
+        opening camera devices, starting streams, or allocating buffers.
+
+        Raises
+        ------
+        RuntimeError
+            If the camera cannot be initialized.
+        """
         pass
     
     @abstractmethod
     def get_frames(self) -> Tuple[int, Optional[Any]]:
+        """
+        Retrieve the next frame(s) from the camera source.
+
+        Returns
+        -------
+        Tuple[int, Optional[Any]]
+            A tuple containing:
+            - An integer timestamp or frame index.
+            - The frame data, which can be in any format depending on the implementation
+              (e.g., NumPy array, OpenCV frame, etc.). Returns None if no frame is available.
+
+        Notes
+        -----
+        Implementations may block until a new frame is available, or return None if no
+        frame is ready.
+        """
         pass
 
     @abstractmethod
     def shutdown(self) -> None:
+        """
+        Shut down the camera source and release any resources.
+
+        This method should safely close camera devices, stop streams, and clean up
+        allocated resources.
+
+        Raises
+        ------
+        RuntimeError
+            If the camera cannot be properly shut down.
+        """
         pass
+
 
 
 class CameraSourceFactory:  
