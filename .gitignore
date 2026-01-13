@@ -2,11 +2,11 @@
 
 !.gitignore
 
-!unitree_control/
-!unitree_control/**
+!src/
+!src/**
 
 # editor configs
-unitree_control/.vscode/
+src/.vscode/
 
 # python junk
 __pycache__/
