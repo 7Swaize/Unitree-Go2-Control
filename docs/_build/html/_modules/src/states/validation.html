@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>src.states.validation &#8212; Unitree-Go2-Control 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for src.states.validation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Internal infrastructure for safely cancelling long-running state execution</span>
+<span class="sd">loops by injecting shutdown checks into user-defined code.</span>
+
+<span class="sd">This system automatically modifies the AST (Abstract Syntax Tree) of state</span>
+<span class="sd">`execute()` methods at class creation time, inserting cancellation checks</span>
+<span class="sd">inside all `for` and `while` loops.</span>
+
+<span class="sd">Purpose</span>
+<span class="sd">-------</span>
+<span class="sd">- Prevent infinite or blocking loops in student-written state logic</span>
+<span class="sd">- Allow graceful shutdown when the robot or controller exits</span>
+<span class="sd">- Avoid requiring students to manually check shutdown flags</span>
+
+<span class="sd">This is an **internal system** and should not be directly used or modified</span>
+<span class="sd">by student code.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+
+<div class="viewcode-block" id="LoopCancellationInjector">
+<a class="viewcode-back" href="../../../internal/states_validation.html#src.states.validation.LoopCancellationInjector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoopCancellationInjector</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">NodeTransformer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    AST transformer that injects shutdown checks into loop bodies.</span>
+
+<span class="sd">    This transformer modifies:</span>
+<span class="sd">    - ``while`` loops</span>
+<span class="sd">    - ``for`` loops</span>
+
+<span class="sd">    by inserting a call to ``self.check_shutdown()`` as the first statement</span>
+<span class="sd">    in each loop body.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Assumes the transformed method belongs to a class defining</span>
+<span class="sd">      ``check_shutdown()``</span>
+<span class="sd">    - Used exclusively by ``CancellableMeta``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_check_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lineno</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ast</span><span class="o">.</span><span class="n">Expr</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">Expr</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">(</span>
+                <span class="n">func</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">(</span>
+                    <span class="n">value</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;self&quot;</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Load</span><span class="p">()),</span>
+                    <span class="n">attr</span><span class="o">=</span><span class="s2">&quot;check_shutdown&quot;</span><span class="p">,</span>
+                    <span class="n">ctx</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Load</span><span class="p">()</span>
+                <span class="p">),</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">keywords</span><span class="o">=</span><span class="p">[]</span>
+            <span class="p">),</span>
+            <span class="n">lineno</span><span class="o">=</span><span class="n">lineno</span><span class="p">,</span>
+            <span class="n">col_offset</span><span class="o">=</span><span class="n">col_offset</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit_While</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generic_visit</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">check_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_check_node</span><span class="p">(</span>
+            <span class="n">lineno</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;lineno&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">col_offset</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;col_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">check_node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">visit_For</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generic_visit</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">check_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_check_node</span><span class="p">(</span>
+            <span class="n">lineno</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;lineno&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">col_offset</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;col_offset&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">check_node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+
+
+
+<div class="viewcode-block" id="CancellableMeta">
+<a class="viewcode-back" href="../../../internal/states_validation.html#src.states.validation.CancellableMeta">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CancellableMeta</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Metaclass that injects loop cancellation logic into `execute()` methods.</span>
+
+<span class="sd">    If a class defines an ``execute`` method:</span>
+<span class="sd">    - Its source code is retrieved</span>
+<span class="sd">    - Parsed into an AST</span>
+<span class="sd">    - All loops are instrumented with shutdown checks</span>
+<span class="sd">    - The modified function replaces the original</span>
+
+<span class="sd">    If any step fails, the original method is preserved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="n">mcls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s2">&quot;execute&quot;</span> <span class="ow">in</span> <span class="n">attrs</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;execute&quot;</span><span class="p">]):</span>
+            <span class="n">original</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;execute&quot;</span><span class="p">]</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">src</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">original</span><span class="p">)</span> <span class="c1"># get source code </span>
+                <span class="n">src</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="c1"># removing indentation -&gt; needed for parsing with AST</span>
+                <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="c1"># parse into AST</span>
+
+                <span class="n">injector</span> <span class="o">=</span> <span class="n">LoopCancellationInjector</span><span class="p">()</span>
+                <span class="n">new_tree</span> <span class="o">=</span> <span class="n">injector</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                <span class="n">ast</span><span class="o">.</span><span class="n">fix_missing_locations</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span> <span class="c1"># fixes line numbers and other metadata for compilation -&gt; cleanup</span>
+
+                <span class="n">env</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="vm">__globals__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">local_env</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="n">compiled</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">new_tree</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;&lt;ast&gt;&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;exec&quot;</span><span class="p">)</span> <span class="c1"># convert the new AST into executable python code</span>
+                <span class="n">exec</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">local_env</span><span class="p">)</span> <span class="c1"># runs in original context to make sure things like &quot;self&quot; still work</span>
+
+                <span class="c1"># if compilation succeeds... the new function replaces the old execute</span>
+                <span class="n">new_func</span> <span class="o">=</span> <span class="n">local_env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">original</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">new_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">new_func</span><span class="o">.</span><span class="vm">__defaults__</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="vm">__defaults__</span>
+                    <span class="n">new_func</span><span class="o">.</span><span class="vm">__kwdefaults__</span> <span class="o">=</span> <span class="n">original</span><span class="o">.</span><span class="vm">__kwdefaults__</span>
+                    <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;execute&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_func</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;execute&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original</span>
+
+            <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">IndentationError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;execute&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">original</span> <span class="c1"># leave as is if exception is raised</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">mcls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Unitree-Go2-Control</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Sachit Raheja.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

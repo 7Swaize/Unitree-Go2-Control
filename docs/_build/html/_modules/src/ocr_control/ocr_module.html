@@ -39,17 +39,16 @@
 
 
 <div class="viewcode-block" id="OCRModule">
-<a class="viewcode-back" href="../../../src.ocr_control.html#src.ocr_control.ocr_module.OCRModule">[docs]</a>
+<a class="viewcode-back" href="../../../api/ocr_control.html#src.ocr_control.ocr_module.OCRModule">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OCRModule</span><span class="p">(</span><span class="n">DogModule</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles optical character recognition&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;OCR&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
 
 <div class="viewcode-block" id="OCRModule.initialize">
-<a class="viewcode-back" href="../../../src.ocr_control.html#src.ocr_control.ocr_module.OCRModule.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../api/ocr_control.html#src.ocr_control.ocr_module.OCRModule.initialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
             <span class="k">return</span>
@@ -59,7 +58,7 @@
 
     <span class="c1"># followed this exactly: https://medium.com/@EnginDenizTangut/from-image-to-voice-building-an-ocr-tts-app-with-python-opencv-tesseract-5f5db8ea3b7b</span>
 <div class="viewcode-block" id="OCRModule.extract_text_from_image">
-<a class="viewcode-back" href="../../../src.ocr_control.html#src.ocr_control.ocr_module.OCRModule.extract_text_from_image">[docs]</a>
+<a class="viewcode-back" href="../../../api/ocr_control.html#src.ocr_control.ocr_module.OCRModule.extract_text_from_image">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">extract_text_from_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract text from an image&quot;&quot;&quot;</span>
         <span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
@@ -97,7 +96,7 @@
 
 
 <div class="viewcode-block" id="OCRModule.shutdown">
-<a class="viewcode-back" href="../../../src.ocr_control.html#src.ocr_control.ocr_module.OCRModule.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../api/ocr_control.html#src.ocr_control.ocr_module.OCRModule.shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">False</span></div>
 </div>
@@ -131,7 +130,8 @@
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
 </ul>
 
 <div class="relations">

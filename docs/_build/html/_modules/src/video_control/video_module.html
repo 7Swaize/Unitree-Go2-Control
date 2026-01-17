@@ -31,7 +31,37 @@
           <div class="body" role="main">
             
   <h1>Source code for src.video_control.video_module</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Video Module for Student Use</span>
+<span class="sd">============================</span>
+
+<span class="sd">This module provides a high-level interface for accessing camera frames</span>
+<span class="sd">and streaming video from the robot or an attached webcam. Students should</span>
+<span class="sd">interact only with :class:`VideoModule` and should not use lower-level</span>
+<span class="sd">camera or streaming classes directly.</span>
+
+<span class="sd">Students should not access or construct this class directly. Rather, they should access it through the :class:`~src.core.unitree_control_core.UnitreeGo2Controller` instance.</span>
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">&gt;&gt;&gt; from src.core.unitree_control_core import UnitreeGo2Controller</span>
+<span class="sd">&gt;&gt;&gt; from src.core.module_registry import ModuleType</span>
+<span class="sd">&gt;&gt;&gt; from src.video_control.camera_source_factory import CameraSourceFactory</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; unitree_controller = UnitreeGo2Controller(sdk_enabled=True)</span>
+<span class="sd">&gt;&gt;&gt; unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_depth_camera()) # Add video module with depth camera</span>
+<span class="sd">&gt;&gt;&gt; unitree_controller.video.start_stream_server()  # Start streaming server</span>
+<span class="sd">&gt;&gt;&gt; while True:</span>
+<span class="sd">...    status, frames = unitree_controller.video.get_frames()</span>
+<span class="sd">...    if status != 0:</span>
+<span class="sd">...        continue</span>
+<span class="sd">...</span>
+<span class="sd">...    color_frame, depth_frame = frames</span>
+<span class="sd">...    unitree_controller.video.send_frame(color_frame)  # Send color frame to stream</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -41,22 +71,49 @@
 
 
 <div class="viewcode-block" id="VideoModule">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VideoModule</span><span class="p">(</span><span class="n">DogModule</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles video capture from dog camera or external webcam&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    High-level video interface for students.</span>
+
+<span class="sd">    ``VideoModule`` provides a simple API for:</span>
+<span class="sd">        - Accessing camera frames</span>
+<span class="sd">        - Streaming video to a browser via WebRTC</span>
+
+<span class="sd">    Students should interact **only** with this class and should not</span>
+<span class="sd">    directly use camera sources, streamers, or threading utilities.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    camera_source : CameraSource</span>
+<span class="sd">        A camera source provided by the system (e.g. dog camera,</span>
+<span class="sd">        webcam, or depth camera). Requires a :class:`~src.video_control.camera_source.CameraSource` instance.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Camera initialization is handled automatically.</span>
+<span class="sd">    - Frames are retrieved using :meth:`get_frames`.</span>
+<span class="sd">    - Streaming must be explicitly started before sending frames.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_source</span><span class="p">:</span> <span class="n">CameraSource</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Video&quot;</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_camera_source</span> <span class="o">=</span> <span class="n">camera_source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_streamer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_streaming</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
         
 
 <div class="viewcode-block" id="VideoModule.initialize">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.initialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the video module. This is called internally,</span>
+<span class="sd">        and should not be called directly by students.</span>
+
+<span class="sd">        This method initializes the underlying camera and prepares</span>
+<span class="sd">        the streaming system. It is called automatically during</span>
+<span class="sd">        construction and does not need to be called by students.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
             <span class="k">return</span>
         
@@ -68,15 +125,63 @@
 
 
 <div class="viewcode-block" id="VideoModule.get_frames">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.get_frames">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.get_frames">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the latest camera frame(s).</span>
+
+<span class="sd">        Depending on the camera type, this method may return:</span>
+<span class="sd">            - A single color image (RGB/BGR)</span>
+<span class="sd">            - A tuple ``(color_frame, depth_frame)`` for depth cameras</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[int, Optional[Any]]</span>
+<span class="sd">            A tuple ``(status, frames)`` where:</span>
+
+<span class="sd">                - ``status`` is ``0`` if frame data is available</span>
+<span class="sd">                - ``status`` is ``-1`` if no frame data is available</span>
+<span class="sd">                - ``frames`` is one of:</span>
+<span class="sd">                </span>
+<span class="sd">                    * ``numpy.ndarray`` — a single color image</span>
+<span class="sd">                    * ``Tuple[numpy.ndarray, numpy.ndarray]`` — ``(color, depth)``</span>
+<span class="sd">                    * ``None`` — if no frame is available</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        Single-frame usage (most cameras):</span>
+
+<span class="sd">        &gt;&gt;&gt; status, frame = unitree_controller.video.get_frames()</span>
+<span class="sd">        &gt;&gt;&gt; if status == 0 and isinstance(frame, np.ndarray):</span>
+<span class="sd">        ...     print(frame.shape)</span>
+
+<span class="sd">        Depth-camera usage:</span>
+
+<span class="sd">        &gt;&gt;&gt; status, frames = unitree_controller.video.get_frames()</span>
+<span class="sd">        &gt;&gt;&gt; if status == 0 and isinstance(frames, tuple):</span>
+<span class="sd">        ...     color, depth = frames</span>
+<span class="sd">        ...     print(color.shape, depth.shape)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_source</span><span class="o">.</span><span class="n">get_frames</span><span class="p">()</span></div>
 
 
 
 <div class="viewcode-block" id="VideoModule.start_stream_server">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.start_stream_server">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.start_stream_server">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start_stream_server</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the video streaming server.</span>
+
+<span class="sd">        This launches a local WebRTC server that allows video frames</span>
+<span class="sd">        to be viewed in a browser. Only clients connected to the same</span>
+<span class="sd">        subnet as the robot can access the stream.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the stream server has already been started.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streaming</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;[Video] Stream server already started.&quot;</span><span class="p">)</span>
         
@@ -85,8 +190,28 @@
 
 
 <div class="viewcode-block" id="VideoModule.send_frame">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.send_frame">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.send_frame">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">send_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send a video frame to connected streaming clients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frame : numpy.ndarray</span>
+<span class="sd">            An image frame to stream (typically obtained from</span>
+<span class="sd">            :meth:`get_frames`).</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the stream server has not been started.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; status, frame = unitree_controller.video.get_frames()</span>
+<span class="sd">        &gt;&gt;&gt; if status == 0:</span>
+<span class="sd">        ...     unitree_controller.video.send_frame(frame)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streaming</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;[Video] Stream server not started. Please start the stream server before sending frames.&quot;</span><span class="p">)</span>
 
@@ -94,8 +219,21 @@
 
 
 <div class="viewcode-block" id="VideoModule.get_stream_server_local_ip">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.get_stream_server_local_ip">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.get_stream_server_local_ip">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_stream_server_local_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the local IP address of the stream server.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Local IP address where the stream is hosted.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the stream server is not running.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streaming</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;[Video] Stream server not started. Please start the stream server before getting its local IP&quot;</span><span class="p">)</span>
         
@@ -103,8 +241,21 @@
 
     
 <div class="viewcode-block" id="VideoModule.get_stream_server_port">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.get_stream_server_port">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.get_stream_server_port">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_stream_server_port</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the port number of the stream server.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            Port number used by the stream server.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the stream server is not running.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streaming</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;[Video] Stream server not started. Please start the stream server before getting its port&quot;</span><span class="p">)</span>
         
@@ -113,15 +264,22 @@
         
 
 <div class="viewcode-block" id="VideoModule.shutdown">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.video_module.VideoModule.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../api/video_control.html#src.video_control.video_module.VideoModule.shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shut down the video module. This is handled automatically and shouldn&#39;t be called by students.</span>
+
+<span class="sd">        This stops camera capture, shuts down the streaming server,</span>
+<span class="sd">        and releases all resources. This should be called when the</span>
+<span class="sd">        program is exiting.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
             <span class="k">return</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">_camera_source</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streamer</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_streamer</span><span class="o">.</span><span class="n">_shutdown</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streamer</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_streamer</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_streaming</span> <span class="o">=</span> <span class="kc">False</span>
@@ -157,7 +315,8 @@
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
 </ul>
 
 <div class="relations">

@@ -31,24 +31,67 @@
           <div class="body" role="main">
             
   <h1>Source code for src.audio_control.audio_module</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Audio Module for Student Use</span>
+<span class="sd">============================</span>
+
+<span class="sd">This module provides simple text-to-speech functionality for the dog robot. </span>
+<span class="sd">It wraps the underlying pyttsx3 engine and handles thread-safe playback.</span>
+
+<span class="sd">Students should not access or construct this class directly. Rather, they should access it through the :class:`~src.core.unitree_control_core.UnitreeGo2Controller` instance.</span>
+
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">&gt;&gt;&gt; from src.core.unitree_control_core import UnitreeGo2Controller</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; unitree_controller = UnitreeGo2Controller(use_sdk=False)</span>
+<span class="sd">&gt;&gt;&gt; unitree_controller.add_module(ModuleType.AUDIO)</span>
+<span class="sd">&gt;&gt;&gt; unitree_controller.audio.play_audio(&quot;Hello World&quot;) # Text-to-speech of the current string</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyttsx3</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.core.base_module</span><span class="w"> </span><span class="kn">import</span> <span class="n">DogModule</span>
 
 
 <div class="viewcode-block" id="AudioModule">
-<a class="viewcode-back" href="../../../src.audio_control.html#src.audio_control.audio_module.AudioModule">[docs]</a>
+<a class="viewcode-back" href="../../../api/audio_control.html#src.audio_control.audio_module.AudioModule">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AudioModule</span><span class="p">(</span><span class="n">DogModule</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handles text-to-speech audio&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    High-level text-to-speech interface for students. This is called internally,</span>
+<span class="sd">    and should not be called directly by students.</span>
+
+<span class="sd">    ``AudioModule`` allows students to easily play audio or speech</span>
+<span class="sd">    using simple text commands. It supports both **blocking** and</span>
+<span class="sd">    **asynchronous** playback.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Students do not need to manage threads or the underlying</span>
+<span class="sd">      pyttsx3 engine.</span>
+<span class="sd">    - Initialization is handled automatically during construction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the AudioModule.</span>
+
+<span class="sd">        The TTS engine is initialized automatically. No parameters</span>
+<span class="sd">        are required.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Audio&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
-    
+
 
 <div class="viewcode-block" id="AudioModule.initialize">
-<a class="viewcode-back" href="../../../src.audio_control.html#src.audio_control.audio_module.AudioModule.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../api/audio_control.html#src.audio_control.audio_module.AudioModule.initialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the text-to-speech engine.</span>
+
+<span class="sd">        This method is called automatically by the constructor. It</span>
+<span class="sd">        ensures that the engine is only initialized once.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
             <span class="k">return</span>
         
@@ -58,8 +101,25 @@
 
 
 <div class="viewcode-block" id="AudioModule.play_audio">
-<a class="viewcode-back" href="../../../src.audio_control.html#src.audio_control.audio_module.AudioModule.play_audio">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">play_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../api/audio_control.html#src.audio_control.audio_module.AudioModule.play_audio">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">play_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">blocking</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Play audio from text.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text : str</span>
+<span class="sd">            The text string to be spoken by the robot.</span>
+<span class="sd">        blocking : bool, optional</span>
+<span class="sd">            If True, the method blocks until the speech finishes.</span>
+<span class="sd">            If False (default), playback occurs asynchronously in</span>
+<span class="sd">            a background thread.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; audio.play_audio(&quot;Hello!&quot;)                # asynchronous playback</span>
+<span class="sd">        &gt;&gt;&gt; audio.play_audio(&quot;Wait for me.&quot;, blocking=True)  # synchronous playback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">say</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="n">blocking</span><span class="p">:</span>
@@ -69,9 +129,44 @@
 
 
 
+<div class="viewcode-block" id="AudioModule.get_engine">
+<a class="viewcode-back" href="../../../api/audio_control.html#src.audio_control.audio_module.AudioModule.get_engine">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pyttsx3</span><span class="o">.</span><span class="n">Engine</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Access the underlying pyttsx3 engine.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyttsx3.Engine</span>
+<span class="sd">            The initialized text-to-speech engine.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        RuntimeError</span>
+<span class="sd">            If the audio module has not been initialized yet.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This method is primarily for advanced use cases. Students typically</span>
+<span class="sd">        do not need to call this directly. Unless they want to modify the </span>
+<span class="sd">        configuration of the text-to-speech</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;[Audio] Audio module must be initialized before accessing pyttsx3 engine&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span></div>
+
+
+
 <div class="viewcode-block" id="AudioModule.shutdown">
-<a class="viewcode-back" href="../../../src.audio_control.html#src.audio_control.audio_module.AudioModule.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../api/audio_control.html#src.audio_control.audio_module.AudioModule.shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shut down the audio module. This is handled automatically and shouldn&#39;t be called by students.</span>
+
+<span class="sd">        Stops the text-to-speech engine and marks the module</span>
+<span class="sd">        as uninitialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">False</span></div>
 </div>
 
@@ -104,7 +199,8 @@
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
 </ul>
 
 <div class="relations">

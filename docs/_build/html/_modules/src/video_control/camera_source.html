@@ -41,22 +41,27 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.video_control.frame_buffer</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameBuffer</span>
 
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
-
 <div class="viewcode-block" id="CameraSource">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSource">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.CameraSource">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CameraSource</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstract base class representing a camera source.</span>
+<span class="sd">    Abstract base class for all camera sources.</span>
 
-<span class="sd">    This class defines the interface that all concrete camera sources must implement.</span>
-<span class="sd">    A camera source is responsible for initialization, providing frames, and proper shutdown.</span>
+<span class="sd">    A ``CameraSource`` provides a unified interface for acquiring image frames</span>
+<span class="sd">    from different camera backends (SDK-based cameras, OpenCV webcams,</span>
+<span class="sd">    depth cameras, etc.).</span>
+
+<span class="sd">    All concrete camera implementations must implement:</span>
+<span class="sd">        - ``initialize``: start the camera and any background threads</span>
+<span class="sd">        - ``get_frames``: retrieve the latest available frame(s)</span>
+<span class="sd">        - ``shutdown``: safely stop the camera and release resources</span>
+
+<span class="sd">    This abstraction allows higher-level modules (e.g. VideoModule)</span>
+<span class="sd">    to consume camera data without caring about the underlying hardware.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="CameraSource.initialize">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSource.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.CameraSource.initialize">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -74,30 +79,32 @@
 
     
 <div class="viewcode-block" id="CameraSource.get_frames">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSource.get_frames">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.CameraSource.get_frames">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Retrieve the next frame(s) from the camera source.</span>
+<span class="sd">        Retrieve the next frame(s) from the camera source. The amount of frames</span>
+<span class="sd">        returned are implementation-dependent (e.g., single frame, color+depth</span>
+<span class="sd">        pair, etc.).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Tuple[int, Optional[Any]]</span>
 <span class="sd">            A tuple containing:</span>
-<span class="sd">            - An integer timestamp or frame index.</span>
-<span class="sd">            - The frame data, which can be in any format depending on the implementation</span>
-<span class="sd">              (e.g., NumPy array, OpenCV frame, etc.). Returns None if no frame is available.</span>
+
+<span class="sd">                - An integer timestamp or frame index.</span>
+<span class="sd">                - The frame data, which can be in any format depending on the implementation (e.g., NumPy array, OpenCV frame, etc.). Returns None if no frame is available.</span>
 
 <span class="sd">        Notes</span>
 <span class="sd">        -----</span>
-<span class="sd">        Implementations may block until a new frame is available, or return None if no</span>
-<span class="sd">        frame is ready.</span>
+<span class="sd">        - This method does **not** block.</span>
+<span class="sd">        - Implementations typically return the latest frame stored in a buffer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="CameraSource.shutdown">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSource.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.CameraSource.shutdown">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -117,35 +124,17 @@
 
 
 
-<div class="viewcode-block" id="CameraSourceFactory">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSourceFactory">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CameraSourceFactory</span><span class="p">:</span>  
-<div class="viewcode-block" id="CameraSourceFactory.create_sdk_camera">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSourceFactory.create_sdk_camera">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_sdk_camera</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CameraSource</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SDKCameraSource</span><span class="p">()</span></div>
-
-    
-<div class="viewcode-block" id="CameraSourceFactory.create_opencv_camera">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSourceFactory.create_opencv_camera">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_opencv_camera</span><span class="p">(</span><span class="n">camera_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CameraSource</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">OpenCVCameraSource</span><span class="p">(</span><span class="n">camera_index</span><span class="p">)</span></div>
-
-    
-<div class="viewcode-block" id="CameraSourceFactory.create_depth_camera">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.CameraSourceFactory.create_depth_camera">[docs]</a>
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">create_depth_camera</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">CameraSource</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">RealSenseDepthCamera</span><span class="p">()</span></div>
-</div>
-
-    
-
 <div class="viewcode-block" id="SDKCameraSource">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.SDKCameraSource">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.SDKCameraSource">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SDKCameraSource</span><span class="p">(</span><span class="n">CameraSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    SDK-based camera source backed by Unitree&#39;s VideoClient.</span>
+
+<span class="sd">    This implementation is intended for:</span>
+<span class="sd">        - Unitree Go2 robot cameras</span>
+
+<span class="sd">    Frames are captured in a background thread and stored in a frame buffer.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_video_client</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -155,7 +144,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span> <span class="o">=</span> <span class="n">FrameBuffer</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SDKCameraSource.initialize">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.SDKCameraSource.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.SDKCameraSource.initialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_capture_thread</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
@@ -183,8 +172,17 @@
                 <span class="k">continue</span>
 
 <div class="viewcode-block" id="SDKCameraSource.get_frames">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.SDKCameraSource.get_frames">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.SDKCameraSource.get_frames">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieve the latest frame from the Unitree Go2&#39;s internal camera source.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[int, Optional[np.ndarray]]</span>
+<span class="sd">            ``(0, frame)`` if a frame is available</span>
+<span class="sd">            ``(-1, None)`` if no frame is available.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">latest_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">latest_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span>
@@ -193,7 +191,7 @@
 
         
 <div class="viewcode-block" id="SDKCameraSource.shutdown">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.SDKCameraSource.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.SDKCameraSource.shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -206,9 +204,26 @@
 
 
 <div class="viewcode-block" id="OpenCVCameraSource">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.OpenCVCameraSource">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.OpenCVCameraSource">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OpenCVCameraSource</span><span class="p">(</span><span class="n">CameraSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Camera source backed by OpenCV&#39;s ``VideoCapture``.</span>
+
+<span class="sd">    This implementation is intended for:</span>
+<span class="sd">        - USB webcams</span>
+<span class="sd">        - Laptop cameras</span>
+<span class="sd">        - Simple RGB camera setups</span>
+
+<span class="sd">    Frames are captured in a background thread and stored in a frame buffer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        camera_index : int, optional</span>
+<span class="sd">            OpenCV camera index (default is 0).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_capture</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_camera_index</span> <span class="o">=</span> <span class="n">camera_index</span>
 
@@ -218,7 +233,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span> <span class="o">=</span> <span class="n">FrameBuffer</span><span class="p">()</span>
 
 <div class="viewcode-block" id="OpenCVCameraSource.initialize">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.OpenCVCameraSource.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.OpenCVCameraSource.initialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_capture_thread</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
@@ -245,8 +260,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_capture</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
 
 <div class="viewcode-block" id="OpenCVCameraSource.get_frames">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.OpenCVCameraSource.get_frames">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.OpenCVCameraSource.get_frames">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieve the latest frame from the OpenCV camera source.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[int, Optional[np.ndarray]]</span>
+<span class="sd">            A tuple containing:</span>
+
+<span class="sd">            - ``(0, frame)`` if a frame is available</span>
+<span class="sd">            - ``(-1, None)`` if no frame is available.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">latest_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
         
         <span class="k">if</span> <span class="n">latest_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -256,7 +282,7 @@
 
     
 <div class="viewcode-block" id="OpenCVCameraSource.shutdown">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.OpenCVCameraSource.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.OpenCVCameraSource.shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -273,8 +299,20 @@
 <span class="c1"># Optimzation/Configs: https://dev.realsenseai.com/docs/tuning-depth-cameras-for-best-performance</span>
 
 <div class="viewcode-block" id="RealSenseDepthCamera">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.RealSenseDepthCamera">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RealSenseDepthCamera</span><span class="p">(</span><span class="n">CameraSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Intel RealSense RGB-D camera source.</span>
+
+<span class="sd">    This camera provides **aligned color and depth frames** using</span>
+<span class="sd">    the RealSense SDK. Frames are captured asynchronously in a</span>
+<span class="sd">    background thread.</span>
+
+<span class="sd">    ``get_frames`` returns a tuple ``(color, depth)`` where:</span>
+<span class="sd">        - ``color`` is a BGR image (H, W, 3)</span>
+<span class="sd">        - ``depth`` is a uint16 depth image (H, W)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">848</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">480</span>
@@ -291,7 +329,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_depth_frame_buffer</span> <span class="o">=</span> <span class="n">FrameBuffer</span><span class="p">()</span>
 
 <div class="viewcode-block" id="RealSenseDepthCamera.initialize">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.RealSenseDepthCamera.initialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rs_thread</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
@@ -330,8 +368,17 @@
 
 
 <div class="viewcode-block" id="RealSenseDepthCamera.get_frames">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera.get_frames">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.RealSenseDepthCamera.get_frames">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the latest aligned color and depth frames.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[int, Optional[Tuple[np.ndarray, np.ndarray]]]</span>
+<span class="sd">            ``(0, (color, depth))`` if frames are available, otherwise</span>
+<span class="sd">            ``(-1, None)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="n">latest_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_color_frame_buffer</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
             <span class="n">latest_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth_frame_buffer</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -344,7 +391,7 @@
 
 
 <div class="viewcode-block" id="RealSenseDepthCamera.shutdown">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.camera_source.RealSenseDepthCamera.shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.camera_source.RealSenseDepthCamera.shutdown">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_color_frame_buffer</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -385,7 +432,8 @@
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
 </ul>
 
 <div class="relations">

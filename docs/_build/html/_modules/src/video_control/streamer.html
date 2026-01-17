@@ -50,8 +50,20 @@
 <span class="c1"># command to install rtc: pip install aiortc opencv-python</span>
 
 <div class="viewcode-block" id="OpenCVStreamTrack">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.OpenCVStreamTrack">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.OpenCVStreamTrack">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OpenCVStreamTrack</span><span class="p">(</span><span class="n">VideoStreamTrack</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Video stream track that supplies frames from a local queue to WebRTC.</span>
+
+<span class="sd">    This class wraps a `queue.Queue` of frames and presents them as</span>
+<span class="sd">    an `aiortc.VideoStreamTrack`. It is designed for internal use</span>
+<span class="sd">    by `WebRTCStreamer`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    frame_queue : queue.Queue</span>
+<span class="sd">        A thread-safe queue containing frames to stream.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_queue</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_queue</span> <span class="o">=</span> <span class="n">frame_queue</span>
@@ -59,8 +71,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_count</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="OpenCVStreamTrack.recv">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.OpenCVStreamTrack.recv">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.OpenCVStreamTrack.recv">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">recv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Receive the next video frame for WebRTC.</span>
+
+<span class="sd">        Retrieves the latest frame from the internal queue. If no</span>
+<span class="sd">        frame is available, the last frame is repeated.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        av.VideoFrame</span>
+<span class="sd">            The video frame in BGR24 format, ready to be sent</span>
+<span class="sd">            over WebRTC.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pts</span><span class="p">,</span> <span class="n">time_base</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_timestamp</span><span class="p">()</span>
 
         <span class="n">frame</span> <span class="o">=</span> <span class="kc">None</span>
@@ -86,8 +110,35 @@
 
 <span class="c1"># TURN for public conn? https://www.100ms.live/blog/webrtc-python-react#interactive-connectivity-establishment---ice</span>
 <div class="viewcode-block" id="WebRTCStreamer">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.WebRTCStreamer">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">WebRTCStreamer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    WebRTC streaming server for internal video broadcasting.</span>
+
+<span class="sd">    Handles serving a video stream over a local WebRTC connection.</span>
+<span class="sd">    This class uses:</span>
+
+<span class="sd">        - `OpenCVStreamTrack` to pull frames from a queue</span>
+<span class="sd">        - `aiortc` for WebRTC communication</span>
+<span class="sd">        - `aiohttp` for HTTP endpoints and offer/answer negotiation</span>
+<span class="sd">        - Asyncio and a background thread for the event loop</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    host : str</span>
+<span class="sd">        The hostname or IP to bind the server (default &quot;0.0.0.0&quot;).</span>
+<span class="sd">    port : int</span>
+<span class="sd">        The TCP port for the server (default 8080).</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _frame_queue : queue.Queue</span>
+<span class="sd">        Queue for frames to send to WebRTC clients.</span>
+<span class="sd">    _pcs : set</span>
+<span class="sd">        Set of active RTCPeerConnections.</span>
+<span class="sd">    _loop : asyncio.AbstractEventLoop</span>
+<span class="sd">        Event loop for running the server in a background thread.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_host</span> <span class="o">=</span> <span class="n">host</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_port</span> <span class="o">=</span> <span class="n">port</span>
@@ -99,9 +150,14 @@
 
 
 <div class="viewcode-block" id="WebRTCStreamer.start_in_thread">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.WebRTCStreamer.start_in_thread">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer.start_in_thread">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start_in_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the WebRTC server in a background thread&quot;&quot;&quot;</span>  
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the WebRTC server in a daemon thread.</span>
+
+<span class="sd">        Initializes a new asyncio event loop in a separate thread</span>
+<span class="sd">        and runs the HTTP + WebRTC server asynchronously.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">_init_event_loop</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
             <span class="n">asyncio</span><span class="o">.</span><span class="n">set_event_loop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
@@ -113,9 +169,21 @@
 
 
 <div class="viewcode-block" id="WebRTCStreamer.send">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.WebRTCStreamer.send">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer.send">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a frame to the WebRTC stream&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enqueue a video frame for streaming.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frame : numpy.ndarray</span>
+<span class="sd">            The video frame to send. If the internal queue exceeds</span>
+<span class="sd">            5 frames, the oldest frames are discarded.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Non-blocking; frames are dropped if the queue is full.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
             
@@ -131,11 +199,16 @@
 
 
 <div class="viewcode-block" id="WebRTCStreamer.get_local_ip_address">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.WebRTCStreamer.get_local_ip_address">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer.get_local_ip_address">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_local_ip_address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the LAN IP address that clients can connect to.</span>
-<span class="sd">        Works even if the robot has multiple interfaces.</span>
+<span class="sd">        Determine the local LAN IP address for client connections.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Local IP address (e.g., 192.168.x.x), or &quot;127.0.0.1&quot;</span>
+<span class="sd">            if detection fails.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
@@ -153,13 +226,36 @@
     
 
 <div class="viewcode-block" id="WebRTCStreamer.get_port">
-<a class="viewcode-back" href="../../../src.video_control.html#src.video_control.streamer.WebRTCStreamer.get_port">[docs]</a>
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer.get_port">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_port</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the TCP port used by the server.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            The port number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port</span></div>
 
     
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_offer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>     
+<div class="viewcode-block" id="WebRTCStreamer._offer">
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer._offer">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_offer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>  
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle incoming SDP offers from clients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        request : aiohttp.web.Request</span>
+<span class="sd">            The HTTP POST request containing the SDP offer.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        aiohttp.web.Response</span>
+<span class="sd">            JSON response containing the SDP answer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">params</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
         <span class="n">offer</span> <span class="o">=</span> <span class="n">RTCSessionDescription</span><span class="p">(</span><span class="n">sdp</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;sdp&quot;</span><span class="p">],</span> <span class="nb">type</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
 
@@ -190,11 +286,20 @@
         <span class="k">return</span> <span class="n">web</span><span class="o">.</span><span class="n">json_response</span><span class="p">({</span>
             <span class="s2">&quot;sdp&quot;</span><span class="p">:</span> <span class="n">pc</span><span class="o">.</span><span class="n">localDescription</span><span class="o">.</span><span class="n">sdp</span><span class="p">,</span>
             <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">pc</span><span class="o">.</span><span class="n">localDescription</span><span class="o">.</span><span class="n">type</span>
-        <span class="p">})</span>
+        <span class="p">})</span></div>
+
 
 
     <span class="c1"># AI GENERATED HTML - Shoutout Claude for this nice work</span>
+<div class="viewcode-block" id="WebRTCStreamer._serve_html">
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer._serve_html">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_serve_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Serve the WebRTC demo HTML page to clients.</span>
+
+<span class="sd">        This page connects to the WebRTC server and displays</span>
+<span class="sd">        video frames in the browser. For internal use only.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">html_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&lt;!DOCTYPE html&gt;</span>
 <span class="s2">&lt;html&gt;</span>
 <span class="s2">&lt;head&gt;</span>
@@ -391,10 +496,19 @@
 <span class="s2">    &lt;/script&gt;</span>
 <span class="s2">&lt;/body&gt;</span>
 <span class="s2">&lt;/html&gt;&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">web</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">html_content</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s2">&quot;text/html&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">web</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">html_content</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s2">&quot;text/html&quot;</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="WebRTCStreamer._run_server">
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer._run_server">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_run_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the aiohttp + WebRTC server asynchronously.</span>
+
+<span class="sd">        Adds endpoints for &quot;/offer&quot; and &quot;/&quot; (HTML page) and keeps</span>
+<span class="sd">        the server alive indefinitely.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">app</span> <span class="o">=</span> <span class="n">web</span><span class="o">.</span><span class="n">Application</span><span class="p">()</span>
         <span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">add_post</span><span class="p">(</span><span class="s2">&quot;/offer&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offer</span><span class="p">)</span>
         <span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">add_get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serve_html</span><span class="p">)</span>
@@ -406,10 +520,22 @@
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_site</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="WebRTCStreamer.shutdown">
+<a class="viewcode-back" href="../../../internal/video_control.html#src.video_control.streamer.WebRTCStreamer.shutdown">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shutdown all active connections and cleanup the server.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Closes all RTCPeerConnections.</span>
+<span class="sd">        - Cleans up the aiohttp runner.</span>
+<span class="sd">        - Should be called before program exit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_async_shutdown</span><span class="p">():</span>
             <span class="n">futures</span> <span class="o">=</span> <span class="p">[</span><span class="n">pc</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="k">for</span> <span class="n">pc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pcs</span><span class="p">]</span>
             <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">futures</span><span class="p">)</span>
@@ -420,6 +546,7 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">is_running</span><span class="p">():</span>
             <span class="n">asyncio</span><span class="o">.</span><span class="n">run_coroutine_threadsafe</span><span class="p">(</span><span class="n">_async_shutdown</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
 
@@ -450,7 +577,8 @@
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
 </ul>
 
 <div class="relations">

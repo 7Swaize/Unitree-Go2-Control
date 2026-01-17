@@ -31,48 +31,116 @@
           <div class="body" role="main">
             
   <h1>Source code for src.states.dog_state_abstract</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">State Machine Approach for Student Use</span>
+<span class="sd">======================================</span>
+
+<span class="sd">Abstract base class for all robot behavior states.</span>
+
+<span class="sd">Students create custom states by inheriting from this class and implementing</span>
+<span class="sd">the :meth:`execute` method. This approach is completely optional. It is solely available</span>
+<span class="sd">for those who are comfortable with a more advanced approach.  </span>
+
+<span class="sd">This framework provides:</span>
+<span class="sd">    - Automatic loop cancellation</span>
+<span class="sd">    - Safe shutdown handling</span>
+<span class="sd">    - Consistent state lifecycle hooks</span>
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">&gt;&gt;&gt; from src.core.unitree_control_core import UnitreeGo2Controller</span>
+<span class="sd">&gt;&gt;&gt; from src.states.dog_state_abstract import DogStateAbstract</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; class RotateInPlaceState(DogStateAbstract):</span>
+<span class="sd">...     def __init__(self, controller, steps==100):</span>
+<span class="sd">...         super().__init__(controller)</span>
+<span class="sd">            self.steps = steps</span>
+<span class="sd">...</span>
+<span class="sd">...     def execute(self):</span>
+<span class="sd">...         for _ in range(self.steps):</span>
+<span class="sd">...             self.unitree_controller.movement.rotate(1.0)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">final</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">src.core.unitree_control_core</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnitreeGo2Controller</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">src.states.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">_CancellableMeta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.states.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">CancellableMeta</span>
 
 
 <div class="viewcode-block" id="DogStateAbstract">
-<a class="viewcode-back" href="../../../src.states.html#src.states.dog_state_abstract.DogStateAbstract">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DogStateAbstract</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">_CancellableMeta</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../api/states.html#src.states.dog_state_abstract.DogStateAbstract">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DogStateAbstract</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CancellableMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for dog behavior states.&quot;&quot;&quot;</span>
     
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functionality_wrapper</span><span class="p">:</span> <span class="n">UnitreeGo2Controller</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unitree_controller</span><span class="p">:</span> <span class="n">UnitreeGo2Controller</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a dog behavior state.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        unitree_controller : UnitreeGo2Controller</span>
+<span class="sd">            High-level controller providing robot control APIs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">unitree_controller</span> <span class="o">=</span> <span class="n">functionality_wrapper</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unitree_controller</span> <span class="o">=</span> <span class="n">unitree_controller</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">should_cancel</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="DogStateAbstract.execute">
-<a class="viewcode-back" href="../../../src.states.html#src.states.dog_state_abstract.DogStateAbstract.execute">[docs]</a>
+<a class="viewcode-back" href="../../../api/states.html#src.states.dog_state_abstract.DogStateAbstract.execute">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span> <span class="c1"># might have to preserve var args in source gen?</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main execution logic for the state.</span>
+
+<span class="sd">        This method is automatically instrumented to support safe shutdown.</span>
+<span class="sd">        Any ``for`` or ``while`` loop inside this method will automatically</span>
+<span class="sd">        check for system shutdown.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Long-running logic is safe by default</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="DogStateAbstract.on_enter">
-<a class="viewcode-back" href="../../../src.states.html#src.states.dog_state_abstract.DogStateAbstract.on_enter">[docs]</a>
+<a class="viewcode-back" href="../../../api/states.html#src.states.dog_state_abstract.DogStateAbstract.on_enter">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_enter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the state becomes active.</span>
+
+<span class="sd">        Sets internal running flags.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">should_cancel</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="DogStateAbstract.on_exit">
-<a class="viewcode-back" href="../../../src.states.html#src.states.dog_state_abstract.DogStateAbstract.on_exit">[docs]</a>
+<a class="viewcode-back" href="../../../api/states.html#src.states.dog_state_abstract.DogStateAbstract.on_exit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">on_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Called when the state exits.</span>
+
+<span class="sd">        Cleans up internal state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_running</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="DogStateAbstract.check_shutdown">
-<a class="viewcode-back" href="../../../src.states.html#src.states.dog_state_abstract.DogStateAbstract.check_shutdown">[docs]</a>
+<a class="viewcode-back" href="../../../api/states.html#src.states.dog_state_abstract.DogStateAbstract.check_shutdown">[docs]</a>
     <span class="nd">@final</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">check_shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether the system is shutting down.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyboardInterrupt</span>
+<span class="sd">            If the controller shutdown event is set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unitree_controller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
         
@@ -81,8 +149,16 @@
 
 
 <div class="viewcode-block" id="DogStateAbstract.cancel">
-<a class="viewcode-back" href="../../../src.states.html#src.states.dog_state_abstract.DogStateAbstract.cancel">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../api/states.html#src.states.dog_state_abstract.DogStateAbstract.cancel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Request cancellation of the current state.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - This flag can be checked manually by student logic</span>
+<span class="sd">        - Loop-based logic is already auto-cancellable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">should_cancel</span> <span class="o">=</span> <span class="kc">True</span></div>
 </div>
 
@@ -117,7 +193,8 @@
 <script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">Public API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../internal/index.html">Internal Implementation Documentation</a></li>
 </ul>
 
 <div class="relations">
