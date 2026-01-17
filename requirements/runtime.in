@@ -1,0 +1,10 @@
+# External dependencies for Unitree Go2 Control project
+numpy
+opencv-python
+pyttsx3
+open3d
+pytesseract
+pyrealsense2
+aiortc
+av
+aiohttp
