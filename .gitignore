@@ -1,6 +1,7 @@
 *
 
 !.gitignore
+!.readthedocs.yaml
 
 !src/
 !src/**
