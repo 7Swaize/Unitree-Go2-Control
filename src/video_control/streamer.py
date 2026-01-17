@@ -17,6 +17,18 @@ import numpy as np
 # command to install rtc: pip install aiortc opencv-python
 
 class OpenCVStreamTrack(VideoStreamTrack):
+    """
+    Video stream track that supplies frames from a local queue to WebRTC.
+
+    This class wraps a `queue.Queue` of frames and presents them as
+    an `aiortc.VideoStreamTrack`. It is designed for internal use
+    by `WebRTCStreamer`.
+
+    Parameters
+    ----------
+    frame_queue : queue.Queue
+        A thread-safe queue containing frames to stream.
+    """
     def __init__(self, frame_queue):
         super().__init__()
         self._frame_queue = frame_queue
@@ -24,6 +36,18 @@ class OpenCVStreamTrack(VideoStreamTrack):
         self._frame_count = 0
 
     async def recv(self):
+        """
+        Receive the next video frame for WebRTC.
+
+        Retrieves the latest frame from the internal queue. If no
+        frame is available, the last frame is repeated.
+
+        Returns
+        -------
+        av.VideoFrame
+            The video frame in BGR24 format, ready to be sent
+            over WebRTC.
+        """
         pts, time_base = await self.next_timestamp()
 
         frame = None
@@ -47,6 +71,33 @@ class OpenCVStreamTrack(VideoStreamTrack):
 
 # TURN for public conn? https://www.100ms.live/blog/webrtc-python-react#interactive-connectivity-establishment---ice
 class WebRTCStreamer:
+    """
+    WebRTC streaming server for internal video broadcasting.
+
+    Handles serving a video stream over a local WebRTC connection.
+    This class uses:
+
+        - `OpenCVStreamTrack` to pull frames from a queue
+        - `aiortc` for WebRTC communication
+        - `aiohttp` for HTTP endpoints and offer/answer negotiation
+        - Asyncio and a background thread for the event loop
+
+    Parameters
+    ----------
+    host : str
+        The hostname or IP to bind the server (default "0.0.0.0").
+    port : int
+        The TCP port for the server (default 8080).
+
+    Attributes
+    ----------
+    _frame_queue : queue.Queue
+        Queue for frames to send to WebRTC clients.
+    _pcs : set
+        Set of active RTCPeerConnections.
+    _loop : asyncio.AbstractEventLoop
+        Event loop for running the server in a background thread.
+    """
     def __init__(self, host="0.0.0.0", port=8080):
         self._host = host
         self._port = port
@@ -58,7 +109,12 @@ class WebRTCStreamer:
 
 
     def start_in_thread(self):
-        """Start the WebRTC server in a background thread"""  
+        """
+        Start the WebRTC server in a daemon thread.
+
+        Initializes a new asyncio event loop in a separate thread
+        and runs the HTTP + WebRTC server asynchronously.
+        """
         def _init_event_loop():
             self._loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self._loop)
@@ -69,7 +125,19 @@ class WebRTCStreamer:
 
 
     def send(self, frame):
-        """Send a frame to the WebRTC stream"""
+        """
+        Enqueue a video frame for streaming.
+
+        Parameters
+        ----------
+        frame : numpy.ndarray
+            The video frame to send. If the internal queue exceeds
+            5 frames, the oldest frames are discarded.
+
+        Notes
+        -----
+        - Non-blocking; frames are dropped if the queue is full.
+        """
         if frame is None:
             return
             
@@ -85,8 +153,13 @@ class WebRTCStreamer:
 
     def get_local_ip_address(self):
         """
-        Returns the LAN IP address that clients can connect to.
-        Works even if the robot has multiple interfaces.
+        Determine the local LAN IP address for client connections.
+
+        Returns
+        -------
+        str
+            Local IP address (e.g., 192.168.x.x), or "127.0.0.1"
+            if detection fails.
         """
         s = None
         try:
@@ -103,10 +176,31 @@ class WebRTCStreamer:
     
 
     def get_port(self):
+        """
+        Get the TCP port used by the server.
+
+        Returns
+        -------
+        int
+            The port number.
+        """
         return self._port
     
 
-    async def _offer(self, request):     
+    async def _offer(self, request):  
+        """
+        Handle incoming SDP offers from clients.
+
+        Parameters
+        ----------
+        request : aiohttp.web.Request
+            The HTTP POST request containing the SDP offer.
+
+        Returns
+        -------
+        aiohttp.web.Response
+            JSON response containing the SDP answer.
+        """
         params = await request.json()
         offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
 
@@ -142,6 +236,12 @@ class WebRTCStreamer:
 
     # AI GENERATED HTML - Shoutout Claude for this nice work
     async def _serve_html(self, request):
+        """
+        Serve the WebRTC demo HTML page to clients.
+
+        This page connects to the WebRTC server and displays
+        video frames in the browser. For internal use only.
+        """
         html_content = """<!DOCTYPE html>
 <html>
 <head>
@@ -342,6 +442,12 @@ class WebRTCStreamer:
 
 
     async def _run_server(self):
+        """
+        Run the aiohttp + WebRTC server asynchronously.
+
+        Adds endpoints for "/offer" and "/" (HTML page) and keeps
+        the server alive indefinitely.
+        """
         app = web.Application()
         app.router.add_post("/offer", self._offer)
         app.router.add_get("/", self._serve_html)
@@ -356,7 +462,16 @@ class WebRTCStreamer:
             await asyncio.sleep(3600)
 
 
-    def _shutdown(self):
+    def shutdown(self):
+        """
+        Shutdown all active connections and cleanup the server.
+
+        Notes
+        -----
+        - Closes all RTCPeerConnections.
+        - Cleans up the aiohttp runner.
+        - Should be called before program exit.
+        """
         async def _async_shutdown():
             futures = [pc.close() for pc in self._pcs]
             await asyncio.gather(*futures)

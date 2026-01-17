@@ -8,16 +8,21 @@ import pyrealsense2 as rs
 
 from src.video_control.frame_buffer import FrameBuffer
 
-
-from abc import ABC, abstractmethod
-from typing import Tuple, Any, Optional
-
 class CameraSource(ABC):
     """
-    Abstract base class representing a camera source.
+    Abstract base class for all camera sources.
 
-    This class defines the interface that all concrete camera sources must implement.
-    A camera source is responsible for initialization, providing frames, and proper shutdown.
+    A ``CameraSource`` provides a unified interface for acquiring image frames
+    from different camera backends (SDK-based cameras, OpenCV webcams,
+    depth cameras, etc.).
+
+    All concrete camera implementations must implement:
+        - ``initialize``: start the camera and any background threads
+        - ``get_frames``: retrieve the latest available frame(s)
+        - ``shutdown``: safely stop the camera and release resources
+
+    This abstraction allows higher-level modules (e.g. VideoModule)
+    to consume camera data without caring about the underlying hardware.
     """
 
     @abstractmethod
@@ -38,20 +43,22 @@ class CameraSource(ABC):
     @abstractmethod
     def get_frames(self) -> Tuple[int, Optional[Any]]:
         """
-        Retrieve the next frame(s) from the camera source.
+        Retrieve the next frame(s) from the camera source. The amount of frames
+        returned are implementation-dependent (e.g., single frame, color+depth
+        pair, etc.).
 
         Returns
         -------
         Tuple[int, Optional[Any]]
             A tuple containing:
-            - An integer timestamp or frame index.
-            - The frame data, which can be in any format depending on the implementation
-              (e.g., NumPy array, OpenCV frame, etc.). Returns None if no frame is available.
+
+                - An integer timestamp or frame index.
+                - The frame data, which can be in any format depending on the implementation (e.g., NumPy array, OpenCV frame, etc.). Returns None if no frame is available.
 
         Notes
         -----
-        Implementations may block until a new frame is available, or return None if no
-        frame is ready.
+        - This method does **not** block.
+        - Implementations typically return the latest frame stored in a buffer.
         """
         pass
 
@@ -72,21 +79,15 @@ class CameraSource(ABC):
 
 
 
-class CameraSourceFactory:  
-    @staticmethod
-    def create_sdk_camera() -> CameraSource:
-        return SDKCameraSource()
-    
-    @staticmethod
-    def create_opencv_camera(camera_index: int = 0) -> CameraSource:
-        return OpenCVCameraSource(camera_index)
-    
-    @staticmethod
-    def create_depth_camera() -> CameraSource:
-        return RealSenseDepthCamera()
-    
-
 class SDKCameraSource(CameraSource):
+    '''
+    SDK-based camera source backed by Unitree's VideoClient.
+
+    This implementation is intended for:
+        - Unitree Go2 robot cameras
+
+    Frames are captured in a background thread and stored in a frame buffer.
+    '''
     def __init__(self):
         self._video_client = None
 
@@ -121,6 +122,15 @@ class SDKCameraSource(CameraSource):
                 continue
 
     def get_frames(self) -> Tuple[int, Optional[np.ndarray]]:
+        '''
+        Retrieve the latest frame from the Unitree Go2's internal camera source.
+
+        Returns
+        -------
+        Tuple[int, Optional[np.ndarray]]
+            ``(0, frame)`` if a frame is available
+            ``(-1, None)`` if no frame is available.
+        '''
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
             return -1, None
@@ -137,7 +147,24 @@ class SDKCameraSource(CameraSource):
 
 
 class OpenCVCameraSource(CameraSource):
+    """
+    Camera source backed by OpenCV's ``VideoCapture``.
+
+    This implementation is intended for:
+        - USB webcams
+        - Laptop cameras
+        - Simple RGB camera setups
+
+    Frames are captured in a background thread and stored in a frame buffer.
+    """
+        
     def __init__(self, camera_index: int = 0):
+        """
+        Parameters
+        ----------
+        camera_index : int, optional
+            OpenCV camera index (default is 0).
+        """
         self._capture = None
         self._camera_index = camera_index
 
@@ -171,6 +198,17 @@ class OpenCVCameraSource(CameraSource):
         self._capture.release()
 
     def get_frames(self) -> Tuple[int, Optional[np.ndarray]]:
+        '''
+        Retrieve the latest frame from the OpenCV camera source.
+
+        Returns
+        -------
+        Tuple[int, Optional[np.ndarray]]
+            A tuple containing:
+
+            - ``(0, frame)`` if a frame is available
+            - ``(-1, None)`` if no frame is available.
+        '''
         latest_frame = self._frame_buffer.get()
         
         if latest_frame is None:
@@ -192,6 +230,18 @@ class OpenCVCameraSource(CameraSource):
 # Optimzation/Configs: https://dev.realsenseai.com/docs/tuning-depth-cameras-for-best-performance
 
 class RealSenseDepthCamera(CameraSource):
+    """
+    Intel RealSense RGB-D camera source.
+
+    This camera provides **aligned color and depth frames** using
+    the RealSense SDK. Frames are captured asynchronously in a
+    background thread.
+
+    ``get_frames`` returns a tuple ``(color, depth)`` where:
+        - ``color`` is a BGR image (H, W, 3)
+        - ``depth`` is a uint16 depth image (H, W)
+    """
+        
     def __init__(self):
         self._width: int = 848
         self._height: int = 480
@@ -244,6 +294,15 @@ class RealSenseDepthCamera(CameraSource):
 
 
     def get_frames(self) -> Tuple[int, Optional[Tuple[np.ndarray, np.ndarray]]]:
+        """
+        Retrieve the latest aligned color and depth frames.
+
+        Returns
+        -------
+        Tuple[int, Optional[Tuple[np.ndarray, np.ndarray]]]
+            ``(0, (color, depth))`` if frames are available, otherwise
+            ``(-1, None)``.
+        """
         with self._lock:
             latest_color = self._color_frame_buffer.get()
             latest_depth = self._depth_frame_buffer.get()

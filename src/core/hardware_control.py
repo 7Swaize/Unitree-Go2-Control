@@ -5,53 +5,102 @@ from abc import ABC, abstractmethod
 
 
 class HardwareInterface(ABC):
-    """Abstract interface for hardware control (SDK or simulation)"""
+    """
+    Abstract interface for dog hardware control.
+
+    This interface defines the minimum set of motion and posture commands
+    required by the system. Concrete implementations may communicate with
+    real hardware (SDK) or simulated backends.
+
+    Notes
+    -----
+    - This is an internal abstraction.
+    - Students should not subclass this directly.
+    """
     
     @abstractmethod
     def initialize(self) -> None:
-        """Initialize hardware connection"""
+        """
+        Initialize the hardware interface. This is handled automatically and shouldn't be called by students.
+
+        Establishes communication with the hardware or simulation backend.
+        """
         pass
     
     @abstractmethod
     def shutdown(self) -> None:
-        """Clean shutdown of hardware"""
+        """
+        Cleanly shut down the hardware interface.
+        """
         pass
     
     @abstractmethod
     def move(self, vx: float, vy: float) -> None:
-        """Move the dog"""
+        """
+        Move the dog in the horizontal plane.
+
+        Parameters
+        ----------
+        vx : float
+            Forward/backward velocity.
+        vy : float
+            Left/right velocity.
+        """
         pass
 
     @abstractmethod
     def rotate(self, vrot: float):
-        """Rotate the dog"""
+        """
+        Rotate the dog in place.
+
+        Parameters
+        ----------
+        vrot : float
+            Rotational velocity.
+        """
         pass
 
     
     @abstractmethod
     def stand_up(self) -> None:
-        """Stand up"""
+        """Command the dog to stand up."""
         pass
     
     @abstractmethod
     def stand_down(self) -> None:
-        """Lay down"""
+        """Command the dog to lie down."""
         pass
     
     @abstractmethod
     def stop_move(self) -> None:
-        """Stop all movement"""
+        """Immediately stop all movement and clear internal movement command buffer."""
         pass
 
 
 class UnitreeSDKHardware(HardwareInterface):
-    """Real Unitree SDK implementation"""
-    
+    """
+    Hardware interface backed by the Unitree SDK.
+
+    This implementation communicates with the real robot using
+    ``unitree_sdk2py``. It is only available when the SDK is installed
+    and properly configured.
+
+    Warnings
+    --------
+    - This class issues real hardware commands.
+    - Improper use may cause unexpected robot motion.
+    """    
     def __init__(self):
         self._sport_client = None
         self._initialized = False
     
     def initialize(self) -> None:
+        """
+        Initialize the Unitree SDK connection.
+
+        This method sets up DDS communication, initializes the sport client,
+        and brings the robot to a safe standing state.
+        """
         if self._initialized:
             return
             
@@ -102,7 +151,18 @@ class UnitreeSDKHardware(HardwareInterface):
 
 
 class SimulatedHardware(HardwareInterface):
-    """Simulated hardware for testing without SDK"""
+    """
+    Simulated hardware backend for development and testing.
+
+    This implementation mimics robot motion using simple kinematic updates
+    and console output. It allows development without access to physical
+    hardware or the Unitree SDK.
+
+    Notes
+    -----
+    - Used automatically when SDK support is disabled.
+    - Motion is not physically accurate.
+    """
     
     def __init__(self):
         self._initialized = False

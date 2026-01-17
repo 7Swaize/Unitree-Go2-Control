@@ -6,7 +6,7 @@ sys.path.insert(0, ROOT)
 
 from src.core.unitree_control_core import UnitreeGo2Controller
 from src.core.module_registry import ModuleType
-from src.video_control.camera_source import CameraSourceFactory
+from src.video_control.camera_source_factory import CameraSourceFactory
 
 import time
 import cv2
@@ -23,6 +23,7 @@ class Tests:
         
         self.unitree_controller.video.start_stream_server()
         self.unitree_controller.video.get_stream_server_local_ip()
+        print(f"WebRTC streaming at: http://{self.unitree_controller.video.get_stream_server_local_ip()}:{self.unitree_controller.video.get_stream_server_port()}")
         
 
     def test_depth_camera(self):

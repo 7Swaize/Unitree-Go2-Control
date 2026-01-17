@@ -1,3 +1,21 @@
+"""
+Internal infrastructure for safely cancelling long-running state execution
+loops by injecting shutdown checks into user-defined code.
+
+This system automatically modifies the AST (Abstract Syntax Tree) of state
+`execute()` methods at class creation time, inserting cancellation checks
+inside all `for` and `while` loops.
+
+Purpose
+-------
+- Prevent infinite or blocking loops in student-written state logic
+- Allow graceful shutdown when the robot or controller exits
+- Avoid requiring students to manually check shutdown flags
+
+This is an **internal system** and should not be directly used or modified
+by student code.
+"""
+
 from abc import ABCMeta
 import ast
 import inspect
@@ -5,8 +23,24 @@ import textwrap
 from typing import Any, Dict
 
 
-class _LoopCancellationInjector(ast.NodeTransformer):
-    def _create_check_node(self, lineno=0, col_offset=0) -> ast.Expr:
+class LoopCancellationInjector(ast.NodeTransformer):
+    """
+    AST transformer that injects shutdown checks into loop bodies.
+
+    This transformer modifies:
+    - ``while`` loops
+    - ``for`` loops
+
+    by inserting a call to ``self.check_shutdown()`` as the first statement
+    in each loop body.
+
+    Notes
+    -----
+    - Assumes the transformed method belongs to a class defining
+      ``check_shutdown()``
+    - Used exclusively by ``CancellableMeta``
+    """
+    def create_check_node(self, lineno=0, col_offset=0) -> ast.Expr:
         return ast.Expr(
             value=ast.Call(
                 func=ast.Attribute(
@@ -23,7 +57,7 @@ class _LoopCancellationInjector(ast.NodeTransformer):
 
     def visit_While(self, node) -> Any:
         self.generic_visit(node)
-        check_node = self._create_check_node(
+        check_node = self.create_check_node(
             lineno=getattr(node, "lineno", 0),
             col_offset=getattr(node, "col_offset", 0)
         )
@@ -32,7 +66,7 @@ class _LoopCancellationInjector(ast.NodeTransformer):
     
     def visit_For(self, node) -> Any:
         self.generic_visit(node)
-        check_node = self._create_check_node(
+        check_node = self.create_check_node(
             lineno=getattr(node, "lineno", 0),
             col_offset=getattr(node, "col_offset", 0)
         )
@@ -40,7 +74,18 @@ class _LoopCancellationInjector(ast.NodeTransformer):
         return node
 
 
-class _CancellableMeta(ABCMeta):
+class CancellableMeta(ABCMeta):
+    """
+    Metaclass that injects loop cancellation logic into `execute()` methods.
+
+    If a class defines an ``execute`` method:
+    - Its source code is retrieved
+    - Parsed into an AST
+    - All loops are instrumented with shutdown checks
+    - The modified function replaces the original
+
+    If any step fails, the original method is preserved.
+    """
     def __new__(mcls, name, bases, attrs):
         if "execute" in attrs and inspect.isfunction(attrs["execute"]):
             original = attrs["execute"]
@@ -50,7 +95,7 @@ class _CancellableMeta(ABCMeta):
                 src = textwrap.dedent(src) # removing indentation -> needed for parsing with AST
                 tree = ast.parse(src) # parse into AST
 
-                injector = _LoopCancellationInjector()
+                injector = LoopCancellationInjector()
                 new_tree = injector.visit(tree)
                 ast.fix_missing_locations(new_tree) # fixes line numbers and other metadata for compilation -> cleanup
 

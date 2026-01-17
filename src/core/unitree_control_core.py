@@ -1,3 +1,45 @@
+"""
+Core Controller Module for Student Use
+======================================
+
+This module provides the **primary public API** for controlling the Unitree Go2
+robot.
+
+Students interact exclusively with :class:`UnitreeGo2Controller`, which exposes
+high-level functionality such as movement, video, audio, OCR, input, and LIDAR
+through strongly-typed properties.
+
+Design Goals
+------------
+    - Provide a **single entry point** for all robot capabilities
+    - Hide hardware and SDK complexity behind safe abstractions
+    - Support both **real hardware** and **simulation** transparently
+    - Enforce clean startup and shutdown semantics
+
+Usage Model
+-----------
+Students:
+    - Create a controller
+    - Access modules via properties (e.g., ``controller.movement``)
+    - Write behavior/state logic on top of this API
+
+Internal systems:
+    - Manage hardware backends
+    - Handle module registration and lifecycle
+    - Enforce safety checks during shutdown
+
+Example
+-------
+>>> import time
+>>> from src.core.unitree_control_core import UnitreeGo2Controller
+>>> 
+>>> unitree_controller = UnitreeGo2Controller(use_sdk=True)
+>>> unitree_controller.movement.stand_up()
+>>> time.sleep(1)
+>>> unitree_controller.safe_shutdown()
+"""
+
+
 from typing import Callable, List, Optional, Dict
 import threading
 
@@ -20,11 +62,44 @@ from src.lidar_control.decoder import LIDARModule
 
 class UnitreeGo2Controller:
     """    
-    This is the main entry point that students/users interact with.
-    Modules are accessed via enum types for compile-time safety.
+    Primary control interface for the Unitree Go2 robot.
+
+    This class is the **main entry point** that students and users interact with.
+    It manages hardware initialization, module lifecycles, safety checks, and
+    shutdown coordination.
+
+    Modules are accessed via typed properties rather than direct instantiation,
+    ensuring compile-time safety and consistent behavior.
+
+    Notes
+    -----
+        - All hardware access is routed through this controller.
+        - Modules are created and initialized automatically.
+        - Accessing modules after shutdown is prohibited.
+        - Supports both SDK-backed hardware and simulation.
+
+    See Also
+    --------
+    DogModule
+    ModuleRegistry
     """
 
     def __init__(self, use_sdk: Optional[bool]):
+        """
+        Create a new controller instance.
+
+        Parameters
+        ----------
+        use_sdk : bool or None
+            If ``True``, forces use of the Unitree SDK.
+            If ``False``, forces simulation mode.
+            If ``None``, SDK availability is auto-detected.
+
+        Raises
+        ------
+        RuntimeError
+            If hardware initialization fails.
+        """
         if use_sdk is None:
             use_sdk = self._detect_sdk()
 
@@ -41,7 +116,7 @@ class UnitreeGo2Controller:
 
         self._modules: Dict[ModuleType, DogModule] = {}
         self._register_default_modules()
-        self._initialize_default()
+        self._initialize_input_bindings()
 
         print(f"[Controller] Initialized in {'SDK' if use_sdk else 'SIMULATION'} mode\n")
 
@@ -55,9 +130,7 @@ class UnitreeGo2Controller:
             return False
         
 
-    def _initialize_default(self):
-        self._hardware.initialize()
-
+    def _initialize_input_bindings(self):
         if self.use_sdk:
             self.input.register_callback(
                 InputSignal.BUTTON_A,
@@ -75,14 +148,31 @@ class UnitreeGo2Controller:
 
     def add_module(self, module_type: ModuleType, **kwargs) -> None:
         """
-        Add a new module to the controller using enum type.
-        
-        Args:
-            module_type: The type of module to add (from ModuleType enum)
-            **kwargs: Constructor arguments for the module
-        
-        Example:
-            controller.add_module(ModuleType.VIDEO, use_sdk=True)
+        Add a module to the controller.
+
+        Modules are identified using :class:`ModuleType` enums to ensure
+        correctness and prevent invalid configurations.
+
+        Parameters
+        ----------
+        module_type : ModuleType
+            The type of module to add.
+        **kwargs
+            Constructor arguments passed to the module implementation.
+
+        Raises
+        ------
+        ValueError
+            If the module type is not registered.
+
+        Notes
+        -----
+        - SDK-required modules are skipped automatically in simulation mode.
+        - Modules are initialized immediately upon addition.
+
+        Example
+        -------
+        >>> controller.add_module(ModuleType.VIDEO)
         """
         descriptor = ModuleRegistry.get_descriptor(module_type)
         if descriptor is None:
@@ -92,22 +182,48 @@ class UnitreeGo2Controller:
             print(f"[Controller] Warning: {module_type.name} requires SDK mode")
             return
         
-        module = descriptor.create_instance(**kwargs)
+        module: DogModule = descriptor.create_instance(**kwargs)
         self._modules[module_type] = module
+
+        module.initialize()
     
 
     def has_module(self, module_type: ModuleType) -> bool:
-        """Check if a module is loaded"""
+        """
+        Check whether a module is currently loaded.
+
+        Returns
+        -------
+        bool
+        """
         return module_type in self._modules
     
     
     def get_available_modules(self) -> list[ModuleType]:
-        """List all modules available for the current mode (SDK/simulation)"""
+        """
+        List all module types available in the current mode.
+
+        Returns
+        -------
+        list of ModuleType
+        """
         return ModuleRegistry.get_list_available(self.use_sdk)
     
 
     @property
     def video(self) -> VideoModule:
+        """
+        Access the video capture module.
+
+        Returns
+        -------
+        VideoModule
+
+        Raises
+        ------
+        RuntimeError
+            If the module is not loaded or shutdown has been requested.
+        """
         module = self._modules.get(ModuleType.VIDEO)
         if not isinstance(module, VideoModule):
             raise RuntimeError("Video module not loaded")
@@ -119,6 +235,18 @@ class UnitreeGo2Controller:
     
     @property
     def movement(self) -> MovementModule:
+        """
+        Access the movement control module.
+
+        Returns
+        -------
+        MovementModule
+
+        Raises
+        ------
+        RuntimeError
+            If the module is not loaded or shutdown has been requested.
+        """
         module = self._modules.get(ModuleType.MOVEMENT)
         if not isinstance(module, MovementModule):
             raise RuntimeError("Movement module not loaded")
@@ -130,6 +258,18 @@ class UnitreeGo2Controller:
     
     @property
     def ocr(self) -> OCRModule:
+        """
+        Access the ocr control module.
+
+        Returns
+        -------
+        OCRModule
+
+        Raises
+        ------
+        RuntimeError
+            If the module is not loaded or shutdown has been requested.
+        """
         module = self._modules.get(ModuleType.OCR)
         if not isinstance(module, OCRModule):
             raise RuntimeError("OCR module not loaded")
@@ -141,6 +281,18 @@ class UnitreeGo2Controller:
     
     @property
     def audio(self) -> AudioModule:
+        """
+        Access the audio control module.
+
+        Returns
+        -------
+        AudioModule
+
+        Raises
+        ------
+        RuntimeError
+            If the module is not loaded or shutdown has been requested.
+        """
         module = self._modules.get(ModuleType.AUDIO)
         if not isinstance(module, AudioModule):
             raise RuntimeError("Audio module not loaded")
@@ -152,6 +304,18 @@ class UnitreeGo2Controller:
     
     @property
     def input(self) -> InputModule:
+        """
+        Access the input control module.
+
+        Returns
+        -------
+        InputMOdule
+
+        Raises
+        ------
+        RuntimeError
+            If the module is not loaded or shutdown has been requested.
+        """
         module = self._modules.get(ModuleType.INPUT)
         if not isinstance(module, InputModule):
             raise RuntimeError("Input module not loaded")
@@ -163,6 +327,18 @@ class UnitreeGo2Controller:
     
     @property
     def lidar(self) -> LIDARModule:
+        """
+        Access the lidar control module.
+
+        Returns
+        -------
+        LIDARModule
+
+        Raises
+        ------
+        RuntimeError
+            If the module is not loaded or shutdown has been requested.
+        """
         module = self._modules.get(ModuleType.LIDAR)
         if not isinstance(module, LIDARModule):
             raise RuntimeError("LIDAR module not loaded")
@@ -174,12 +350,35 @@ class UnitreeGo2Controller:
     
 
     def register_cleanup_callback(self, callback: Callable[[], None]):
-        """Register a callback to run during shutdown"""
+        """
+        Register a cleanup callback.
+
+        Callbacks are executed during safe shutdown after modules are stopped
+        but before hardware is released.
+
+        Parameters
+        ----------
+        callback : callable
+            Zero-argument function to execute during shutdown.
+        """
         self._cleanup_callbacks.append(callback)
 
 
     def safe_shutdown(self):
-        """Perform safe shutdown of all systems"""
+        """
+        Perform a coordinated and safe shutdown.
+
+        This method:
+            - Stops movement immediately
+            - Signals shutdown to all subsystems
+            - Shuts down all modules
+            - Executes registered cleanup callbacks
+            - Releases hardware resources
+
+        Notes
+        -----
+        This method is **idempotent** and may be safely called multiple times.
+        """
         print("\n[Controller] Starting safe shutdown...")
         self.movement.stop()
         

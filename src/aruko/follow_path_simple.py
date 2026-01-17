@@ -11,7 +11,7 @@ sys.path.insert(0, ROOT)
 from aruko_helpers import *
 from src.core.unitree_control_core import UnitreeGo2Controller
 from src.core.module_registry import ModuleType
-from src.video_control.camera_source import CameraSourceFactory
+from src.video_control.camera_source_factory import CameraSourceFactory
 
 
 # ============================================================================

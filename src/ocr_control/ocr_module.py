@@ -11,7 +11,6 @@ class OCRModule(DogModule):
     def __init__(self):
         super().__init__("OCR")
 
-        self.initialize()
 
     def initialize(self) -> None:
         if self._initialized:
