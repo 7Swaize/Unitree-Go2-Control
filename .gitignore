@@ -1,23 +1,26 @@
-*
-
+# ======
+# KEEP
+# ======
 !.gitignore
 !.readthedocs.yaml
-
 !src/
-!src/**
-
 !docs/
-!docs/**
-
 !requirements/
-!requirements/**
 
-# editor configs
+
+# ======
+# IGNORE
+# ======
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.env
+*.venv
+*.egg-info/
 src/.vscode/
 
-# python junk
-__pycache__/
-**/__pycache__/
-*.pyc
-*.pyo
-*.pyd
+docs/_build/
+docs/_static/
+docs/_templates/
