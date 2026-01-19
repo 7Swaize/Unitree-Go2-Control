@@ -6,6 +6,8 @@
 !src/
 !docs/
 !requirements/
+!ros2_ws
+!c_extensions
 
 
 # ======
@@ -19,8 +21,12 @@ __pycache__/
 *.env
 *.venv
 *.egg-info/
-src/.vscode/
+*.vscode/
 
 docs/_build/
 docs/_static/
 docs/_templates/
+
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/

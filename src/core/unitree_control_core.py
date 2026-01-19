@@ -59,6 +59,8 @@ from src.lidar_control.decoder import LIDARModule
 
 # Update to JetPack 6.x on Dog's Jetson: https://theroboverse.com/unitree-go2-edu-jetpack-6-2-1-update/
 
+# TETHERING + ROS2 SETUP: https://www.youtube.com/watch?v=Q_dqPLJDPms
+
 
 class UnitreeGo2Controller:
     """    

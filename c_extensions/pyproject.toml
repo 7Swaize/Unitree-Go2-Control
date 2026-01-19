@@ -1,0 +1,17 @@
+# https://stackoverflow.com/questions/72912762/setup-py-building-c-extension-with-numpy-dependency
+
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+    "oldest-supported-numpy"
+]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "fast_pointcloud"
+version = "0.1.0"
+dependencies = [
+    "numpy"
+]
