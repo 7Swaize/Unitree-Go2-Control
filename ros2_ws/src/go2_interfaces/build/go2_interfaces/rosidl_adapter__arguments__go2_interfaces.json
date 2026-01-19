@@ -1,6 +1,0 @@
-{
-  "package_name": "go2_interfaces",
-  "non_idl_tuples": [
-    "/home/gsmst/gsmst/Unitree-Go2-Control/ros2_ws/src/go2_interfaces:msg/LidarDecoded.msg"
-  ]
-}

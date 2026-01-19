@@ -1,8 +1,0 @@
-uint32[] shape
-uint8 dtype
-uint8[] data
-
-bool has_aux
-uint32[] aux_shape
-uint8 aux_dtype
-uint8[] aux_data
