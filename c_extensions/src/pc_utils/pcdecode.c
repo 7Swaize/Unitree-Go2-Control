@@ -4,6 +4,14 @@
 #include <math.h>
 #include <stdint.h>
 
+#define PF_INT8    1
+#define PF_UINT8   2
+#define PF_INT16   3
+#define PF_UINT16  4
+#define PF_INT32   5
+#define PF_UINT32  6
+#define PF_FLOAT32 7
+#define PF_FLOAT64 8
 
 
 static int host_little_endian(void) {
@@ -11,33 +19,56 @@ static int host_little_endian(void) {
     return *((uint8_t*)&x);
 }
 
-static inline float load_32(const char* p, int swap) {
-    union { uint32_t u; float f; } tmp;
-    tmp.u = *(uint32_t*)p;
-    if (swap) {
-        tmp.u = __builtin_bswap32(tmp.u);
+static inline double read_point_field(const char* p, int dtype, int swap) {
+    switch (dtype) {
+        case PF_INT8:   return (double)(*(int8_t*)p);
+        case PF_UINT8:  return (double)(*(uint8_t*)p);
+        case PF_INT16: {
+            int16_t val = *(int16_t*)p;
+            if (swap) val = (int16_t)__builtin_bswap16((uint16_t)val);
+            return (double)val;
+        }
+        case PF_UINT16: {
+            uint16_t val = *(uint16_t*)p;
+            if (swap) val = __builtin_bswap16(val);
+            return (double)val;
+        }
+        case PF_INT32: {
+            int32_t val = *(int32_t*)p;
+            if (swap) val = (int32_t)__builtin_bswap32((uint32_t)val);
+            return (double)val;
+        }
+        case PF_UINT32: {
+            uint32_t val = *(uint32_t*)p;
+            if (swap) val = __builtin_bswap32(val);
+            return (double)val;
+        }
+        case PF_FLOAT32: {
+            union { uint32_t u; float f; } tmp;
+            tmp.u = *(uint32_t*)p;
+            if (swap) tmp.u = __builtin_bswap32(tmp.u);
+            return (double)tmp.f;
+        }
+        case PF_FLOAT64: {
+            union { uint64_t u; double f; } tmp;
+            tmp.u = *(uint64_t*)p;
+            if (swap) tmp.u = __builtin_bswap64(tmp.u);
+            return tmp.f;
+        }
+        default:
+            return 0.0;
     }
-
-    return tmp.f;
-}
-
-static inline double load_64(const char* p, int swap) {
-    union { uint64_t u; double f; } tmp;
-    tmp.u = *(uint64_t*)p;
-    if (swap) {
-        tmp.u = __builtin_bswap64(tmp.u);
-    }
-
-    return tmp.f;
 }
 
 
 static PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
     PyObject* data_obj;
     int point_step, ox, oy, oz, oi;
-    int is_bigendian, dtype, skip_nans;
+    int is_bigendian, dtype_xyz, dtype_intensity, skip_nans;
 
-    if (!PyArg_ParseTuple(args, "Oiiiiiiii", &data_obj, &point_step, &ox, &oy, &oz, &oi, &is_bigendian, &dtype, &skip_nans)) {
+    if (!PyArg_ParseTuple(args, "Oiiiiiiiii", 
+            &data_obj, &point_step, &ox, &oy, &oz, &oi,
+            &is_bigendian, &dtype_xyz, &dtype_intensity, &skip_nans)) {
         return NULL;
     }
     
@@ -76,13 +107,13 @@ static PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
     for (Py_ssize_t i = 0; i < n_points; i++, p_base += point_step) {
         char* p = p_base;
 
-        double x = (dtype == 32) ? load_32(p + ox, swap) : load_64(p + ox, swap);
-        double y = (dtype == 32) ? load_32(p + oy, swap) : load_64(p + oy, swap);
-        double z = (dtype == 32) ? load_32(p + oz, swap) : load_64(p + oz, swap);
+        double x = read_point_field(p + ox, dtype_xyz, swap);
+        double y = read_point_field(p + oy, dtype_xyz, swap);
+        double z = read_point_field(p + oz, dtype_xyz, swap);
         double inten_val = 0.0;
 
         if (i_data && oi >= 0) {
-            inten_val = (dtype == 32) ? load_32(p + oi, swap) : load_64(p + oi, swap);
+            inten_val = read_point_field(p + oi, dtype_intensity, swap);
         }
 
         if (skip_nans && (isnan(x) || isnan(y) || isnan(z) || (i_data && oi >= 0 && isnan(inten_val)))) {
@@ -134,7 +165,7 @@ static PyMethodDef methods[] = {
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
     "fast_pointcloud",
-    NULL, // docs later?
+    (PyCFunction)decode_xyz_intensity,
     -1,
     methods
 };
