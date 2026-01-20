@@ -1,0 +1,45 @@
+/* Improve overall readability */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    line-height: 1.65;
+    font-size: 15px;
+}
+
+/* Make headings pop more */
+h1, h2, h3 {
+    letter-spacing: 0.3px;
+}
+
+/* Better code blocks */
+.highlight pre {
+    border-radius: 8px;
+    padding: 0.9em;
+    font-size: 0.9em;
+}
+
+/* Inline code */
+code.literal {
+    background-color: rgba(0, 0, 0, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Tables should never overflow badly */
+table {
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+}
+
+/* API signatures cleaner */
+.sig-name {
+    font-weight: 600;
+}
+
+/* Subtle page width constraint */
+.content {
+    max-width: 1050px;
+}

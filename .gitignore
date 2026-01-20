@@ -24,8 +24,7 @@ __pycache__/
 *.vscode/
 
 docs/_build/
-docs/_static/
-docs/_templates/
+
 
 ros2_ws/build/
 ros2_ws/install/

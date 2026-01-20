@@ -15,11 +15,11 @@ release = '0.0.1'
 # -- General configuration ---------------------------------------------------
 
 extensions = [
-    'sphinx.ext.autodoc',          # Core autodoc functionality
-    'sphinx.ext.napoleon',         # For Google/NumPy style docstrings
-    'sphinx.ext.viewcode',         # Add links to source code
-    'sphinx.ext.autosummary',      # Generate summary tables automatically
-    'sphinx_copybutton',           # Adds "copy" buttons to code blocks
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+    'sphinx_copybutton',
 ]
 
 # Mock imports for modules that may not be available
@@ -40,42 +40,22 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 
 # Use a modern, responsive theme
-html_theme = 'furo'  # Recommended: 'furo' or 'sphinx_rtd_theme'
+html_theme = 'furo'
 html_static_path = ['_static']
+
+html_last_updated_fmt = "%Y-%m-%d"
 
 # Optional: theme-specific options
 html_theme_options = {
-    "light_logo": "logo-light.png",  # if you have a logo
+    "light_logo": "logo-light.png", 
     "dark_logo": "logo-dark.png",
-    "navigation_with_keys": True,     # allow keyboard nav
+    "navigation_with_keys": True,    
 }
 
 # -- Custom CSS tweaks -------------------------------------------------------
-# Create _static/custom.css with any tweaks you want
 html_css_files = [
     'custom.css',
 ]
-
-# Suggested custom.css content (create _static/custom.css):
-"""
-/* Limit table widths and allow scrolling */
-table {
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-/* Make code blocks wrap nicely */
-.highlight pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-/* Improve body readability */
-body {
-    line-height: 1.6;
-    font-size: 14px;
-}
-"""
 
 # Make copy button ignore Python REPL prompts (>>> and ...)
 copybutton_prompt_text = r'>>> |\.\.\. '
