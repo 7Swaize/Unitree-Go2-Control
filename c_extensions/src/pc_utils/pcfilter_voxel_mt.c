@@ -126,7 +126,7 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
 
     int64_t* voxel_keys = (int64_t*)malloc(keep_count * sizeof(int64_t));
     // shouldnt need any lock or safety because unique indices are garunteed
-    #pragma omp for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (Py_ssize_t i = 0; i < keep_count; i++) {
         Py_ssize_t idx = indices[i];
 
