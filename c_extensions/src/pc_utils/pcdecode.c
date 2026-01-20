@@ -83,12 +83,12 @@ static PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
 
     int swap = (host_little_endian() == is_bigendian);
 
-    npy_intp dims_xyz[2] = {n_points, 3};
+    Py_ssize_t dims_xyz[2] = {n_points, 3};
     PyObject* xyz = PyArray_SimpleNew(2, dims_xyz, NPY_FLOAT64); 
 
     PyObject* intensity = Py_None;
     if (oi >= 0) {
-        npy_intp dims_i[1] = {n_points};
+        Py_ssize_t dims_i[1] = {n_points};
         intensity = PyArray_SimpleNew(1, dims_i, NPY_FLOAT64);
     } else {
         // why we do this: https://docs.python.org/3/extending/extending.html#back-to-the-example

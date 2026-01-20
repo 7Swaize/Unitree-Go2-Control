@@ -35,16 +35,17 @@ NP_DTYPE_TO_CODE = {
 }
 
 @dataclass
-class PointCloudCollectionConfig:
+class CollectionConfig:
     optimize_collection: bool
+    skip_nans: bool 
 
 
-class LidarToPointCloudNode(Node):
+class LidarDecoderNode(Node):
     def __init__(self) -> None:
-        super().__init__("lidar_to_pointcloud")
+        super().__init__("lidar_decoder")
 
-        self._declare_parameters()
-        self._config = self._load_configuration()
+        self.declare_parameters()
+        self.config = self.load_configuration()
 
         self._qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -52,56 +53,56 @@ class LidarToPointCloudNode(Node):
             depth=1
         )
 
-        self._setup_publishers()
-        self._setup_subscriptions()
+        self.setup_publishers()
+        self.setup_subscriptions()
 
     
-    def _declare_parameters(self) -> None:
+    def declare_parameters(self) -> None:
         self.declare_parameter("optimize_collection", False)
+        self.declare_parameter("skip_nans", True)
 
 
-    def _load_configuration(self) -> PointCloudCollectionConfig:
-        optimize_collection: bool = self.get_parameter("optimize_collection").get_parameter_value().bool_value
-
-        return PointCloudCollectionConfig(
-            optimize_collection=optimize_collection
+    def load_configuration(self) -> CollectionConfig:
+        return CollectionConfig(
+            optimize_collection=self.get_parameter("optimize_collection").get_parameter_value().bool_value,
+            skip_nans=self.get_parameter("skip_nans").get_parameter_value().bool_value,
         )
 
 
-    def _setup_publishers(self) -> None:
-        self._decoded_pointcloud_pub = self.create_publisher(
+    def setup_publishers(self) -> None:
+        self.decoded_pointcloud_pub = self.create_publisher(
             LidarDecoded,
-            "utlidar/lidar_decoded",
+            "utlidar/decoded_cloud",
             self._qos_profile
         )
 
 
-    def _setup_subscriptions(self) -> None:
+    def setup_subscriptions(self) -> None:
         self.cloud_subscription = self.create_subscription(
             PointCloud2,
             "/utlidar/cloud",
-            self._lidar_callback_optimized if self._config.optimize_collection else self._lidar_callback_unoptimized,
+            self.lidar_callback_optimized if self.config.optimize_collection else self.lidar_callback_unoptimized,
             self._qos_profile
         )
 
 
-    def _lidar_callback_unoptimized(self, msg: PointCloud2) -> None:
+    def lidar_callback_unoptimized(self, msg: PointCloud2) -> None:
         try:
             gen = point_cloud2.read_points(
                 msg,
                 field_names=["x", "y", "z"],
-                skip_nans=True
+                skip_nans=self.config.skip_nans
             )
 
             xyz = np.array(list(gen), dtype=np.float64)
 
-            self._publish_decoded_pointcloud(xyz, None)
+            self.publish_decoded_pointcloud(xyz, None)
 
         except Exception as e:
             self.get_logger().error(f"Error processing LiDAR data: {e}")
             
 
-    def _lidar_callback_optimized(self, msg: PointCloud2) -> None:
+    def lidar_callback_optimized(self, msg: PointCloud2) -> None:
         try:
             fields = {f.name: f for f in msg.fields}
             if not all(k in fields for k in ("x", "y", "z")):
@@ -123,15 +124,16 @@ class LidarToPointCloudNode(Node):
                 is_bigendian=msg.is_bigendian,
                 dtype_xyz=POINTFIELD_TO_INTERNAL_CTYPE[dtype_xyz],
                 dtype_intensity=POINTFIELD_TO_INTERNAL_CTYPE[fields["intensity"].datatype] if has_intensity else fp.PF_INT8,
-                skip_nans=True
+                skip_nans=self.config.skip_nans
             )
 
-            self._publish_decoded_pointcloud(xyz, intensity)
+            self.publish_decoded_pointcloud(xyz, intensity)
+
         except Exception as e:
             self.get_logger().error(f"Error processing LiDAR data: {e}")
 
 
-    def _publish_decoded_pointcloud(self, xyz: np.ndarray, intensity: Optional[np.ndarray]) -> None:
+    def publish_decoded_pointcloud(self, xyz: np.ndarray, intensity: Optional[np.ndarray]) -> None:
         try:
             msg = LidarDecoded()
 
@@ -150,18 +152,17 @@ class LidarToPointCloudNode(Node):
                 msg.intensity_dtype = 0
                 msg.intensity_data = []
 
-            self._decoded_pointcloud_pub.publish(msg)
+            self.decoded_pointcloud_pub.publish(msg)
 
         except Exception as e:
             self.get_logger().error(f"Error publishing point cloud: {e}")
-
             
 
 def main(args=None):
     rclpy.init(args=args)
 
     try:
-        node = LidarToPointCloudNode()
+        node = LidarDecoderNode()
         rclpy.spin(node)
     except KeyboardInterrupt:
         pass
