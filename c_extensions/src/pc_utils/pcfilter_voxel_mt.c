@@ -21,8 +21,9 @@ typedef struct {
 } FilterConfig;
 
 
-static inline int64_t voxel_hash(int64_t x, int64_t y, int64_t z) {
-    return (x * 73856093LL) ^ (y * 19349663LL) ^ (z * 83492791LL);
+static inline uint64_t voxel_hash(int64_t x, int64_t y, int64_t z) {
+    uint64_t hash = (uint64_t)(x * 73856093LL) ^ (uint64_t)(y * 19349663LL) ^ (uint64_t)(z * 83492791LL);
+    return hash + 1;
 }
 
 
@@ -50,6 +51,66 @@ static inline bool get_attr_int(PyObject* obj, const char* name, int* out) {
         double*: get_attr_float, \
         int*:    get_attr_int \
     )(obj, field, out)
+
+
+// some paper on parallelization: https://www.sci.utah.edu/~csilva/papers/cgf.pdf
+void radix_sort_64(uint64_t* keys, Py_ssize_t* indices,  Py_ssize_t N) {
+    if (N <= 1) return;
+
+    uint64_t* tmp_keys = malloc(N * sizeof(*tmp_keys));
+    Py_ssize_t* tmp_indices = malloc(N * sizeof(*tmp_indices));
+    if (!tmp_keys || !tmp_indices) {
+        free(tmp_keys);
+        free(tmp_indices);
+        return;
+    }
+
+    const int RADIX = 256; 
+    const int PASSES = 8;
+    Py_ssize_t count[RADIX];
+
+    uint64_t* in_keys = keys;
+    Py_ssize_t* in_idx = indices;
+    uint64_t* out_keys = tmp_keys;
+    Py_ssize_t* out_idx = tmp_indices;
+
+    for (int p = 0; p < PASSES; p++) {
+        memset(count, 0, sizeof(count));
+
+        int shift = p * 8;
+        for (Py_ssize_t i = 0; i < N; i++) {
+            uint8_t byte = (in_keys[i] >> shift) & 0xFF;
+            count[byte]++;
+        }
+
+        Py_ssize_t sum = 0;
+        for (int i = 0; i < RADIX; i++) {
+            Py_ssize_t tmp = count[i];
+            count[i] = sum;
+            sum += tmp;
+        }
+
+        for (Py_ssize_t i = 0; i < N; i++) {
+            uint8_t byte = (in_keys[i] >> shift) & 0xFF;
+            out_keys[count[byte]] = in_keys[i];
+            out_idx[count[byte]] = in_idx[i];
+            count[byte]++;
+        }
+
+        // swap in and out
+        uint64_t* tmpk = in_keys; in_keys = out_keys; out_keys = tmpk;
+        Py_ssize_t* tmpi = in_idx; in_idx = out_idx; out_idx = tmpi;
+    }
+
+    if (in_keys != keys) {
+        memcpy(keys, in_keys, N * sizeof(*keys));
+        memcpy(indices, in_idx, N * sizeof(*indices));
+    }
+
+    free(tmp_keys);
+    free(tmp_indices);
+}
+
 
 
 
@@ -86,9 +147,9 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
     double rmax2 = cfg.max_range * cfg.max_range;
     double voxel_size = cfg.sor_radius;
 
-    AtomicBitset* bs = bitset_create(N);
+    AtomicBitset* bs = bitset_create(N); // need to free
     bitset_clear_all(bs);
-    int keep_count = 0;
+    Py_ssize_t keep_count = 0;
 
     Py_BEGIN_ALLOW_THREADS
     // basically splits threads over a (fairly) equal workload and handles atomic update of 'keep_count'
@@ -114,7 +175,7 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
     // later: https://stackoverflow.com/questions/43057426/openmp-multiple-threads-update-same-array
     // also multi thread later
 
-    Py_ssize_t* indices = (Py_ssize_t*)malloc(keep_count * sizeof(Py_ssize_t));
+    Py_ssize_t* indices = malloc(keep_count * sizeof(*indices)); // need to free
     Py_ssize_t pos = 0;
 
     for (Py_ssize_t i = 0; i < N; i++) {
@@ -124,7 +185,7 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
     }
 
 
-    int64_t* voxel_keys = (int64_t*)malloc(keep_count * sizeof(int64_t));
+    uint64_t* voxel_keys = malloc(keep_count * sizeof(*voxel_keys)); // need to free
     // shouldnt need any lock or safety because unique indices are garunteed
     #pragma omp parallel for schedule(static)
     for (Py_ssize_t i = 0; i < keep_count; i++) {
@@ -140,4 +201,6 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
 
         voxel_keys[i] = voxel_hash(ix, iy, iz);
     }
+
+    radix_sort_64(voxel_keys, indices, keep_count);
 }

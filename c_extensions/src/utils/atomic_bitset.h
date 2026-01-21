@@ -17,13 +17,37 @@ typedef struct {
 #define BIT_MASK(i)  (1ULL << (i % 64)) // (i % 64)th bit
 
 AtomicBitset* bitset_create(size_t nbits);
-void bitset_free(AtomicBitset* bs);
 
-void bitset_set(AtomicBitset* bs, size_t i);
-void bitset_clear(AtomicBitset* bs, size_t i);
-void bitset_set_relaxed(AtomicBitset* bs, size_t i);
-void bitset_clear_relaxed(AtomicBitset* bs, size_t i);
-bool bitset_test(AtomicBitset* bs, size_t i);
-void bitset_clear_all(AtomicBitset* bs);
+static inline void bitset_free(AtomicBitset* bs) {
+    if (!bs) return;
+    free(bs->words);
+    free(bs);
+}
+
+static inline void bitset_clear(AtomicBitset* bs, size_t i) {
+    if (i >= bs->nbits) return;
+    atomic_fetch_and(&bs->words[WORD_INDEX(i)], ~BIT_MASK(i));
+}
+
+static inline void bitset_set_relaxed(AtomicBitset* bs, size_t i) {
+    if (i >= bs->nbits) return;
+    atomic_fetch_or_explicit(&bs->words[WORD_INDEX(i)], BIT_MASK(i), memory_order_relaxed);
+}
+
+static inline void bitset_clear_relaxed(AtomicBitset* bs, size_t i) {
+    if (i >= bs->nbits) return;
+    atomic_fetch_and_explicit(&bs->words[WORD_INDEX(i)], ~BIT_MASK(i), memory_order_relaxed);
+}
+
+static inline bool bitset_test(AtomicBitset* bs, size_t i) {
+    if (i >= bs->nbits) return false;
+    return (atomic_load(&bs->words[WORD_INDEX(i)]) & BIT_MASK(i)) != 0;
+}
+
+static inline void bitset_clear_all(AtomicBitset *bs) {
+    for (size_t i = 0; i < bs->nwords; i++) {
+        atomic_store(&bs->words[i], 0);
+    }
+}
 
 #endif 
