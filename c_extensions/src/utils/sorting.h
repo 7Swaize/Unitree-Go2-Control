@@ -11,6 +11,9 @@
 #define PASSES 8
 #define THREADS 8
 
+// stanford paper: https://stanford.edu/~rezab/classes/cme323/S16/projects_reports/he.pdf
+// more math heavy paper: https://scispace.com/pdf/paradis-an-efficient-parallel-algorithm-for-in-place-radix-4zo3nn8gi4.pdf
+
 
 void radix_64_inp_par(uint64_t* keys, Py_ssize_t* indices, Py_ssize_t N, int shift, int passes);
 
