@@ -111,6 +111,90 @@ void radix_sort_64(uint64_t* keys, Py_ssize_t* indices,  Py_ssize_t N) {
     free(tmp_indices);
 }
 
+void radix_sort_64_mt(uint64_t* keys, Py_ssize_t* indices, Py_ssize_t N) {
+    if (N <= 1) return;
+
+    uint64_t* tmp_keys = malloc(N * sizeof(*tmp_keys));
+    Py_ssize_t* tmp_indices = malloc(N * sizeof(*tmp_indices));
+    if (!tmp_keys || !tmp_indices) {
+        free(tmp_keys);
+        free(tmp_indices);
+        return;
+    }
+
+    const int RADIX = 256;
+    const int PASSES = 8;
+
+    uint64_t* in_keys = keys;
+    Py_ssize_t* in_idx = indices;
+    uint64_t* out_keys = keys;
+    Py_ssize_t* out_idx = indices;
+
+    int nthreads = omp_get_max_threads();
+    Py_ssize_t* thread_count = malloc(nthreads * RADIX * sizeof(*thread_count));
+    if (!thread_count) {
+        free(tmp_keys);
+        free(tmp_indices);
+        return;
+    }
+
+    for (int p = 0; p < PASSES; p++) {
+        int shift = p * 8;
+        
+        #pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            Py_ssize_t* hist = thread_count + (tid * RADIX);
+            memset(hist, 0, RADIX * sizeof(Py_ssize_t));
+
+            #pragma omp for schedule(static)
+            for (Py_ssize_t i = 0; i < N; i++) {
+                uint8_t byte = (in_keys[i] >> shift) & 0xFF;
+                hist[byte]++;
+            } 
+        }
+
+        Py_ssize_t global_count[RADIX] = {0};
+
+        for (int b = 0; b < RADIX; ++b) {
+            for (int t = 0; t < nthreads; ++t) {
+                Py_ssize_t tmp = thread_count[t*RADIX + b];
+                thread_count[t*RADIX + b] = global_count[b];
+                global_count[b] += tmp;
+            }
+        }
+
+        #pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            Py_ssize_t* hist = thread_count + tid * RADIX;
+
+            #pragma omp for schedule(static)
+            for (Py_ssize_t i = 0; i < N; ++i) {
+                uint8_t byte = (in_keys[i] >> shift) & 0xFF;
+                Py_ssize_t pos;
+
+                #pragma omp atomic capture
+                pos = global_count[byte]++;
+                
+                out_keys[pos] = in_keys[i];
+                out_idx[pos]  = in_idx[i];
+            }
+        }
+
+        uint64_t* tmpk = in_keys; in_keys = out_keys; out_keys = tmpk;
+        Py_ssize_t* tmpi = in_idx; in_idx = out_idx; out_idx = tmpi;
+    }
+
+    if (in_keys != keys) {
+        memcpy(keys, in_keys, N * sizeof(*keys));
+        memcpy(indices, in_idx, N * sizeof(*indices));
+    }
+
+    free(tmp_keys);
+    free(tmp_indices);
+    free(thread_count);
+}
 
 
 
