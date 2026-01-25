@@ -1,13 +1,13 @@
 #ifndef SORTING_H
 #define SORTING_H
 
+#define PY_SSIZE_T_CLEAN
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
 #include <string.h>
 #include <Python.h>
-#include <immintrin.h>
-
+#include <arm_neon.h>
 
 #define RADIX 256
 #define PASSES 8

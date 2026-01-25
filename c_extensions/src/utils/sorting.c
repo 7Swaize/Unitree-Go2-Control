@@ -37,7 +37,10 @@ void build_histogram(uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
         const int tid = omp_get_thread_num();
 
         #pragma omp single
-        thist = calloc(nthreads * RADIX, sizeof(Py_ssize_t));
+        {
+            thist = (Py_ssize_t*)aligned_alloc(16, nthreads * RADIX * sizeof(Py_ssize_t));
+            memset(thist, 0, nthreads * RADIX * sizeof(Py_ssize_t));
+        }
 
         Py_ssize_t* local = &thist[tid * RADIX];
 
@@ -48,15 +51,15 @@ void build_histogram(uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
         }
 
         #pragma omp for schedule(static)
-        for (int b = 0; b < RADIX; b += 4) {
-            __m256i sum = _mm256_setzero_si256(); // lets hope its a 64 bit platform
+        for (int b = 0; b < RADIX; b += 2) { // NEON supports 128-bit vectors. Code just converted from AVX 256-bit register impl
+            uint64x2_t sum = vdupq_n_u64(0);
 
             for (int t = 0; t < nthreads; t++) {
-                __m256i tmp = _mm256_loadu_si256((__m256i*)&thist[t * RADIX + b]);
-                sum = _mm256_add_epi64(sum, tmp);
+                uint64x2_t tmp = vld1q_u64((uint64_t*)&thist[t * RADIX + b]);
+                sum = vaddq_u64(sum, tmp);
             }
 
-            _mm256_storeu_si256((__m256i*)&hist[b], sum);
+            vst1q_u64((uint64_t*)&hist[b], sum);
         }
     }
 

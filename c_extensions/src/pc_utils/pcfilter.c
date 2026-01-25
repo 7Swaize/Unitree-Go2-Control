@@ -7,8 +7,10 @@
 #include <stdbool.h>
 #include <omp.h>
 
+#include "methods.h"
 #include "atomic_bitset.h"
 #include "sorting.h"
+
 
 typedef struct {
     double max_range;
@@ -155,6 +157,12 @@ static Py_ssize_t calc_out(double** out_ptr, double* points_buf, uint64_t* voxel
 }
 
 
+void free_out_buf(PyObject* capsule) {
+    void* obj = PyCapsule_GetPointer(capsule, PyCapsule_GetName(capsule));
+    free(obj);
+}
+
+
 static PyObject* apply_filter(PyObject* self, PyObject* args) {
     PyArrayObject* points_obj;
     PyObject* config_obj;
@@ -232,9 +240,22 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
     free(voxel_keys);
     bitset_free(bs);
 
-    if (post_sor_fcnt < 0 || out_buf) {
+    if (post_sor_fcnt < 0 || !out_buf) {
         return PyErr_NoMemory();
     } 
 
 
+    npy_intp dims[2] = {post_sor_fcnt, D};
+    PyObject* npy_out = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, out_buf);
+    if (!npy_out) { free(out_buf); return NULL; }
+
+    // from docs: https://numpy.org/doc/stable/reference/c-api/data_memory.html
+    PyObject* capsule = PyCapsule_New(out_buf, "wrapped_out_buf", (PyCapsule_Destructor)&free_out_buf);
+    if (PyArray_SetBaseObject(npy_out, capsule) == -1) {
+        Py_DECREF(npy_out);
+        Py_DECREF(capsule);
+        return NULL;
+    }
+
+    return npy_out;
 }

@@ -1,6 +1,5 @@
 #include "atomic_bitset.h"
-#include <stdlib.h>
-#include <stdatomic.h>
+
 
 AtomicBitset* bitset_create(size_t nbits) {
     AtomicBitset* bs = malloc(sizeof(*bs));

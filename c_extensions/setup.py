@@ -3,7 +3,7 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 
 # https://stackoverflow.com/questions/27817190/what-does-cmdclass-do-in-pythons-setuptools
-class build_ext(_build_ext):
+class build_ext_with_numpy(_build_ext):
     def finalize_options(self):
         _build_ext.finalize_options(self)
 
@@ -16,13 +16,23 @@ ext_modules = [
     Extension(
         "fast_pointcloud",
         sources=[
-            os.path.join("src", "pc_utils", "pcdecode.c")
-        ]
+            os.path.join("src", "pc_utils", "module.c"),
+            os.path.join("src", "pc_utils", "pcdecode.c"),
+            os.path.join("src", "pc_utils", "pcfilter.c"),
+            os.path.join("src", "utils", "atomic_bitset.c"),
+            os.path.join("src", "utils", "sorting.c"),
+        ],
+        include_dirs=[
+            os.path.join("src", "pc_utils"),
+            os.path.join("src", "utils"),
+        ],
+        extra_compile_args=["-O3", "-fopenmp"], # no 'march=' directive for NEON support
+        extra_link_args=["-fopenmp"]
     )
 ]
 
 
 setup(
-    cmdclass={'build_ext': build_ext},
+    cmdclass={'build_ext': build_ext_with_numpy},
     ext_modules=ext_modules,
 )

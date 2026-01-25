@@ -1,6 +1,7 @@
 #ifndef ATOMIC_BITSET_H
 #define ATOMIC_BITSET_H
 
+#define PY_SSIZE_T_CLEAN
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdatomic.h>

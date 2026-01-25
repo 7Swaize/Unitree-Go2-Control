@@ -4,6 +4,8 @@
 #include <math.h>
 #include <stdint.h>
 
+#include "methods.h"
+
 #define PF_INT8    1
 #define PF_UINT8   2
 #define PF_INT16   3
@@ -149,29 +151,4 @@ static PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
     Py_DECREF(intensity);
 
     return ret ? ret : NULL;
-}
-
-// https://docs.python.org/3/extending/extending.html#the-module-s-method-table-and-initialization-function
-static PyMethodDef methods[] = {
-    {
-        "decode_xyz_intensity",
-        decode_xyz_intensity,
-        METH_VARARGS,
-        "Fast PointCloud2 XYZ(+intensity) decoder"
-    },
-    { NULL, NULL, 0, NULL }
-};
-
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "fast_pointcloud",
-    (PyCFunction)decode_xyz_intensity,
-    -1,
-    methods
-};
-
-
-PyMODINIT_FUNC PyInit_fast_pointcloud(void) {
-    import_array() // i think for custom ret val on exception its "import_array1(ret)" but NULL is fine for us
-    return PyModuleDef_Init(&moduledef);
 }
