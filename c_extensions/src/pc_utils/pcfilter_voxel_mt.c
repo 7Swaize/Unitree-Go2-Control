@@ -7,7 +7,8 @@
 #include <stdbool.h>
 #include <omp.h>
 
-#include <atomic_bitset.h>
+#include "atomic_bitset.h"
+#include "sorting.h"
 
 typedef struct {
     double max_range;
@@ -52,150 +53,106 @@ static inline bool get_attr_int(PyObject* obj, const char* name, int* out) {
         int*:    get_attr_int \
     )(obj, field, out)
 
+    
 
-// some paper on parallelization: https://www.sci.utah.edu/~csilva/papers/cgf.pdf
-void radix_sort_64(uint64_t* keys, Py_ssize_t* indices,  Py_ssize_t N) {
-    if (N <= 1) return;
+static Py_ssize_t calc_post_init_fcnt(double* points_buf, AtomicBitset* bs, FilterConfig* cfg, Py_ssize_t N, Py_ssize_t D) {
+    double rmin2 = cfg->min_range * cfg->min_range;
+    double rmax2 = cfg->max_range * cfg->max_range;
 
-    uint64_t* tmp_keys = malloc(N * sizeof(*tmp_keys));
-    Py_ssize_t* tmp_indices = malloc(N * sizeof(*tmp_indices));
-    if (!tmp_keys || !tmp_indices) {
-        free(tmp_keys);
-        free(tmp_indices);
-        return;
-    }
+    Py_ssize_t post_init_fcnt = 0;
 
-    const int RADIX = 256; 
-    const int PASSES = 8;
-    Py_ssize_t count[RADIX];
+    #pragma omp parallel for schedule(static) reduction(+:post_init_fcnt)
+    for (Py_ssize_t i = 0; i < N; i += cfg->downsample_rate) {
+        double x = points_buf[i*D + 0];
+        double y = points_buf[i*D + 1];
+        double z = points_buf[i*D + 2];
+        double r2 = x*x + y*y + z*z;
 
-    uint64_t* in_keys = keys;
-    Py_ssize_t* in_idx = indices;
-    uint64_t* out_keys = tmp_keys;
-    Py_ssize_t* out_idx = tmp_indices;
+        if (r2 < rmin2 || r2 > rmax2) continue;
+        if (z < cfg->height_min || z > cfg->height_max) continue;
 
-    for (int p = 0; p < PASSES; p++) {
-        memset(count, 0, sizeof(count));
-
-        int shift = p * 8;
-        for (Py_ssize_t i = 0; i < N; i++) {
-            uint8_t byte = (in_keys[i] >> shift) & 0xFF;
-            count[byte]++;
+        if (D > 3) {
+            double inten = points_buf[i*D + 3];
+            if (inten < cfg->intensity_min) continue;
         }
 
-        Py_ssize_t sum = 0;
-        for (int i = 0; i < RADIX; i++) {
-            Py_ssize_t tmp = count[i];
-            count[i] = sum;
-            sum += tmp;
-        }
-
-        for (Py_ssize_t i = 0; i < N; i++) {
-            uint8_t byte = (in_keys[i] >> shift) & 0xFF;
-            out_keys[count[byte]] = in_keys[i];
-            out_idx[count[byte]] = in_idx[i];
-            count[byte]++;
-        }
-
-        // swap in and out
-        uint64_t* tmpk = in_keys; in_keys = out_keys; out_keys = tmpk;
-        Py_ssize_t* tmpi = in_idx; in_idx = out_idx; out_idx = tmpi;
+        bitset_set_relaxed(bs, i);
+        post_init_fcnt++;
     }
 
-    if (in_keys != keys) {
-        memcpy(keys, in_keys, N * sizeof(*keys));
-        memcpy(indices, in_idx, N * sizeof(*indices));
-    }
-
-    free(tmp_keys);
-    free(tmp_indices);
+    return post_init_fcnt;
 }
 
-void radix_sort_64_mt(uint64_t* keys, Py_ssize_t* indices, Py_ssize_t N) {
-    if (N <= 1) return;
+static void calc_voxel_keys(double* points_buf, uint64_t* voxel_keys, Py_ssize_t* indices, FilterConfig* cfg, Py_ssize_t post_init_fcnt, Py_ssize_t D) {
+    #pragma omp parallel for schedule(static)
+    for (Py_ssize_t i = 0; i < post_init_fcnt; i++) {
+        Py_ssize_t idx = indices[i];
 
-    uint64_t* tmp_keys = malloc(N * sizeof(*tmp_keys));
-    Py_ssize_t* tmp_indices = malloc(N * sizeof(*tmp_indices));
-    if (!tmp_keys || !tmp_indices) {
-        free(tmp_keys);
-        free(tmp_indices);
-        return;
+        double x = points_buf[idx*D + 0];
+        double y = points_buf[idx*D + 1];
+        double z = points_buf[idx*D + 2];
+
+        int64_t ix = (int64_t)floor(x / cfg->sor_radius);
+        int64_t iy = (int64_t)floor(y / cfg->sor_radius);
+        int64_t iz = (int64_t)floor(z / cfg->sor_radius);
+
+        voxel_keys[i] = voxel_hash(ix, iy, iz);
     }
+}
 
-    const int RADIX = 256;
-    const int PASSES = 8;
+static void calc_valid_idx(Py_ssize_t* indices, AtomicBitset* bs, Py_ssize_t N) {
+    Py_ssize_t pos = 0;
 
-    uint64_t* in_keys = keys;
-    Py_ssize_t* in_idx = indices;
-    uint64_t* out_keys = keys;
-    Py_ssize_t* out_idx = indices;
-
-    int nthreads = omp_get_max_threads();
-    Py_ssize_t* thread_count = malloc(nthreads * RADIX * sizeof(*thread_count));
-    if (!thread_count) {
-        free(tmp_keys);
-        free(tmp_indices);
-        return;
+    for (Py_ssize_t i = 0; i < N; i++) {
+        if (bitset_test(bs, i)) {
+            indices[pos++] = i;
+        }
     }
+}
 
-    for (int p = 0; p < PASSES; p++) {
-        int shift = p * 8;
-        
-        #pragma omp parallel
-        {
-            int tid = omp_get_thread_num();
-            Py_ssize_t* hist = thread_count + (tid * RADIX);
-            memset(hist, 0, RADIX * sizeof(Py_ssize_t));
 
-            #pragma omp for schedule(static)
-            for (Py_ssize_t i = 0; i < N; i++) {
-                uint8_t byte = (in_keys[i] >> shift) & 0xFF;
-                hist[byte]++;
-            } 
+static Py_ssize_t calc_out(double** out_ptr, double* points_buf, uint64_t* voxel_keys, Py_ssize_t* indices, AtomicBitset* bs, FilterConfig* cfg, Py_ssize_t post_init_fcnt, Py_ssize_t D) {
+    Py_ssize_t post_sor_fcnt = 0;
+
+    bitset_clear_all(bs);
+
+    for (Py_ssize_t voxel_start = 0; voxel_start < post_init_fcnt;) {
+        Py_ssize_t voxel_end = voxel_start + 1;
+        while (voxel_end < post_init_fcnt && voxel_keys[voxel_end] == voxel_keys[voxel_start]) {
+            voxel_end++;
         }
 
-        Py_ssize_t global_count[RADIX] = {0};
-
-        for (int b = 0; b < RADIX; ++b) {
-            for (int t = 0; t < nthreads; ++t) {
-                Py_ssize_t tmp = thread_count[t*RADIX + b];
-                thread_count[t*RADIX + b] = global_count[b];
-                global_count[b] += tmp;
+        Py_ssize_t size = voxel_end - voxel_start;
+        if (size >= cfg->sor_min_neighbors) {
+            for (Py_ssize_t i = voxel_start; i < voxel_end; i++) {
+                bitset_set_relaxed(bs, i);
+                post_sor_fcnt++;
             }
         }
 
-        #pragma omp parallel
-        {
-            int tid = omp_get_thread_num();
-            Py_ssize_t* hist = thread_count + tid * RADIX;
+        voxel_start = voxel_end;
+    }
 
-            #pragma omp for schedule(static)
-            for (Py_ssize_t i = 0; i < N; ++i) {
-                uint8_t byte = (in_keys[i] >> shift) & 0xFF;
-                Py_ssize_t pos;
+    double* out = malloc(post_sor_fcnt * D * sizeof(*out));
+    if (!out) {
+        *out_ptr = NULL;
+        return -1;
+    }
 
-                #pragma omp atomic capture
-                pos = global_count[byte]++;
-                
-                out_keys[pos] = in_keys[i];
-                out_idx[pos]  = in_idx[i];
+    Py_ssize_t pos = 0;
+    for (Py_ssize_t i = 0; i < post_init_fcnt; i++) {
+        if (bitset_test(bs, i)) {
+            Py_ssize_t idx = indices[i];
+            for (Py_ssize_t d = 0; d < D; d++) {
+                out[D*pos + d] = points_buf[idx*D + d];
             }
+            pos++;
         }
-
-        uint64_t* tmpk = in_keys; in_keys = out_keys; out_keys = tmpk;
-        Py_ssize_t* tmpi = in_idx; in_idx = out_idx; out_idx = tmpi;
     }
 
-    if (in_keys != keys) {
-        memcpy(keys, in_keys, N * sizeof(*keys));
-        memcpy(indices, in_idx, N * sizeof(*indices));
-    }
-
-    free(tmp_keys);
-    free(tmp_indices);
-    free(thread_count);
+    *out_ptr = out;
+    return post_sor_fcnt;
 }
-
 
 
 static PyObject* apply_filter(PyObject* self, PyObject* args) {
@@ -227,64 +184,57 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
     if (!GET_ATTR(config_obj, "sor_min_neighbors", &cfg.sor_min_neighbors)) return NULL;
     if (!GET_ATTR(config_obj, "intensity_min", &cfg.intensity_min)) return NULL;
 
-    double rmin2 = cfg.min_range * cfg.min_range;
-    double rmax2 = cfg.max_range * cfg.max_range;
-    double voxel_size = cfg.sor_radius;
 
     AtomicBitset* bs = bitset_create(N); // need to free
+    if (!bs) return PyErr_NoMemory();
     bitset_clear_all(bs);
-    Py_ssize_t keep_count = 0;
+
+    Py_ssize_t post_init_fcnt;
+    Py_BEGIN_ALLOW_THREADS
+    post_init_fcnt = calc_post_init_fcnt(points_buf, bs, &cfg, N, D);
+    Py_END_ALLOW_THREADS
+
+
+    Py_ssize_t* indices = malloc(post_init_fcnt * sizeof(*indices)); // need to free
+    if (!indices) { bitset_free(bs); return PyErr_NoMemory(); }
+
+    calc_valid_idx(indices, bs, N);
+
+
+    free(bs);
+    bs = NULL;
+
+
+    uint64_t* voxel_keys = malloc(post_init_fcnt * sizeof(*voxel_keys)); // need to free
+    if (!voxel_keys) { free(indices); return PyErr_NoMemory(); }
 
     Py_BEGIN_ALLOW_THREADS
-    // basically splits threads over a (fairly) equal workload and handles atomic update of 'keep_count'
-    #pragma omp for schedule(static) reduction(+: keep_count)
-    for (Py_ssize_t i = 0; i < N; i += cfg.downsample_rate) {
-        double x = points_buf[i*D + 0];
-        double y = points_buf[i*D + 1];
-        double z = points_buf[i*D + 2];
-        double r2 = x*x + y*y + z*z;
+    calc_voxel_keys(points_buf, voxel_keys, indices, &cfg, post_init_fcnt, D);
+    Py_END_ALLOW_THREADS
 
-        if (r2 < rmin2 || r2 > rmin2) continue;
-        if (z < cfg.height_min || z > cfg.height_max) continue;
+    Py_BEGIN_ALLOW_THREADS
+    radix_64_inp_par(voxel_keys, indices, post_init_fcnt, 0);
+    Py_END_ALLOW_THREADS
 
-        if (D > 3) {
-            double inten = points_buf[i*D + 3];
-            if (inten < cfg.intensity_min) continue;
-        }
+    
+    bs = bitset_create(post_init_fcnt); // need to free
+    if (!bs) { free(indices); free(voxel_keys); return PyErr_NoMemory(); }
 
-        bitset_set_relaxed(bs, i);
-        keep_count++;
-    }
-
-    // later: https://stackoverflow.com/questions/43057426/openmp-multiple-threads-update-same-array
-    // also multi thread later
-
-    Py_ssize_t* indices = malloc(keep_count * sizeof(*indices)); // need to free
-    Py_ssize_t pos = 0;
-
-    for (Py_ssize_t i = 0; i < N; i++) {
-        if (bitset_test(bs, i)) {
-            indices[pos++] = i;
-        }
-    }
+    
+    double* out_buf;
+    Py_ssize_t post_sor_fcnt;
+    Py_BEGIN_ALLOW_THREADS
+    post_sor_fcnt = calc_out(&out_buf, points_buf, voxel_keys, indices, bs, &cfg, post_init_fcnt, D);
+    Py_END_ALLOW_THREADS
 
 
-    uint64_t* voxel_keys = malloc(keep_count * sizeof(*voxel_keys)); // need to free
-    // shouldnt need any lock or safety because unique indices are garunteed
-    #pragma omp parallel for schedule(static)
-    for (Py_ssize_t i = 0; i < keep_count; i++) {
-        Py_ssize_t idx = indices[i];
+    free(indices);
+    free(voxel_keys);
+    bitset_free(bs);
 
-        double x = points_buf[idx*D + 0];
-        double y = points_buf[idx*D + 1];
-        double z = points_buf[idx*D + 2];
+    if (post_sor_fcnt < 0 || out_buf) {
+        return PyErr_NoMemory();
+    } 
 
-        int64_t ix = (int64_t)floor(x / cfg.sor_radius);
-        int64_t iy = (int64_t)floor(y / cfg.sor_radius);
-        int64_t iz = (int64_t)floor(z / cfg.sor_radius);
 
-        voxel_keys[i] = voxel_hash(ix, iy, iz);
-    }
-
-    radix_sort_64(voxel_keys, indices, keep_count);
 }
