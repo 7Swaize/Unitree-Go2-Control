@@ -4,6 +4,7 @@ import subprocess
 
 from src.core.base_module import DogModule
 
+# pip install pyzmq
 
 class LIDARModule(DogModule):
     def __init__(self, use_sdk: bool = True):
