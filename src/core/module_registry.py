@@ -5,7 +5,7 @@ from typing import Dict, Generic, Optional, Type, TypeVar
 from src.core.base_module import DogModule
 from src.audio_control.audio_module import AudioModule
 from src.controller_input_control.input_module import InputModule
-from src.lidar_control.decoder import LIDARModule
+from src.lidar_control.lidar_module import LIDARModule
 from src.movement.movement_module import MovementModule
 from src.ocr_control.ocr_module import OCRModule
 from src.video_control.video_module import VideoModule
