@@ -42,6 +42,7 @@ static PyObject* create_point_field_type_enum(void) {
     PyDict_SetItemString(enum_dict, "FLOAT32", int_float32);
     PyDict_SetItemString(enum_dict, "FLOAT64", int_float64);
 
+    // person on stack overflow said we need to decref: https://stackoverflow.com/questions/40700251/reference-counting-using-pydict-setitemstring
     Py_DECREF(int_int8);
     Py_DECREF(int_uint8);
     Py_DECREF(int_int16);
