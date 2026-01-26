@@ -163,7 +163,7 @@ void free_out_buf(PyObject* capsule) {
 }
 
 
-static PyObject* apply_filter(PyObject* self, PyObject* args) {
+__attribute__((unused)) PyObject* apply_filter(PyObject* self, PyObject* args) {
     PyArrayObject* points_obj;
     PyObject* config_obj;
 
@@ -251,7 +251,7 @@ static PyObject* apply_filter(PyObject* self, PyObject* args) {
 
     // from docs: https://numpy.org/doc/stable/reference/c-api/data_memory.html
     PyObject* capsule = PyCapsule_New(out_buf, "wrapped_out_buf", (PyCapsule_Destructor)&free_out_buf);
-    if (PyArray_SetBaseObject(npy_out, capsule) == -1) {
+    if (PyArray_SetBaseObject((PyArrayObject*)npy_out, capsule) == -1) {
         Py_DECREF(npy_out);
         Py_DECREF(capsule);
         return NULL;

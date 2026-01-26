@@ -47,7 +47,7 @@ void build_histogram(uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
         #pragma omp for schedule(static)
         for (Py_ssize_t i = 0; i < N; i++) {
             uint8_t b = msb(keys[i], pass);
-            local[b++];
+            local[b]++;
         }
 
         #pragma omp for schedule(static)

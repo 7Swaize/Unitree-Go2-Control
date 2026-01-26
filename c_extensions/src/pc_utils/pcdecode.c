@@ -6,14 +6,16 @@
 
 #include "methods.h"
 
-#define PF_INT8    1
-#define PF_UINT8   2
-#define PF_INT16   3
-#define PF_UINT16  4
-#define PF_INT32   5
-#define PF_UINT32  6
-#define PF_FLOAT32 7
-#define PF_FLOAT64 8
+typedef enum {
+    PF_INT8    = 1,
+    PF_UINT8   = 2,
+    PF_INT16   = 3,
+    PF_UINT16  = 4,
+    PF_INT32   = 5,
+    PF_UINT32  = 6,
+    PF_FLOAT32 = 7,
+    PF_FLOAT64 = 8
+} PointFieldType;
 
 
 static int host_little_endian(void) {
@@ -21,7 +23,7 @@ static int host_little_endian(void) {
     return *((uint8_t*)&x);
 }
 
-static inline double read_point_field(const char* p, int dtype, int swap) {
+static inline double read_point_field(const char* p, PointFieldType dtype, int swap) {
     switch (dtype) {
         case PF_INT8:   return (double)(*(int8_t*)p);
         case PF_UINT8:  return (double)(*(uint8_t*)p);
@@ -62,17 +64,20 @@ static inline double read_point_field(const char* p, int dtype, int swap) {
     }
 }
 
-
-static PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
+// unused attr to prevent compiler from giving that dumb warning
+__attribute__((unused)) PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
     PyObject* data_obj;
     int point_step, ox, oy, oz, oi;
-    int is_bigendian, dtype_xyz, dtype_intensity, skip_nans;
+    int is_bigendian, dtype_xyz_val, dtype_intensity_val, skip_nans;
 
     if (!PyArg_ParseTuple(args, "Oiiiiiiiii", 
             &data_obj, &point_step, &ox, &oy, &oz, &oi,
-            &is_bigendian, &dtype_xyz, &dtype_intensity, &skip_nans)) {
+            &is_bigendian, &dtype_xyz_val, &dtype_intensity_val, &skip_nans)) {
         return NULL;
     }
+
+    PointFieldType dtype_xyz = (PointFieldType)dtype_xyz_val;
+    PointFieldType dtype_intensity = (PointFieldType)dtype_intensity_val;
     
     // https://users.pja.edu.pl/~error501/python-html/c-api/buffer.html
     Py_buffer buf;
@@ -137,11 +142,11 @@ static PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
     PyBuffer_Release(&buf);
 
     if (count != n_points) {
-        PyArray_Dims newshape = {{count, 3}, 2};
+        PyArray_Dims newshape = {(npy_intp[]){count, 3}, 2};
         PyArray_Resize((PyArrayObject*)xyz, &newshape, 1, NPY_CORDER);
 
         if (i_data) {
-            PyArray_Dims newshape_i = {{count}, 1};
+            PyArray_Dims newshape_i = {(npy_intp[]){count}, 1};
             PyArray_Resize((PyArrayObject*)intensity, &newshape_i, 1, NPY_CORDER);
         }
     }

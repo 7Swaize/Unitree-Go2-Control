@@ -26,6 +26,7 @@ ext_modules = [
             os.path.join("src", "pc_utils"),
             os.path.join("src", "utils"),
         ],
+        define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_2_0_API_VERSION')],
         extra_compile_args=["-O3", "-fopenmp"], # no 'march=' directive for NEON support
         extra_link_args=["-fopenmp"]
     )

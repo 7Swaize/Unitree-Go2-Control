@@ -24,6 +24,22 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'lidar_decoder_node = lidar_processor.lidar_decoder_node:main',
+            'lidar_filter_node = lidar_processor.lidar_filter_node:main',  
         ],
     },
 )
+
+
+
+'''
+ROS2 packages needed by conda:
+pip install -U pip setuptools wheel
+pip install colcon-common-extensions
+pip install empy catkin_pkg lark-parser
+
+then:
+export PYTHON_EXECUTABLE=$(which python)
+export AMENT_PYTHON_EXECUTABLE=$(which python)
+source /opt/ros/humble/setup.bash
+'''

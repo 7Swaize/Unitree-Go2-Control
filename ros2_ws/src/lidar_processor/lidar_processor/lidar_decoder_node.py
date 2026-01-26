@@ -11,28 +11,11 @@ from go2_interfaces.msg import LidarDecoded
 import numpy as np
 import fast_pointcloud as fp
 
+from lidar_processor.lidar_message_utils import (
+    POINTFIELD_TO_INTERNAL_CTYPE,
+    create_lidar_decoded_message
+)
 
-POINTFIELD_TO_INTERNAL_CTYPE = {
-    PointField.INT8: fp.PF_INT8,
-    PointField.UINT8: fp.PF_UINT8,
-    PointField.INT16: fp.PF_INT16,
-    PointField.UINT16: fp.PF_UINT16,
-    PointField.INT32: fp.PF_INT32,
-    PointField.UINT32: fp.PF_UINT32,
-    PointField.FLOAT32: fp.PF_FLOAT32,
-    PointField.FLOAT64: fp.PF_FLOAT64
-}
-
-NP_DTYPE_TO_CODE = {
-    np.int8: 1,
-    np.uint8: 2,
-    np.int16: 3,
-    np.uint16: 4,
-    np.int32: 5,
-    np.uint32: 6,
-    np.float32: 7,
-    np.float64: 8
-}
 
 @dataclass
 class CollectionConfig:
@@ -44,7 +27,7 @@ class LidarDecoderNode(Node):
     def __init__(self) -> None:
         super().__init__("lidar_decoder")
 
-        self.declare_parameters()
+        self._declare_parameters()
         self.config = self.load_configuration()
 
         self._qos_profile = QoSProfile(
@@ -57,15 +40,23 @@ class LidarDecoderNode(Node):
         self.setup_subscriptions()
 
     
-    def declare_parameters(self) -> None:
-        self.declare_parameter("optimize_collection", False)
-        self.declare_parameter("skip_nans", True)
+    def _declare_parameters(self) -> None:
+        self.declare_parameters(
+            namespace="",
+            parameters=[
+                ("collection.optimize_collection", rclpy.Parameter.Type.BOOL),
+                ("collection.skip_nans", rclpy.Parameter.Type.BOOL),   
+            ]
+        )
 
 
     def load_configuration(self) -> CollectionConfig:
+        optimize_collection = self.get_parameter('collection.optimize_collection').get_parameter_value().bool_value
+        skip_nans = self.get_parameter('collection.skip_nans').get_parameter_value().bool_value
+
         return CollectionConfig(
-            optimize_collection=self.get_parameter("optimize_collection").get_parameter_value().bool_value,
-            skip_nans=self.get_parameter("skip_nans").get_parameter_value().bool_value,
+            optimize_collection=optimize_collection,
+            skip_nans=skip_nans,
         )
 
 
@@ -135,25 +126,8 @@ class LidarDecoderNode(Node):
 
     def publish_decoded_pointcloud(self, xyz: np.ndarray, intensity: Optional[np.ndarray]) -> None:
         try:
-            msg = LidarDecoded()
-
-            msg.xyz_shape = list(xyz.shape)
-            msg.xyz_dtype = NP_DTYPE_TO_CODE[xyz.dtype]
-            msg.xyz_data = xyz.tobytes(order='C')
-
-            if intensity is not None:
-                msg.has_intensity = True
-                msg.intensity_shape = list(intensity.shape)
-                msg.intensity_dtype = NP_DTYPE_TO_CODE[intensity.dtype]
-                msg.intensity_data = intensity.tobytes(order='C')
-            else:
-                msg.has_intensity = False
-                msg.intensity_shape = []
-                msg.intensity_dtype = 0
-                msg.intensity_data = []
-
+            msg = create_lidar_decoded_message(xyz, intensity)
             self.decoded_pointcloud_pub.publish(msg)
-
         except Exception as e:
             self.get_logger().error(f"Error publishing point cloud: {e}")
             

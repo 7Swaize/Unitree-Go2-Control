@@ -1,16 +1,14 @@
-# fast_pointcloud.pyi
-from typing import Tuple, Optional
+from typing import Tuple, Optional, TypedDict
 import numpy
 
-# PointField data types
-PF_INT8: int
-PF_UINT8: int
-PF_INT16: int
-PF_UINT16: int
-PF_INT32: int
-PF_UINT32: int
-PF_FLOAT32: int
-PF_FLOAT64: int
+
+PointFieldType: dict[str, int]
+"""
+Enum for point field data types.
+
+Contains the following constants:
+- INT8, UINT8, INT16, UINT16, INT32, UINT32, FLOAT32, FLOAT64
+"""
 
 
 def decode_xyz_intensity(
@@ -56,7 +54,7 @@ def decode_xyz_intensity(
     ...
 
 
-class FilterConfig:
+class FilterConfig(TypedDict):
     """
     Configuration for point cloud filtering.
 
