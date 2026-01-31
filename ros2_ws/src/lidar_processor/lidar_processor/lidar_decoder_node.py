@@ -28,7 +28,7 @@ class LidarDecoderNode(Node):
         super().__init__("lidar_decoder")
 
         self._declare_parameters()
-        self.config = self.load_configuration()
+        self.config = self._load_configuration()
 
         self._qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -50,7 +50,7 @@ class LidarDecoderNode(Node):
         )
 
 
-    def load_configuration(self) -> CollectionConfig:
+    def _load_configuration(self) -> CollectionConfig:
         optimize_collection = self.get_parameter('collection.optimize_collection').get_parameter_value().bool_value
         skip_nans = self.get_parameter('collection.skip_nans').get_parameter_value().bool_value
 

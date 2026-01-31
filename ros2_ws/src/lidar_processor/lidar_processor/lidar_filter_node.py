@@ -31,7 +31,7 @@ class LidarFilterNode(Node):
         super().__init__("lidar_filter")
 
         self._declare_parameters()
-        self.config = self.load_configuration()
+        self.config = self._load_configuration()
 
         self.qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -59,7 +59,7 @@ class LidarFilterNode(Node):
         )
 
 
-    def load_configuration(self) -> FilterConfig:
+    def _load_configuration(self) -> FilterConfig:
         max_range = self.get_parameter('filter.max_range').get_parameter_value().double_value
         min_range = self.get_parameter('filter.min_range').get_parameter_value().double_value
         height_min = self.get_parameter('filter.height_min').get_parameter_value().double_value
