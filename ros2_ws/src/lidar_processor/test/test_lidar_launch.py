@@ -39,8 +39,6 @@ def generate_test_description():
     }
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
 
 
 '''

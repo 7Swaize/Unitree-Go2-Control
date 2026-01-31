@@ -26,7 +26,6 @@ class CollectionConfig:
 class LidarDecoderNode(Node):
     def __init__(self) -> None:
         super().__init__("lidar_decoder")
-
         self._declare_parameters()
         self.config = self._load_configuration()
 

@@ -1,13 +1,9 @@
 import time
 import numpy as np
 import unittest
-from unittest.mock import Mock
 
 import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import PointField
-from sensor_msgs_py import point_cloud2
-from std_msgs.msg import Header
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from go2_interfaces.msg import LidarDecoded
 
 from lidar_processor.lidar_message_utils import create_lidar_decoded_message
@@ -24,17 +20,23 @@ class TestLidarFilterNode(unittest.TestCase):
         self.node = rclpy.create_node('test_decoder_unit')
         self.received_messages = []
 
+        qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10,
+        )
+
         self.subscription = self.node.create_subscription(
             LidarDecoded,
             'utlidar/filtered_cloud',
             lambda msg: self.received_messages.append(msg),
-            10
+            qos
         )
 
         self.publisher = self.node.create_publisher(
             LidarDecoded,
             "/utlidar/decoded_cloud",
-            10
+            qos
         )
 
 
@@ -57,7 +59,7 @@ class TestLidarFilterNode(unittest.TestCase):
             [10.0, 0.0, 0.0],   # within range
             [30.0, 0.0, 0.0],   # beyond max_range
             [15.0, 0.0, 0.0],   # within range
-        ], dtype=np.float64)
+        ], dtype=np.float32)
         msg = self.create_decoded_message(xyz_data)
 
         self.publisher.publish(msg)
@@ -79,8 +81,8 @@ class TestLidarFilterNode(unittest.TestCase):
             [15.0, 0.0, 0.0],
             [12.0, 0.0, 1.0],
             [41.0, 0.0, 0.0],
-        ], dtype=np.float64)
-        intensity_data = np.array([-100.0, 150.0, 91.0], dtype=np.float64)
+        ], dtype=np.float32)
+        intensity_data = np.array([-100.0, 150.0, 91.0], dtype=np.float32)
         msg = self.create_decoded_message(xyz_data, intensity_data)
 
         self.publisher.publish(msg)
