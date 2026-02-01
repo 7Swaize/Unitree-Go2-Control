@@ -26,16 +26,12 @@ class TestLidarDecoderNode(unittest.TestCase):
         def create_node():
             from lidar_processor.lidar_decoder_node import LidarDecoderNode, CollectionConfig
 
-            optimize_collection = self.config_params['optimize_collection']
-            skip_nans = self.config_params['skip_nans']
-
             with patch('lidar_processor.lidar_decoder_node.Node.__init__', return_value=None):
                 node = LidarDecoderNode.__new__(LidarDecoderNode)
-                node.config = CollectionConfig(
-                    optimize_collection=optimize_collection,
-                    skip_nans=skip_nans
-                )
+                node.config = CollectionConfig(**self.config_params)
                 node.decoded_pointcloud_pub = Mock(publish=lambda msg: self.received_messages.append(msg))
+                node.pc_layout = None
+                
                 node.get_logger = MagicMock(return_value=MagicMock(
                     info=lambda msg: print(msg, file=sys.stdout),
                     warn=lambda msg: print(msg, file=sys.stderr),

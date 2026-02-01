@@ -23,6 +23,17 @@ class CollectionConfig:
     skip_nans: bool 
 
 
+@dataclass(frozen=True)
+class PointCloudLayout:
+    has_intensity: bool
+    x_offset: int
+    y_offset: int
+    z_offset: int
+    intensity_offset: int
+    xyz_internal_type: int
+    intensity_internal_type: int
+
+
 class LidarDecoderNode(Node):
     def __init__(self) -> None:
         super().__init__("lidar_decoder")
@@ -34,6 +45,8 @@ class LidarDecoderNode(Node):
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
+
+        self.pc_layout: Optional[PointCloudLayout] = None
 
         self.setup_publishers()
         self.setup_subscriptions()
@@ -76,17 +89,64 @@ class LidarDecoderNode(Node):
         )
 
 
+    def _init_pointcloud_layout(self, msg: PointCloud2) -> PointCloudLayout:
+        fields: dict[str, PointField] = {f.name: f for f in msg.fields}
+        if not all(k in fields for k in ("x", "y", "z")):
+            raise ValueError("PointCloud2 missing XYZ fields")
+
+        dtype_xyz = fields["x"].datatype
+        if not all(fields[k].datatype == dtype_xyz for k in ("x", "y", "z")):
+            raise TypeError("Mixed XYZ datatypes not supported")
+        
+        xyz_internal = POINTFIELD_TO_INTERNAL_CTYPE.get(dtype_xyz)
+        if xyz_internal is None:
+            raise TypeError(f"Unsupported XYZ datatype: {dtype_xyz}")
+
+        has_intensity = "intensity" in fields
+        if has_intensity:
+            intensity_dtype = fields["intensity"].datatype
+            intensity_internal = POINTFIELD_TO_INTERNAL_CTYPE.get(intensity_dtype)
+            if intensity_internal is None:
+                raise TypeError(f"Unsupported intensity datatype: {intensity_dtype}")
+            intensity_offset = fields["intensity"].offset
+        else:
+            intensity_internal = fp.PointFieldType["INT8"]
+            intensity_offset = -1
+
+        return PointCloudLayout(
+            has_intensity=has_intensity,
+            x_offset=fields["x"].offset,
+            y_offset=fields["y"].offset,
+            z_offset=fields["z"].offset,
+            intensity_offset=intensity_offset,
+            xyz_internal_type=xyz_internal,
+            intensity_internal_type=intensity_internal
+        )
+
+
     def lidar_callback_unoptimized(self, msg: PointCloud2) -> None:
         try:
-            gen = point_cloud2.read_points(
-                msg,
-                field_names=["x", "y", "z"],
-                skip_nans=self.config.skip_nans
-            )
+            if self.pc_layout is None:
+                self.pc_layout = self._init_pointcloud_layout(msg)
 
-            xyz = np.array(list(gen), dtype=np.float64)
+            if self.pc_layout.has_intensity:
+                data = point_cloud2.read_points_numpy(
+                    msg,
+                    field_names=["x", "y", "z", "intensity"],
+                    skip_nans=self.config.skip_nans
+                ).astype(np.float32)
 
-            self.publish_decoded_pointcloud(xyz, None)
+                xyz = data[:, :3]
+                intensity = data[:, 3]
+            else:
+                xyz = point_cloud2.read_points_numpy(
+                    msg,
+                    field_names=["x", "y", "z"],
+                    skip_nans=self.config.skip_nans
+                ).astype(np.float32)
+                intensity = None
+
+            self.publish_decoded_pointcloud(xyz, intensity)
 
         except Exception as e:
             self.get_logger().error(f"Error processing LiDAR data: {e}")
@@ -94,26 +154,21 @@ class LidarDecoderNode(Node):
 
     def lidar_callback_optimized(self, msg: PointCloud2) -> None:       
         try:
-            fields: dict[str, PointField] = {f.name: f for f in msg.fields}
-            if not all(k in fields for k in ("x", "y", "z")):
-                raise ValueError("PointCloud2 missing XYZ fields")
+            if self.pc_layout is None:
+                self.pc_layout = self._init_pointcloud_layout(msg)
 
-            dtype_xyz = fields["x"].datatype
-            if not all(fields[k].datatype == dtype_xyz for k in ("x", "y", "z")):
-                raise TypeError("Mixed XYZ datatypes not supported")
-
-            has_intensity = "intensity" in fields and POINTFIELD_TO_INTERNAL_CTYPE.get(fields["intensity"].datatype)
+            l = self.pc_layout
 
             xyz, intensity = fp.decode_xyz_intensity(
                 msg.data,
                 msg.point_step,
-                fields["x"].offset,
-                fields["y"].offset,
-                fields["z"].offset,
-                fields["intensity"].offset if has_intensity else -1,
+                l.x_offset,
+                l.y_offset,
+                l.z_offset,
+                l.intensity_offset,
                 msg.is_bigendian,
-                POINTFIELD_TO_INTERNAL_CTYPE[dtype_xyz],
-                POINTFIELD_TO_INTERNAL_CTYPE[fields["intensity"].datatype] if has_intensity else fp.PointFieldType["INT8"],
+                l.xyz_internal_type,
+                l.intensity_internal_type,
                 self.config.skip_nans
             )
 
