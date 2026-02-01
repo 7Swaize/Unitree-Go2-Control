@@ -92,29 +92,29 @@ class LidarDecoderNode(Node):
             self.get_logger().error(f"Error processing LiDAR data: {e}")
             
 
-    def lidar_callback_optimized(self, msg: PointCloud2) -> None:
+    def lidar_callback_optimized(self, msg: PointCloud2) -> None:       
         try:
-            fields = {f.name: f for f in msg.fields}
+            fields: dict[str, PointField] = {f.name: f for f in msg.fields}
             if not all(k in fields for k in ("x", "y", "z")):
                 raise ValueError("PointCloud2 missing XYZ fields")
 
             dtype_xyz = fields["x"].datatype
-            if any(fields[k].datatype != dtype_xyz for k in ("x", "y", "z")):
+            if not all(fields[k].datatype == dtype_xyz for k in ("x", "y", "z")):
                 raise TypeError("Mixed XYZ datatypes not supported")
 
             has_intensity = "intensity" in fields and POINTFIELD_TO_INTERNAL_CTYPE.get(fields["intensity"].datatype)
 
             xyz, intensity = fp.decode_xyz_intensity(
-                data=msg.data,
-                point_step=msg.point_step,
-                ox=fields["x"].offset,
-                oy=fields["y"].offset,
-                oz=fields["z"].offset,
-                oi=fields["intensity"].offset if has_intensity else -1,
-                is_bigendian=msg.is_bigendian,
-                dtype_xyz=POINTFIELD_TO_INTERNAL_CTYPE[dtype_xyz],
-                dtype_intensity=POINTFIELD_TO_INTERNAL_CTYPE[fields["intensity"].datatype] if has_intensity else fp.PF_INT8,
-                skip_nans=self.config.skip_nans
+                msg.data,
+                msg.point_step,
+                fields["x"].offset,
+                fields["y"].offset,
+                fields["z"].offset,
+                fields["intensity"].offset if has_intensity else -1,
+                msg.is_bigendian,
+                POINTFIELD_TO_INTERNAL_CTYPE[dtype_xyz],
+                POINTFIELD_TO_INTERNAL_CTYPE[fields["intensity"].datatype] if has_intensity else fp.PointFieldType["INT8"],
+                self.config.skip_nans
             )
 
             self.publish_decoded_pointcloud(xyz, intensity)

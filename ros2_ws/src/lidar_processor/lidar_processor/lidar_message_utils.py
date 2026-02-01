@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Optional
 import numpy as np
 from sensor_msgs.msg import PointField
 
@@ -34,7 +34,7 @@ POINTFIELD_TO_INTERNAL_CTYPE = {
 def encode_array_to_message(array: np.ndarray, arr_prefix: str) -> dict:
     return {
         f"{arr_prefix}_shape": list(array.shape),
-        f"{arr_prefix}_dtype": NP_DTYPE_TO_CODE[array.dtype],
+        f"{arr_prefix}_dtype": NP_DTYPE_TO_CODE[array.dtype.type],
         f"{arr_prefix}_data": array.tobytes(order='C')
     }
 

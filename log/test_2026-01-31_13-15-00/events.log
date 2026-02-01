@@ -1,0 +1,5 @@
+[0.000000] (-) TimerEvent: {}
+[0.000445] (lidar_processor) JobQueued: {'identifier': 'lidar_processor', 'dependencies': OrderedDict([('fast_pointcloud', '/home/gsmst/gsmst/Unitree-Go2-Control/install/fast_pointcloud'), ('go2_interfaces', '/home/gsmst/gsmst/Unitree-Go2-Control/install/go2_interfaces'), ('lidar_processor', '/home/gsmst/gsmst/Unitree-Go2-Control/install/lidar_processor')])}
+[0.000573] (lidar_processor) JobStarted: {'identifier': 'lidar_processor'}
+[0.022020] (lidar_processor) JobEnded: {'identifier': 'lidar_processor', 'rc': 1}
+[0.024064] (-) EventReactorShutdown: {}

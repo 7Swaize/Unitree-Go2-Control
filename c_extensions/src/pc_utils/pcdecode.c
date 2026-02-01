@@ -1,8 +1,11 @@
 #define PY_SSIZE_T_CLEAN
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL FPC_ARRAY_API
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "methods.h"
 
@@ -64,6 +67,29 @@ static inline double read_point_field(const char* p, PointFieldType dtype, int s
     }
 }
 
+static PyObject* build_empty_ret(bool has_intensity) {
+    PyObject* xyz = PyArray_SimpleNew(2, ((npy_intp[]){0, 3}), NPY_FLOAT64);
+    if (!xyz) return NULL;
+
+    PyObject* intensity = Py_None;
+    if (has_intensity) {
+        intensity = PyArray_SimpleNew(1, (npy_intp[]){0}, NPY_FLOAT64);
+        if (!intensity) {
+            Py_DECREF(xyz);
+            return NULL;
+        }
+    } else {
+        Py_INCREF(Py_None);
+    }
+
+    PyObject* ret = PyTuple_Pack(2, xyz, intensity);
+    Py_DECREF(xyz);
+    Py_DECREF(intensity);
+
+    return ret;
+}
+
+
 // unused attr to prevent compiler from giving that dumb warning
 __attribute__((unused)) PyObject* decode_xyz_intensity(PyObject* self, PyObject* args) {
     PyObject* data_obj;
@@ -85,27 +111,24 @@ __attribute__((unused)) PyObject* decode_xyz_intensity(PyObject* self, PyObject*
         return NULL;
     }
 
+    if (buf.len == 0 || point_step <= 0) {
+        PyBuffer_Release(&buf);
+        return build_empty_ret(oi >= 0);
+    }
+
     Py_ssize_t n_points = buf.len / point_step;
     char* base = (char*)buf.buf;
-
     int swap = (host_little_endian() == is_bigendian);
 
-    Py_ssize_t dims_xyz[2] = {n_points, 3};
-    PyObject* xyz = PyArray_SimpleNew(2, dims_xyz, NPY_FLOAT64); 
-
-    PyObject* intensity = Py_None;
-    if (oi >= 0) {
-        Py_ssize_t dims_i[1] = {n_points};
-        intensity = PyArray_SimpleNew(1, dims_i, NPY_FLOAT64);
-    } else {
-        // why we do this: https://docs.python.org/3/extending/extending.html#back-to-the-example
-        // about ref counts: // https://docs.python.org/3/extending/extending.html#reference-counts
-        Py_INCREF(Py_None);
-    }
+    // why we do this: https://docs.python.org/3/extending/extending.html#back-to-the-example
+    // about ref counts: // https://docs.python.org/3/extending/extending.html#reference-counts
+    PyObject* xyz = PyArray_SimpleNew(2, ((npy_intp[]){n_points, 3}), NPY_FLOAT64);
+    PyObject* intensity = (oi >= 0) ? PyArray_SimpleNew(1, ((npy_intp[]){n_points}), NPY_FLOAT64) : Py_None;
+    if (intensity == Py_None) Py_INCREF(Py_None);
 
     
     double* xyz_data = (double*)PyArray_DATA((PyArrayObject*)xyz);
-    double* i_data = oi >= 0 ? (double*)PyArray_DATA((PyArrayObject*)intensity) : NULL;
+    double* i_data = (oi >= 0) ? (double*)PyArray_DATA((PyArrayObject*)intensity) : NULL;
 
     Py_ssize_t count = 0; // num valid points
 
@@ -117,11 +140,7 @@ __attribute__((unused)) PyObject* decode_xyz_intensity(PyObject* self, PyObject*
         double x = read_point_field(p + ox, dtype_xyz, swap);
         double y = read_point_field(p + oy, dtype_xyz, swap);
         double z = read_point_field(p + oz, dtype_xyz, swap);
-        double inten_val = 0.0;
-
-        if (i_data && oi >= 0) {
-            inten_val = read_point_field(p + oi, dtype_intensity, swap);
-        }
+        double inten_val = (i_data) ? read_point_field(p + oi, dtype_intensity, swap) : 0.0;
 
         if (skip_nans && (isnan(x) || isnan(y) || isnan(z) || (i_data && oi >= 0 && isnan(inten_val)))) {
             continue;
@@ -155,5 +174,5 @@ __attribute__((unused)) PyObject* decode_xyz_intensity(PyObject* self, PyObject*
     Py_DECREF(xyz); // i hope this ref tracking is correct
     Py_DECREF(intensity);
 
-    return ret ? ret : NULL;
+    return ret;
 }

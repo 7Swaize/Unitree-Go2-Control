@@ -7,7 +7,6 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 
-@pytest.mark.launch_test
 def generate_test_description():
     params_file = os.path.join(get_package_share_directory('bringup'), 'config', 'lidar_processor.yaml')
 

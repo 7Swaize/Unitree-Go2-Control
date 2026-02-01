@@ -11,6 +11,23 @@ class build_ext_with_numpy(_build_ext):
         self.include_dirs.append(numpy.get_include())
 
 
+extra_compile_args = ["-fopenmp"]
+extra_link_args = ["-fopenmp"]
+
+if os.environ.get("DEBUG") == "1":
+    extra_compile_args += [
+        "-O0",
+        "-g",
+        "-fno-omit-frame-pointer",
+        "-fsanitize=address,undefined",
+    ]
+    extra_link_args += [
+        "-fsanitize=address,undefined",
+    ]
+else:
+    extra_compile_args += ["-O3"]
+
+
 # https://numpy.org/devdocs/user/c-info.ufunc-tutorial.html
 ext_modules = [
     Extension(
@@ -27,8 +44,8 @@ ext_modules = [
             os.path.join("src", "utils"),
         ],
         define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_2_0_API_VERSION')],
-        extra_compile_args=["-O3", "-fopenmp"], # no 'march=' directive for NEON support
-        extra_link_args=["-fopenmp"]
+        extra_compile_args=extra_compile_args, 
+        extra_link_args=extra_link_args
     )
 ]
 

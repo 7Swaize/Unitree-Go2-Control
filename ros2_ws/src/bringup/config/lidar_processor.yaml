@@ -1,7 +1,7 @@
 lidar_decoder:
   ros__parameters:
     collection:
-      optimize_collection: false
+      optimize_collection: true
       skip_nans: true
 
 

@@ -1,4 +1,5 @@
 #define PY_SSIZE_T_CLEAN
+#define PY_ARRAY_UNIQUE_SYMBOL FPC_ARRAY_API
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include "methods.h"
