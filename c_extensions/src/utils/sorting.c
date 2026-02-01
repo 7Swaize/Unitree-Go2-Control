@@ -1,34 +1,8 @@
 #include "sorting.h"
 
-/*
-void build_histogram(uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
-    memset(hist, 0, RADIX * sizeof(Py_ssize_t));
-
-
-    #pragma omp parallel
-    {
-        Py_ssize_t local[RADIX] = {0};
-
-        #pragma omp for schedule(static)
-        for (Py_ssize_t i = 0; i < N; i++) {
-            local[msb(keys[i], pass)]++;
-
-        }
-
-        #pragma omp critical
-        {
-            // gloval merge optmize SIMD later
-            for (int b = 0; b < RADIX; b++) {
-                hist[b] += local[b];
-            }
-        }
-    }
-}
-*/
-
 
 // https://stackoverflow.com/questions/16789242/fill-histograms-array-reduction-in-parallel-with-openmp-without-using-a-critic
-void build_histogram(uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
+void build_histogram(const uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
     Py_ssize_t* thist;
 
     #pragma omp parallel 
@@ -66,7 +40,7 @@ void build_histogram(uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist) {
     free(thist);
 }
 
-void compute_heads_tails(Py_ssize_t* hist, Py_ssize_t* heads, Py_ssize_t* tails) {
+void compute_heads_tails(const Py_ssize_t* hist, Py_ssize_t* heads, Py_ssize_t* tails) {
     Py_ssize_t sum = 0;
 
     for (int b = 0; b < RADIX; b++) {
@@ -77,7 +51,7 @@ void compute_heads_tails(Py_ssize_t* hist, Py_ssize_t* heads, Py_ssize_t* tails)
 }
 
 // had to get some help from the big GPT for this
-void permute(uint64_t* keys, Py_ssize_t* indices, int pass, Py_ssize_t* heads, Py_ssize_t* tails, Py_ssize_t* hist) {
+void permute(uint64_t* keys, Py_ssize_t* indices, int pass, const Py_ssize_t* heads, const Py_ssize_t* tails, const Py_ssize_t* hist) {
     int P = omp_get_max_threads();
 
     #pragma omp parallel
@@ -125,7 +99,7 @@ void permute(uint64_t* keys, Py_ssize_t* indices, int pass, Py_ssize_t* heads, P
     }
 }
 
-void repair(uint64_t* keys, Py_ssize_t* indices, int pass, Py_ssize_t* heads, Py_ssize_t* tails) {
+void repair(uint64_t* keys, Py_ssize_t* indices, int pass, const Py_ssize_t* heads, const Py_ssize_t* tails) {
     #pragma omp parallel for schedule(dynamic)
     for (int b = 0; b < RADIX; b++) {
         Py_ssize_t l = heads[b];

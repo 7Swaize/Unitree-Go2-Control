@@ -5,10 +5,12 @@ import numpy as np
 import unittest
 from unittest.mock import Mock, MagicMock, patch
 
-from go2_interfaces.msg import LidarDecoded
 from ament_index_python import get_package_share_directory
 
-from lidar_processor.lidar_message_utils import create_lidar_decoded_message
+from lidar_processor.lidar_filter_node import LidarFilterNode, FilterConfig
+from lidar_processor.lidar_message_utils import (
+    create_lidar_decoded_message
+)
 
 
 class TestLidarFilterNode(unittest.TestCase):
@@ -23,8 +25,6 @@ class TestLidarFilterNode(unittest.TestCase):
 
     def setUp(self):
         def create_node():
-            from lidar_processor.lidar_filter_node import LidarFilterNode, FilterConfig
-
             with patch('lidar_processor.lidar_decoder_node.Node.__init__', return_value=None):
                 node = LidarFilterNode.__new__(LidarFilterNode)
                 node.config = FilterConfig(**self.config_params)
@@ -42,33 +42,60 @@ class TestLidarFilterNode(unittest.TestCase):
         self.received_messages = []
 
 
-    def test_filter_removes_out_of_range_xyz_points(self):
-        xyz_data = np.array([
-            [10.0, 0.0, 0.0],   # within range
-            [30.0, 0.0, 0.0],   # beyond max_range
-            [15.0, 0.0, 0.0],   # within range
-        ], dtype=np.float32)
-        msg = create_lidar_decoded_message(xyz_data)
+    def collect_ndarray(self, cloud_filtered: np.ndarray):
+        xyz = cloud_filtered[:, :3]
+        intensity = cloud_filtered[:, 3:] if cloud_filtered.shape[1] > 3 else None
+        self.captured_xyz = xyz
+        self.captured_intensity = intensity
 
-        self.node.decoded_cloud_callback(msg)
+    
+    def validate_sor(self, outliers):
+        sor_radius = self.node.config.sor_radius
+        sor_min_neighbors = self.node.config.sor_min_neighbors
+        voxel_indices = np.floor(self.captured_xyz / sor_radius).astype(int)
 
-        self.assertGreater(len(self.received_messages), 0)
-        filtered_msg: LidarDecoded = self.received_messages[0]
+        voxels, counts = np.unique([tuple(v) for v in voxel_indices], return_counts=True, axis=0)
 
-        self.assertIsInstance(filtered_msg, LidarDecoded)
+        for v, c in zip(voxels, counts):
+            self.assertGreaterEqual(
+                c,
+                sor_min_neighbors,
+                f"Voxel {v} has only {c} points, less than sor_min_neighbors {sor_min_neighbors}"
+            )
+
+        for outlier in outliers:
+            dists = np.linalg.norm(self.captured_xyz - outlier, axis=1)
+            self.assertTrue(np.all(dists > 1e-6), f"Outlier {outlier} not removed by SOR")
 
 
-    def test_filter_with_intensity_data(self):
-        xyz_data = np.array([
-            [15.0, 0.0, 0.0],
-            [12.0, 0.0, 1.0],
-            [41.0, 0.0, 0.0],
-        ], dtype=np.float32)
-        intensity_data = np.array([-100.0, 150.0, 91.0], dtype=np.float32)
+    def test_c_filter_result(self):
+        num_points = 15000
+        xyz_data = np.random.default_rng().uniform(low=-5, high=25, size=(num_points, 3))
+        intensity_data = np.random.default_rng().uniform(low=-50, high=200, size=(num_points, 1))
+
+        # filter outliers
+        xyz_data[0] = [self.node.config.min_range - 1, 0, 0]
+        xyz_data[1] = [self.node.config.max_range + 1, 0, 0] 
+        xyz_data[2] = [10, self.node.config.height_max + 1, 0]
+        intensity_data[3] = [self.node.config.intensity_min - 10]
+
+        # sor outliers
+        outliers = np.array([[50, 50, 50], [60, -40, 30], [55, 0, -45]])
+        xyz_data = np.vstack([xyz_data, outliers])
+        intensity_data = np.vstack([intensity_data, [[100], [150], [200]]])
+
         msg = create_lidar_decoded_message(xyz_data, intensity_data)
+        with patch.object(LidarFilterNode, 'publish_filtered_pointcloud', side_effect=self.collect_ndarray):
+            self.node.decoded_cloud_callback(msg)
 
-        self.assertGreater(len(self.received_messages), 0)
-        filtered_msg: LidarDecoded = self.received_messages[0]
+        self.assertTrue(np.all(np.linalg.norm(self.captured_xyz[:, :2], axis=1) >= self.node.config.min_range))
+        self.assertTrue(np.all(np.linalg.norm(self.captured_xyz[:, :2], axis=1) <= self.node.config.max_range))
+        self.assertTrue(np.all(self.captured_xyz[:, 2] >= self.node.config.height_min))
+        self.assertTrue(np.all(self.captured_xyz[:, 2] <= self.node.config.height_max))
+        self.assertTrue(np.all(self.captured_intensity >= self.node.config.intensity_min))
 
-        self.assertIsInstance(filtered_msg, LidarDecoded)
-        self.assertTrue(filtered_msg.has_intensity)
+        self.assertEqual(self.captured_xyz.shape[0], self.captured_intensity.shape[0])
+        self.assertEqual(self.captured_xyz.shape[1], 3)
+        self.assertEqual(self.captured_intensity.shape[1], 1)
+
+        self.validate_sor(outliers)

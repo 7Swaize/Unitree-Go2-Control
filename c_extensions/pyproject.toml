@@ -3,7 +3,7 @@
 
 [build-system]
 requires = [
-    "setuptools",
+    "setuptools>=64",
     "wheel",
     "numpy>=2.0"
 ]
@@ -12,7 +12,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fast_pointcloud"
-version = "0.1.1"
+version = "0.1.0"
 dependencies = [
     "numpy>=2.0"
 ]

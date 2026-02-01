@@ -59,7 +59,7 @@ static inline bool get_attr_int(PyObject* obj, const char* name, int* out) {
 
     
 
-static Py_ssize_t calc_post_init_fcnt(double* points_buf, AtomicBitset* bs, FilterConfig* cfg, Py_ssize_t N, Py_ssize_t D) {
+static Py_ssize_t calc_post_init_fcnt(const double* points_buf, AtomicBitset* bs, const FilterConfig* cfg, Py_ssize_t N, Py_ssize_t D) {
     double rmin2 = cfg->min_range * cfg->min_range;
     double rmax2 = cfg->max_range * cfg->max_range;
 
@@ -87,7 +87,7 @@ static Py_ssize_t calc_post_init_fcnt(double* points_buf, AtomicBitset* bs, Filt
     return post_init_fcnt;
 }
 
-static void calc_voxel_keys(double* points_buf, uint64_t* voxel_keys, Py_ssize_t* indices, FilterConfig* cfg, Py_ssize_t post_init_fcnt, Py_ssize_t D) {
+static void calc_voxel_keys(const double* points_buf, uint64_t* voxel_keys, const Py_ssize_t* indices, const FilterConfig* cfg, Py_ssize_t post_init_fcnt, Py_ssize_t D) {
     #pragma omp parallel for schedule(static)
     for (Py_ssize_t i = 0; i < post_init_fcnt; i++) {
         Py_ssize_t idx = indices[i];
@@ -104,7 +104,7 @@ static void calc_voxel_keys(double* points_buf, uint64_t* voxel_keys, Py_ssize_t
     }
 }
 
-static void calc_valid_idx(Py_ssize_t* indices, AtomicBitset* bs, Py_ssize_t N) {
+static void calc_valid_idx(Py_ssize_t* indices, const AtomicBitset* bs, Py_ssize_t N) {
     Py_ssize_t pos = 0;
 
     for (Py_ssize_t i = 0; i < N; i++) {
@@ -115,7 +115,7 @@ static void calc_valid_idx(Py_ssize_t* indices, AtomicBitset* bs, Py_ssize_t N) 
 }
 
 
-static Py_ssize_t calc_out(double** out_ptr, double* points_buf, uint64_t* voxel_keys, Py_ssize_t* indices, AtomicBitset* bs, FilterConfig* cfg, Py_ssize_t post_init_fcnt, Py_ssize_t D) {
+static Py_ssize_t calc_out(double** out_ptr, const double* points_buf, const uint64_t* voxel_keys, const Py_ssize_t* indices, AtomicBitset* bs, const FilterConfig* cfg, Py_ssize_t post_init_fcnt, Py_ssize_t D) {
     Py_ssize_t post_sor_fcnt = 0;
 
     bitset_clear_all(bs);
@@ -174,8 +174,8 @@ __attribute__((unused)) PyObject* apply_filter(PyObject* self, PyObject* args) {
     }
 
     // https://docs.scipy.org/doc/numpy-1.11.0/reference/c-api.array.html
-    if (PyArray_TYPE(points_obj) != NPY_DOUBLE || PyArray_NDIM(points_obj) != 2) {
-        return PyErr_Format(PyExc_TypeError, "Input point array must be 2D of dtype float64");
+    if (PyArray_TYPE(points_obj) != NPY_DOUBLE || PyArray_NDIM(points_obj) != 2 || !PyArray_IS_C_CONTIGUOUS(points_obj)) {
+        return PyErr_Format(PyExc_TypeError, "Input point array must be 2D of dtype float64 and contiguous");
     }
 
     Py_ssize_t N = PyArray_DIM(points_obj, 0);
@@ -187,8 +187,8 @@ __attribute__((unused)) PyObject* apply_filter(PyObject* self, PyObject* args) {
     FilterConfig cfg;
     if (!GET_ATTR(config_obj, "max_range", &cfg.max_range)) return NULL;
     if (!GET_ATTR(config_obj, "min_range", &cfg.min_range)) return NULL;
-    if (!GET_ATTR(config_obj, "height_filter_min", &cfg.height_min)) return NULL;
-    if (!GET_ATTR(config_obj, "height_filter_max", &cfg.height_max)) return NULL;
+    if (!GET_ATTR(config_obj, "height_min", &cfg.height_min)) return NULL;
+    if (!GET_ATTR(config_obj, "height_max", &cfg.height_max)) return NULL;
     if (!GET_ATTR(config_obj, "downsample_rate", &cfg.downsample_rate)) return NULL;
     if (!GET_ATTR(config_obj, "sor_radius", &cfg.sor_radius)) return NULL;
     if (!GET_ATTR(config_obj, "sor_min_neighbors", &cfg.sor_min_neighbors)) return NULL;
@@ -210,8 +210,7 @@ __attribute__((unused)) PyObject* apply_filter(PyObject* self, PyObject* args) {
 
     calc_valid_idx(indices, bs, N);
 
-
-    free(bs);
+    bitset_free(bs);
     bs = NULL;
 
 

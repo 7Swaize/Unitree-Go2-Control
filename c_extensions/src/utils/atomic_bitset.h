@@ -40,7 +40,7 @@ static inline void bitset_set_relaxed(AtomicBitset* bs, size_t i) {
     atomic_fetch_or_explicit(&bs->words[WORD_INDEX(i)], BIT_MASK(i), memory_order_relaxed);
 }
 
-static inline bool bitset_test(AtomicBitset* bs, size_t i) {
+static inline bool bitset_test(const AtomicBitset* bs, size_t i) {
     if (i >= bs->nbits) return false;
     return (atomic_load(&bs->words[WORD_INDEX(i)]) & BIT_MASK(i)) != 0;
 }

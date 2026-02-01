@@ -18,13 +18,13 @@ void radix_sort_64(uint64_t* keys, Py_ssize_t* indices,  Py_ssize_t N);
 
 void radix_64_inp_par(uint64_t* keys, Py_ssize_t* indices, Py_ssize_t N, int pass);
 
-void build_histogram(uint64_t* keys, Py_ssize_t N, int shift, Py_ssize_t* hist);
+void build_histogram(const uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* hist);
 
-void compute_heads_tails(Py_ssize_t* hist, Py_ssize_t* heads, Py_ssize_t* tails);
+void compute_heads_tails(const Py_ssize_t* hist, Py_ssize_t* heads, Py_ssize_t* tails);
 
-void permute(uint64_t* keys, Py_ssize_t* indices, int pass, Py_ssize_t* heads, Py_ssize_t* tails, Py_ssize_t* hist);
+void permute(uint64_t* keys, Py_ssize_t* indices, int pass, const Py_ssize_t* heads, const Py_ssize_t* tails, const Py_ssize_t* hist);
 
-void repair(uint64_t* keys, Py_ssize_t* indices, int pass, Py_ssize_t* heads, Py_ssize_t* tails);
+void repair(uint64_t* keys, Py_ssize_t* indices, int pass, const Py_ssize_t* heads, const Py_ssize_t* tails);
 
 static inline uint8_t msb(uint64_t num, int pass) {
     return (num >> (8 * (7 - pass))) & 0xFF;
