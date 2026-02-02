@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from go2_interfaces.msg import LidarDecoded
+from std_msgs.msg import Header
 
 import numpy as np
 import fast_pointcloud as fp
@@ -112,18 +113,18 @@ class LidarFilterNode(Node):
                 cloud_decoded = xyz_decoded
 
             cloud_filtered = fp.apply_filter(cloud_decoded, self.config)
-            self.publish_filtered_pointcloud(cloud_filtered)
+            self.publish_filtered_pointcloud(cloud_filtered, msg.header)
 
         except Exception as e:
             self.get_logger().error(f"Error processing LiDAR data: {e}")
     
 
-    def publish_filtered_pointcloud(self, cloud_filtered: np.ndarray) -> None:
+    def publish_filtered_pointcloud(self, cloud_filtered: np.ndarray, src_pc_header: Header) -> None:
         try:
             xyz = cloud_filtered[:, :3]
             intensity = cloud_filtered[:, 3:] if cloud_filtered.shape[1] > 3 else None
             
-            msg = create_lidar_decoded_message(xyz, intensity.squeeze() if intensity is not None else None)
+            msg = create_lidar_decoded_message(xyz, intensity.squeeze() if intensity is not None else None, src_pc_header)
             self.filtered_cloud_pub.publish(msg)
         except Exception as e:
             self.get_logger().error(f"Error publishing filtered point cloud: {e}")

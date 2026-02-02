@@ -5,6 +5,7 @@ import numpy as np
 import unittest
 from unittest.mock import Mock, MagicMock, patch
 
+from std_msgs.msg import Header
 from ament_index_python import get_package_share_directory
 
 from lidar_processor.lidar_filter_node import LidarFilterNode, FilterConfig
@@ -42,7 +43,7 @@ class TestLidarFilterNode(unittest.TestCase):
         self.received_messages = []
 
 
-    def collect_ndarray(self, cloud_filtered: np.ndarray):
+    def collect_ndarray(self, cloud_filtered: np.ndarray, src_pc_header: Header):
         xyz = cloud_filtered[:, :3]
         intensity = cloud_filtered[:, 3:] if cloud_filtered.shape[1] > 3 else None
         self.captured_xyz = xyz
@@ -84,7 +85,7 @@ class TestLidarFilterNode(unittest.TestCase):
         xyz_data = np.vstack([xyz_data, outliers])
         intensity_data = np.vstack([intensity_data, [[100], [150], [200]]])
 
-        msg = create_lidar_decoded_message(xyz_data, intensity_data)
+        msg = create_lidar_decoded_message(xyz_data, intensity_data, Header())
         with patch.object(LidarFilterNode, 'publish_filtered_pointcloud', side_effect=self.collect_ndarray):
             self.node.decoded_cloud_callback(msg)
 

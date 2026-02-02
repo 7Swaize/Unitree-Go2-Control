@@ -1,6 +1,7 @@
 from typing import Optional
 import numpy as np
 from sensor_msgs.msg import PointField
+from std_msgs.msg import Header
 
 import fast_pointcloud as fp
 from go2_interfaces.msg import LidarDecoded
@@ -51,8 +52,9 @@ def decode_array_from_message(msg: LidarDecoded, arr_prefix: str) -> np.ndarray:
     return np.frombuffer(data, dtype=dtype).reshape(shape)
 
 
-def create_lidar_decoded_message(xyz: np.ndarray, intensity: Optional[np.ndarray] = None) -> LidarDecoded:
+def create_lidar_decoded_message(xyz: np.ndarray, intensity: Optional[np.ndarray], src_pc_header: Header) -> LidarDecoded:
     msg = LidarDecoded()
+    msg.header = src_pc_header
     
     xyz_encoded = encode_array_to_message(xyz, "xyz")
     msg.xyz_shape = xyz_encoded["xyz_shape"]

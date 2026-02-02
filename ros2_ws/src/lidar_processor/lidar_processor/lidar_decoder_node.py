@@ -4,6 +4,7 @@ from typing import Optional
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+from std_msgs.msg import Header
 from sensor_msgs.msg import PointCloud2, PointField
 from sensor_msgs_py import point_cloud2
 from go2_interfaces.msg import LidarDecoded
@@ -43,7 +44,7 @@ class LidarDecoderNode(Node):
         self._qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=1
+            depth=5
         )
 
         self.pc_layout: Optional[PointCloudLayout] = None
@@ -172,15 +173,15 @@ class LidarDecoderNode(Node):
                 self.config.skip_nans
             )
 
-            self.publish_decoded_pointcloud(xyz, intensity)
+            self.publish_decoded_pointcloud(xyz, intensity, msg.header)
 
         except Exception as e:
             self.get_logger().error(f"Error processing LiDAR data: {e}")
 
 
-    def publish_decoded_pointcloud(self, xyz: np.ndarray, intensity: Optional[np.ndarray]) -> None:
+    def publish_decoded_pointcloud(self, xyz: np.ndarray, intensity: Optional[np.ndarray], src_pc_header: Header) -> None:
         try:
-            msg = create_lidar_decoded_message(xyz, intensity)
+            msg = create_lidar_decoded_message(xyz, intensity, src_pc_header)
             self.decoded_pointcloud_pub.publish(msg)
         except Exception as e:
             self.get_logger().error(f"Error publishing point cloud: {e}")

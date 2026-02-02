@@ -1,3 +1,5 @@
+std_msgs/Header header
+
 uint32[] xyz_shape       # e.g., [n_points, 3]
 uint8 xyz_dtype         # enum (float64)
 uint8[] xyz_data         # raw bytes

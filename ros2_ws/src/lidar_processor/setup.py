@@ -25,7 +25,8 @@ setup(
     entry_points={
         'console_scripts': [
             'lidar_decoder_node = lidar_processor.lidar_decoder_node:main',
-            'lidar_filter_node = lidar_processor.lidar_filter_node:main',  
+            'lidar_filter_node = lidar_processor.lidar_filter_node:main',
+            'ros_bridge_node = lidar_processor.ros_bridge_node:main'  
         ],
     },
 )

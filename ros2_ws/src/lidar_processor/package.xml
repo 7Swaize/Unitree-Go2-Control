@@ -13,6 +13,7 @@
   <depend>go2_interfaces</depend>
   <depend>numpy</depend>
   <depend>fast_pointcloud</depend>
+  <depend>zmq</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
