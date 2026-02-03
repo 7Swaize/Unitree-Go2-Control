@@ -16,6 +16,13 @@ classifiers = [
     "Intended Audience :: Education",
     "Programming Language :: Python :: 3",
 ]
+dynamic = ["dependencies"]
+
+
+# docs: https://packaging.python.org/en/latest/specifications/pyproject-toml/
+# dynamic read dependencies: https://stackoverflow.com/questions/73600082/how-to-reference-a-requirements-txt-in-the-pyproject-toml-of-a-setuptools-projec
+[tool.setuptools.dynamic]
+dependencies = { file = "requirements/runtime.txt" }
 
 
 [project.optional-dependencies]
