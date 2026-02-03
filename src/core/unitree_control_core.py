@@ -45,9 +45,8 @@ import threading
 
 from src.controller_input_control.input_signal import InputSignal
 from src.core.base_module import DogModule
-from src.core.module_registry import AudioModule, InputModule, ModuleRegistry, ModuleType, MovementModule, OCRModule, VideoModule
+from src.core.module_registry import ModuleRegistry, ModuleType, AudioModule, InputModule, MovementModule, OCRModule, VideoModule, LIDARModule
 from src.core.hardware_control import HardwareInterface, SimulatedHardware, UnitreeSDKHardware
-from src.lidar_control.decoder import LIDARModule
 
 
 # TTS: https://medium.com/@vndee.huynh/build-your-own-voice-assistant-and-run-it-locally-whisper-ollama-bark-c80e6f815cba
@@ -146,6 +145,7 @@ class UnitreeGo2Controller:
 
         if self.use_sdk:
             self.add_module(ModuleType.INPUT, use_sdk=self.use_sdk)
+            self.add_module(ModuleType.LIDAR, use_sdk=self.use_sdk)
 
 
     def add_module(self, module_type: ModuleType, **kwargs) -> None:
@@ -235,6 +235,7 @@ class UnitreeGo2Controller:
         
         return module
     
+
     @property
     def movement(self) -> MovementModule:
         """
@@ -258,6 +259,7 @@ class UnitreeGo2Controller:
 
         return module
     
+
     @property
     def ocr(self) -> OCRModule:
         """
@@ -281,6 +283,7 @@ class UnitreeGo2Controller:
         
         return module
     
+
     @property
     def audio(self) -> AudioModule:
         """
@@ -304,6 +307,7 @@ class UnitreeGo2Controller:
         
         return module
     
+
     @property
     def input(self) -> InputModule:
         """
@@ -327,6 +331,7 @@ class UnitreeGo2Controller:
 
         return module
     
+
     @property
     def lidar(self) -> LIDARModule:
         """

@@ -4,6 +4,7 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from go2_interfaces.msg import LidarDecoded
 from message_filters import Subscriber, TimeSynchronizer
 from go2_interfaces.msg import LidarDecoded
+from std_msgs.msg import Header
 
 import zmq
 import numpy as np
@@ -49,8 +50,12 @@ class ROSBridge(Node):
         )
 
     
-    def send_array(self, array: np.ndarray, topic):
-        md = {"dtype": str(array.dtype), "shape": array.shape}
+    def send_array(self, array: np.ndarray, topic: str, header: Header):
+        md = {
+            "dtype": str(array.dtype),
+            "shape": array.shape,
+            "stamp_ns": header.stamp.sec * 1_000_000_000 + header.stamp.nanosec
+        }
 
         self.socket.send_string(topic, flags=zmq.SNDMORE)
         self.socket.send_json(md, zmq.SNDMORE)
@@ -68,11 +73,11 @@ class ROSBridge(Node):
             return arr
 
         try:
-            d = combine_xyz_intensity(decoded_msg)
-            f = combine_xyz_intensity(filtered_msg)
+            decoded_arr = combine_xyz_intensity(decoded_msg)
+            filtered_arr = combine_xyz_intensity(filtered_msg)
 
-            self.send_array(d, "decoded_topic")
-            self.send_array(f, "filtered_topic")
+            self.send_array(decoded_arr, "decoded_topic", decoded_msg)
+            self.send_array(filtered_arr, "filtered_topic", filtered_msg)
 
         except Exception as e:
             self.get_logger().error(f"Error processing LiDAR data: {e}")

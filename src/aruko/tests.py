@@ -19,7 +19,7 @@ class Tests:
         self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
 
         self.unitree_controller.add_module(ModuleType.AUDIO)
-        self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_depth_camera())
+        self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_opencv_camera())
         self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
         
         self.unitree_controller.video.start_stream_server()
