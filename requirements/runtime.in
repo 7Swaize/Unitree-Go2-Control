@@ -1,10 +1,21 @@
-# External dependencies for Unitree Go2 Control project
+# Core libraries
 numpy
 opencv-python
-pyttsx3
 open3d
+pyyaml
+
+# Text-to-speech / OCR
+pyttsx3
 pytesseract
-pyrealsense2
+
+# Async / WebRTC
 aiortc
 av
 aiohttp
+pyzmq
+
+# ROS 2 build / Python dependencies
+colcon-common-extensions
+empy
+catkin_pkg
+lark-parser
