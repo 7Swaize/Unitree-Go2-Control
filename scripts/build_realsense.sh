@@ -48,7 +48,7 @@ exec 2> /dev/null
 con_dev=$(ls /dev/video* | wc -l)
 exec 2>&3
 
-if [ $con_dev -ne 0 ];
+if [[ $con_dev -ne 0 ]];
 then
 	echo -e "\e[32m"
 	read -p "Remove all RealSense cameras attached. Hit any key when ready"
@@ -89,6 +89,7 @@ if [[ $ENABLE_CUDA -eq 1 ]]; then
             echo "Error: CUDA compiler not found. Use --cuda-compiler or --disable-cuda"
             exit 1
         fi
+    fi
 
     if [ ! -f "$CUDA_COMPILER" ]; then
         echo "Error: CUDA compiler not found at $CUDA_COMPILER"
@@ -132,7 +133,7 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 mkdir build && cd build
 CMAKE_CMD="cmake ../ -DFORCE_LIBUVC=true -DBUILD_PYTHON_BINDINGS:bool=true -DPYTHON_EXECUTABLE=$PYTHON_PATH -DCMAKE_BUILD_TYPE=release"
 
-if [[ $ENABLE_CUDA -eq 1]]; then
+if [[ $ENABLE_CUDA -eq 1 ]]; then
     CMAKE_CMD="$CMAKE_CMD -DBUILD_WITH_CUDA=true -DCMAKE_CUDA_COMPILER=$CUDA_COMPILER"
 else
     CMAKE_CMD="$CMAKE_CMD -DBUILD_WITH_CUDA=false"
