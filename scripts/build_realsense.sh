@@ -3,7 +3,7 @@
 ################################################################################
 # Librealsense SDK Installation Script for Jetson Orin Nano
 # 
-# Usage: ./install_librealsense_jetson.sh [OPTIONS]
+# Usage: ./install_librealsense.sh [OPTIONS]
 #
 # Options:
 #   --install-dir <path>        Installation directory (default: ~/librealsense_build)
@@ -15,13 +15,13 @@
 ################################################################################
 
 
-INSTALL_DIR="~/librealsense_build"
+INSTALL_DIR="$HOME/librealsense_build"
 PYTHON_PATH=""
 CUDA_COMPILER=""
 ENABLE_CUDA=-1  # -1: auto, 0: disable, 1: enable
 
 
-while [[ "$# -gt -0"]]; do
+while [[ $# -gt 0 ]]; do
     case $1 in 
         --install-dir) 
             [[ -z "$2" ]] && { echo "Error: --install-dir requires a value"; exit 1; }
