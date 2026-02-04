@@ -49,6 +49,7 @@ set -e
 if grep -i "cyclonedds" tmp_install.log; then
     echo -e "\e[31m Detected CycloneDDS error, applying patch... \033[0m"
     patch_cyclonedds
+    sudo rm tmp_install.log
     pip3 install -e .
 fi
 
