@@ -149,7 +149,3 @@ sudo ldconfig
 
 
 echo -e "\e[92m\n\e[1m Librealsense installation completed. \n\e[0m"
-echo "Next steps:"
-echo "  1. Reboot system"
-echo "  2. Plug in RealSense camera"
-echo "  3. Test with: realsense-viewer"
