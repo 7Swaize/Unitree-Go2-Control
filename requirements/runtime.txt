@@ -136,7 +136,7 @@ dnspython==2.8.0
     # via aioice
 docutils==0.22.4
     # via catkin-pkg
-empy==4.2
+empy==3.3.4
     # via
     #   -r runtime.in
     #   colcon-core

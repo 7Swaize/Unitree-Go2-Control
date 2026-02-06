@@ -1,9 +1,12 @@
 #!/bin/bash -xe
 
-DIR=$(dirname "${BASH_SOURCE[0]}")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-bash "$DIR/build_realsense.sh"
-bash "$DIR/build_unitree_sdk.sh"
+# bash "$SCRIPT_DIR/build_realsense.sh"
+bash "$SCRIPT_DIR/build_unitree_sdk.sh"
+bash "$SCRIPT_DIR/build_c_extensions.sh"
+bash "$SCRIPT_DIR/build_ros_ws.sh"
+
 
 echo -e "\e[92m\n\e[1m Installed all native dependencies. \n\e[0m"
 echo "Next steps:"
