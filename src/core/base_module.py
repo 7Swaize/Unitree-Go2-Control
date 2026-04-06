@@ -7,7 +7,7 @@ class DogModule(ABC):
 
     This class defines the common lifecycle shared by all internal modules
     (e.g., movement, video, input, audio). Students typically interact with
-    higher-level APIs rather than instantiating modules directly.
+    higher-level APIs instead of instantiating modules directly.
 
     Notes
     -----
@@ -34,8 +34,7 @@ class DogModule(ABC):
         """
         Initialize the module.
 
-        This method is called once during module registration to a :class:`~src.core.unitree_control_core.UnitreeGo2Controller` instance. Implementations
-        should allocate resources, connect to hardware, or start background
+        This method is called once during module registration to a :class:`~src.core.unitree_control_core.UnitreeGo2Controller` instance.
         threads as needed.
         """
         pass

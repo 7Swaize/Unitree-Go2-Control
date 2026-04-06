@@ -41,7 +41,7 @@ class LIDARModule(DogModule):
     def launch_ros2_internal(self) -> None:
         self.ros_proc = subprocess.Popen(
             ["ros2", "launch", "bringup", "lidar_processor.launch.py"],
-            preexec_fn=os.setsid
+            preexec_fn=os.setsid # TODO: Remove: https://stackoverflow.com/questions/42257512/difference-between-subprocess-popen-preexec-fn-and-start-new-session-in-python
         )
 
 

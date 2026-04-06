@@ -7,26 +7,7 @@ robot.
 
 Students interact exclusively with :class:`UnitreeGo2Controller`, which exposes
 high-level functionality such as movement, video, audio, OCR, input, and LIDAR
-through strongly-typed properties.
-
-Design Goals
-------------
-    - Provide a **single entry point** for all robot capabilities
-    - Hide hardware and SDK complexity behind safe abstractions
-    - Support both **real hardware** and **simulation** transparently
-    - Enforce clean startup and shutdown semantics
-
-Usage Model
------------
-Students:
-    - Create a controller
-    - Access modules via properties (e.g., ``controller.movement``)
-    - Write behavior/state logic on top of this API
-
-Internal systems:
-    - Manage hardware backends
-    - Handle module registration and lifecycle
-    - Enforce safety checks during shutdown
+through strongly-typed properties.I
 
 Example
 -------
@@ -40,19 +21,19 @@ Example
 """
 
 
-from typing import Callable, List, Optional, Dict
+from typing import Callable, List, Dict
 import threading
 
 from ..controller_input_control.input_signal import InputSignal
 from .base_module import DogModule
 from .module_registry import ModuleRegistry, ModuleType, AudioModule, InputModule, MovementModule, OCRModule, VideoModule, LIDARModule
-from .hardware_control import HardwareInterface, SimulatedHardware, UnitreeSDKHardware
+from .hardware.hardware_interface import HardwareInterface
+from .hardware.native_hardware import NativeHardware
+from .hardware.virtual_hardware import VirtualHardware
 
 
 # TTS: https://medium.com/@vndee.huynh/build-your-own-voice-assistant-and-run-it-locally-whisper-ollama-bark-c80e6f815cba
 # Digging into Dog: https://www.darknavy.org/darknavy_insight/the_jailbroken_unitree_robot_dog
-
-# Github Repo Searcher: https://github.com/search?type=Code
 
 # Some very interesting turtorial with the G02: https://hackmd.io/@c12hQ00ySVi6JYIERU7bCg/ByAOr12qJg
 
@@ -66,18 +47,16 @@ class UnitreeGo2Controller:
     Primary control interface for the Unitree Go2 robot.
 
     This class is the **main entry point** that students and users interact with.
-    It manages hardware initialization, module lifecycles, safety checks, and
-    shutdown coordination.
+    It manages hardware initialization, module lifecycles, safety checks, and shutdown.
 
-    Modules are accessed via typed properties rather than direct instantiation,
-    ensuring compile-time safety and consistent behavior.
+    Modules are accessed via properties rather than direct instantiation.
 
     Notes
     -----
         - All hardware access is routed through this controller.
-        - Modules are created and initialized automatically.
+        - Modules creation and initialization is handled automatically.
         - Accessing modules after shutdown is prohibited.
-        - Supports both SDK-backed hardware and simulation.
+        - Supports both SDK-backed hardware and a Mujoco simulation.
 
     See Also
     --------
@@ -85,7 +64,7 @@ class UnitreeGo2Controller:
     ModuleRegistry
     """
 
-    def __init__(self, use_sdk: Optional[bool]):
+    def __init__(self, use_sdk: bool):
         """
         Create a new controller instance.
 
@@ -94,16 +73,12 @@ class UnitreeGo2Controller:
         use_sdk : bool or None
             If ``True``, forces use of the Unitree SDK.
             If ``False``, forces simulation mode.
-            If ``None``, SDK availability is auto-detected.
 
         Raises
         ------
         RuntimeError
-            If hardware initialization fails.
+            If hardware backend initialization fails.
         """
-        if use_sdk is None:
-            use_sdk = self._detect_sdk()
-
         self.use_sdk = use_sdk
 
         self._shutdown_event = threading.Event()
@@ -111,7 +86,7 @@ class UnitreeGo2Controller:
         self._cleanup_callbacks: List[Callable[[], None]] = []
 
         self._hardware: HardwareInterface = (
-            UnitreeSDKHardware() if use_sdk else SimulatedHardware()
+            NativeHardware() if use_sdk else VirtualHardware()
         )
         self._hardware.initialize()
 
@@ -121,15 +96,6 @@ class UnitreeGo2Controller:
 
         print(f"[Controller] Initialized in {'SDK' if use_sdk else 'SIMULATION'} mode\n")
 
-
-    def _detect_sdk(self) -> bool:
-        try:
-            import unitree_sdk2py
-            return True
-        
-        except ImportError:
-            return False
-        
 
     def _initialize_input_bindings(self):
         if self.use_sdk:
@@ -150,10 +116,9 @@ class UnitreeGo2Controller:
 
     def add_module(self, module_type: ModuleType, **kwargs) -> None:
         """
-        Add a module to the controller.
+        Add a module to the controller. Modules are initialized immediately upon addition.
 
-        Modules are identified using :class:`ModuleType` enums to ensure
-        correctness and prevent invalid configurations.
+        Modules are identified using :class:`ModuleType` enums to ensure correctness and prevent invalid configurations.
 
         Parameters
         ----------
@@ -166,11 +131,6 @@ class UnitreeGo2Controller:
         ------
         ValueError
             If the module type is not registered.
-
-        Notes
-        -----
-        - SDK-required modules are skipped automatically in simulation mode.
-        - Modules are initialized immediately upon addition.
 
         Example
         -------

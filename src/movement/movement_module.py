@@ -6,8 +6,7 @@ This module provides high-level movement controls for the dog robot.
 
 Students should interact only with the ``MovementModule`` class to
 command the robot. It wraps the underlying hardware interface and
-performs safety checks on translation and rotation commands to
-prevent unsafe motions.
+performs safety checks to prevent unsafe motions.
 
 Students should not access or construct this class directly. Rather, they should access it through the :class:`~src.core.unitree_control_core.UnitreeGo2Controller` instance.
 
@@ -36,21 +35,12 @@ Not working on the robot (simulation or testing):
 
 
 from ..core.base_module import DogModule
-from ..core.hardware_control import HardwareInterface
+from ..core.hardware.hardware_interface import HardwareInterface
 
 
 class MovementModule(DogModule):
     """
     High-level movement control for the robot.
-
-    ``MovementModule`` provides safe, student-facing methods to:
-        - Move the robot forward/backward and laterally
-        - Rotate (yaw) the robot
-        - Command the robot to stand up or lay down
-        - Stop all movement immediately
-
-    It wraps the underlying hardware interface and automatically clamps
-    translation and rotation commands to safe maximum values.
 
     Parameters
     ----------
