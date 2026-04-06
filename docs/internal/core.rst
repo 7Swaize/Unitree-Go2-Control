@@ -17,7 +17,7 @@ Base Module
 Hardware Control
 ----------------
 
-.. automodule:: src.core.hardware_control
+.. automodule:: src.core.hardware_control.hardware
    :members:
    :private-members:
    :show-inheritance:
