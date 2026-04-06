@@ -14,13 +14,32 @@ Base Module
    :private-members:
    :show-inheritance:
 
+
 Hardware Control
 ----------------
 
-.. automodule:: src.core.hardware_control.hardware
+Hardware Interface
+~~~~~~~~~~~~~~~~~~
+
+.. automodule:: src.core.hardware.hardware_interface
    :members:
    :private-members:
    :show-inheritance:
+
+Native Hardware
+~~~~~~~~~~~~~~~
+.. automodule:: src.core.hardware.native_hardware
+   :members:
+   :private-members:
+   :show-inheritance:
+
+Virtual Hardware
+~~~~~~~~~~~~~~~~
+.. automodule:: src.core.hardware.virtual_hardware
+   :members:
+   :private-members:
+   :show-inheritance:
+
 
 Module Registry
 ---------------
