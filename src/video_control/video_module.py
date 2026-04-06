@@ -32,9 +32,9 @@ from typing import Any, Optional, Tuple
 
 import numpy as np
 
-from src.core.base_module import DogModule
-from src.video_control.streamer import WebRTCStreamer
-from src.video_control.camera_source import CameraSource
+from ..core.base_module import DogModule
+from .streamer import WebRTCStreamer
+from .camera_source import CameraSource
 
 
 class VideoModule(DogModule):

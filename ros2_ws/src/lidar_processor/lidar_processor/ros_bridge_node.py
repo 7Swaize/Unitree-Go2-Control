@@ -9,7 +9,7 @@ from std_msgs.msg import Header
 import zmq
 import numpy as np
 
-from lidar_processor.lidar_message_utils import decode_array_from_message
+from .lidar_message_utils import decode_array_from_message
 
 
 class ROSBridge(Node):

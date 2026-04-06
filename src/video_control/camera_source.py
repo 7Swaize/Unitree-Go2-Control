@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import pyrealsense2 as rs
 
-from src.video_control.frame_buffer import FrameBuffer
+from .frame_buffer import FrameBuffer
 
 class CameraSource(ABC):
     """

@@ -12,7 +12,7 @@ from go2_interfaces.msg import LidarDecoded
 import numpy as np
 import fast_pointcloud as fp
 
-from lidar_processor.lidar_message_utils import (
+from .lidar_message_utils import (
     POINTFIELD_TO_INTERNAL_CTYPE,
     create_lidar_decoded_message
 )

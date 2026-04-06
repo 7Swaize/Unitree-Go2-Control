@@ -1,4 +1,4 @@
-from src.video_control.camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCamera, SDKCameraSource
+from .camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCamera, SDKCameraSource
 
 
 class CameraSourceFactory:

@@ -2,7 +2,7 @@ import zmq
 import threading
 import numpy as np
 
-from src.lidar_control.callback_dispatcher import CallbackDispatcher
+from .callback_dispatcher import CallbackDispatcher
 
 
 # pip install pyzmq

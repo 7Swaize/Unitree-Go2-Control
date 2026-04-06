@@ -32,8 +32,8 @@ Example
 from abc import ABC, abstractmethod
 from typing import Any, final
 
-from src.core.unitree_control_core import UnitreeGo2Controller
-from src.states.validation import CancellableMeta
+from ..core.unitree_control_core import UnitreeGo2Controller
+from .validation import CancellableMeta
 
 
 class DogStateAbstract(ABC, metaclass=CancellableMeta):

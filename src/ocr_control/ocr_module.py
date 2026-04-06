@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pytesseract
 
-from src.core.base_module import DogModule
+from ..core.base_module import DogModule
 
 
 class OCRModule(DogModule):

@@ -43,10 +43,10 @@ Example
 from typing import Callable, List, Optional, Dict
 import threading
 
-from src.controller_input_control.input_signal import InputSignal
-from src.core.base_module import DogModule
-from src.core.module_registry import ModuleRegistry, ModuleType, AudioModule, InputModule, MovementModule, OCRModule, VideoModule, LIDARModule
-from src.core.hardware_control import HardwareInterface, SimulatedHardware, UnitreeSDKHardware
+from ..controller_input_control.input_signal import InputSignal
+from .base_module import DogModule
+from .module_registry import ModuleRegistry, ModuleType, AudioModule, InputModule, MovementModule, OCRModule, VideoModule, LIDARModule
+from .hardware_control import HardwareInterface, SimulatedHardware, UnitreeSDKHardware
 
 
 # TTS: https://medium.com/@vndee.huynh/build-your-own-voice-assistant-and-run-it-locally-whisper-ollama-bark-c80e6f815cba

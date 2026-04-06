@@ -9,7 +9,7 @@ from std_msgs.msg import Header
 import numpy as np
 import fast_pointcloud as fp
 
-from lidar_processor.lidar_message_utils import (
+from .lidar_message_utils import (
     decode_array_from_message,
     create_lidar_decoded_message
 )

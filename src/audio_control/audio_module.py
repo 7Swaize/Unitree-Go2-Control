@@ -19,7 +19,7 @@ Example
 
 import threading
 import pyttsx3
-from src.core.base_module import DogModule
+from ..core.base_module import DogModule
 
 
 class AudioModule(DogModule):

@@ -28,11 +28,13 @@ Example
 
 
 from typing import Callable, Optional
-from src.controller_input_control.callback_manager import InputSignalCallbackManager, UnitreeRemoteControllerInputParser
-from src.controller_input_control.controller_state import ControllerState
-from src.controller_input_control.input_signal import InputSignal
-from src.core.base_module import DogModule
-from src.dds.dds_constants import DDS_TOPICS
+
+from .callback_manager import InputSignalCallbackManager, UnitreeRemoteControllerInputParser
+from .controller_state import ControllerState
+from .input_signal import InputSignal
+
+from ..core.base_module import DogModule
+from ..dds.dds_constants import DDS_TOPICS
 
 
 class InputModule(DogModule):

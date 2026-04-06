@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 import struct
 from typing import Callable, Dict, List, Optional
-from src.controller_input_control.controller_state import ControllerState
-from src.controller_input_control.input_signal import InputSignal
+from .controller_state import ControllerState
+from .input_signal import InputSignal
 
 
 _ANALOG_SIGNALS = {

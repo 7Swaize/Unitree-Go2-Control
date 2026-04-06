@@ -4,9 +4,9 @@ import subprocess
 import numpy as np
 from typing import Callable, Any
 
-from src.core.base_module import DogModule
-from src.lidar_control.zmq_receiver import ZMQReceiver
-from src.lidar_control.callback_dispatcher import CallbackDispatcher
+from ..core.base_module import DogModule
+from .zmq_receiver import ZMQReceiver
+from .callback_dispatcher import CallbackDispatcher
 
 
 class LIDARModule(DogModule):

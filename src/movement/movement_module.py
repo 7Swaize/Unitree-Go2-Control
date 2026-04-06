@@ -35,8 +35,8 @@ Not working on the robot (simulation or testing):
 """
 
 
-from src.core.base_module import DogModule
-from src.core.hardware_control import HardwareInterface
+from ..core.base_module import DogModule
+from ..core.hardware_control import HardwareInterface
 
 
 class MovementModule(DogModule):
