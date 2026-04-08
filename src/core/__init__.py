@@ -1,5 +1,3 @@
-"""Core controller and module infrastructure."""
-
 from core.controller import UnitreeGo2Controller
 from core.module import DogModule
 from core.registry import ModuleRegistry, ModuleType, ModuleDescriptor

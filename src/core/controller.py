@@ -2,26 +2,14 @@
 Core Controller Module for Student Use
 ======================================
 
-This module provides the **primary public API** for controlling the Unitree Go2
-robot.
+This module provides the **primary public API** for controlling the Unitree Go2 robot.
 
-Students interact exclusively with :class:`UnitreeGo2Controller`, which exposes
-high-level functionality such as movement, video, audio, OCR, input, and LIDAR
-through strongly-typed properties.
-
-Example
--------
->>> import time
->>> from core import UnitreeGo2Controller
->>> 
->>> unitree_controller = UnitreeGo2Controller(use_sdk=True)
->>> unitree_controller.movement.stand_up()
->>> time.sleep(1)
->>> unitree_controller.safe_shutdown()
+Users should interact exclusively with :class:`UnitreeGo2Controller`, which exposes
+high-level functionality such as movement, video, audio, OCR, input, and LIDAR through properties.
 """
 
-from typing import Callable, List, Dict
 import threading
+from typing import Callable, List, Dict
 
 from modules.input import InputSignal
 from core.module import DogModule
@@ -51,7 +39,7 @@ class UnitreeGo2Controller:
     """    
     Primary control interface for the Unitree Go2 robot.
 
-    This class is the **main entry point** that students and users interact with.
+    This class is the **main entry point** that users interact with.
     It manages hardware initialization, module lifecycles, safety checks, and shutdown.
 
     Modules are accessed via properties rather than direct instantiation.
@@ -59,8 +47,7 @@ class UnitreeGo2Controller:
     Notes
     -----
         - All hardware access is routed through this controller.
-        - Modules creation and initialization is handled automatically.
-        - Accessing modules after shutdown is prohibited.
+        - Modules creation, initialization, and shutdown is handled automatically.
         - Supports both SDK-backed hardware and a Mujoco simulation.
 
     See Also
@@ -122,8 +109,9 @@ class UnitreeGo2Controller:
     def add_module(self, module_type: ModuleType, **kwargs) -> None:
         """
         Add a module to the controller. Modules are initialized immediately upon addition.
+        Manual module initialization is discouraged and should not be attempted. 
 
-        Modules are identified using :class:`ModuleType` enums to ensure correctness and prevent invalid configurations.
+        Modules are identified using :class:`ModuleType` enums.
 
         Parameters
         ----------
@@ -136,18 +124,15 @@ class UnitreeGo2Controller:
         ------
         ValueError
             If the module type is not registered.
-
-        Example
-        -------
-        >>> controller.add_module(ModuleType.VIDEO)
+        ValueError
+            If the module type depends on native hardware support, but the controller is not set up to provide it.
         """
         descriptor = ModuleRegistry.get_descriptor(module_type)
         if descriptor is None:
-            raise ValueError(f"Module type {module_type} is not registered")
+            raise ValueError(f"[Controller] Module type '{module_type.name}' is not registered")
         
         if descriptor.requires_sdk and not self.use_sdk:
-            print(f"[Controller] Warning: {module_type.name} requires SDK mode")
-            return
+            raise ValueError(f"[Controller] Module type '{module_type.name}' requires native hardware support")
         
         module: DogModule = descriptor.create_instance(**kwargs)
         self._modules[module_type] = module
@@ -325,8 +310,7 @@ class UnitreeGo2Controller:
         """
         Register a cleanup callback.
 
-        Callbacks are executed during safe shutdown after modules are stopped
-        but before hardware is released.
+        Callbacks are executed during safe shutdown after modules are stopped but before hardware is released.
 
         Parameters
         ----------
@@ -379,5 +363,11 @@ class UnitreeGo2Controller:
 
 
     def is_shutdown_requested(self) -> bool:
-        """Check if shutdown has been requested"""
+        """
+        Check if shutdown has been requested
+        
+        Returns
+        -------
+        bool
+        """
         return self._shutdown_event.is_set()

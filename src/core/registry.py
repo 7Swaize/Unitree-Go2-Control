@@ -33,8 +33,7 @@ class ModuleDescriptor(Generic[T]):
     """
     Descriptor linking a module type to its implementation.
 
-    A descriptor contains all metadata required to construct and
-    display a module in the system.
+    A descriptor contains all metadata required to construct and display a module in the system.
 
     Attributes
     ----------
@@ -68,8 +67,7 @@ class ModuleRegistry:
     """
     Central registry for all available modules.
 
-    The registry maps ``ModuleType`` values to their corresponding
-    implementations and metadata. It is responsible for controlling
+    The registry maps ``ModuleType`` values to their corresponding implementations and metadata. It is responsible for controlling
     which modules are available based on system configuration.
 
     Notes
@@ -150,8 +148,7 @@ def register_all_default_modules():
     """
     Register all default system modules.
 
-    This function is called at import time to populate the module registry
-    with all built-in modules.
+    This function is called automatically at import time to populate the module registry with all built-in modules.
     """
     ModuleRegistry.register(ModuleDescriptor(
         ModuleType.VIDEO,
