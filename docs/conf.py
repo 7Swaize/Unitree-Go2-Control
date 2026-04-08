@@ -24,7 +24,6 @@ extensions = [
 
 # Mock imports for modules that may not be available
 autodoc_mock_imports = [
-    "aruko_helpers",
     "pyrealsense2",
     "unitree_sdk2py"
 ]
