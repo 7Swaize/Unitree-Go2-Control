@@ -7,7 +7,7 @@ class DogModule(ABC):
 
     This class defines the common lifecycle shared by all internal modules (e.g., movement, video, etc.).
     Modules are not meant to be interacted with or instaniated directly. Users should only interact with initialized modules 
-    via :class:`~core.UnitreeGo2Controller`.
+    via :class:`~core.Go2Controller`.
 
     Notes
     -----
@@ -30,17 +30,16 @@ class DogModule(ABC):
         self._initialized = False
 
     @abstractmethod
-    def initialize(self) -> None:
+    def _initialize(self) -> None:
         """
         Initialize the module.
 
-        This method is called once during module registration to a :class:`~unitree_go2.core.UnitreeGo2Controller` instance.
-        This should not be called by users.
+        This method is called once during module registration to a :class:`~core.Go2Controller` instance. This should not be called by users.
         """
         pass
 
     @abstractmethod
-    def shutdown(self) -> None:
+    def _shutdown(self) -> None:
         """
         Cleanly shut down the module. This is handled automatically and shouldn't be called by users.
 

@@ -5,6 +5,15 @@ loops by injecting shutdown checks into user-defined code.
 This system automatically modifies the AST (Abstract Syntax Tree) of state
 `execute()` methods at class creation time, inserting cancellation checks
 inside all `for` and `while` loops.
+
+Purpose
+-------
+- Prevent infinite or blocking loops in student-written state logic
+- Allow graceful shutdown when the robot or controller exits
+- Avoid requiring students to manually check shutdown flags
+
+This is an **internal system** and should not be directly used or modified
+by student code.
 """
 
 from abc import ABCMeta
@@ -24,6 +33,12 @@ class LoopCancellationInjector(ast.NodeTransformer):
 
     by inserting a call to ``self.check_shutdown()`` as the first statement
     in each loop body.
+
+    Notes
+    -----
+    - Assumes the transformed method belongs to a class defining
+      ``check_shutdown()``
+    - Used exclusively by ``CancellableMeta``
     """
     def create_check_node(self, lineno=0, col_offset=0) -> ast.Expr:
         return ast.Expr(
@@ -68,26 +83,29 @@ class CancellableMeta(ABCMeta):
     - Parsed into an AST
     - All loops are instrumented with shutdown checks
     - The modified function replaces the original
+
+    If any step fails, the original method is preserved.
     """
     def __new__(mcls, name, bases, attrs):
         if "execute" in attrs and inspect.isfunction(attrs["execute"]):
             original = attrs["execute"]
 
             try:
-                src = inspect.getsource(original)
-                src = textwrap.dedent(src)
-                tree = ast.parse(src)
+                src = inspect.getsource(original) # get source code 
+                src = textwrap.dedent(src) # removing indentation -> needed for parsing with AST
+                tree = ast.parse(src) # parse into AST
 
                 injector = LoopCancellationInjector()
                 new_tree = injector.visit(tree)
-                ast.fix_missing_locations(new_tree)
+                ast.fix_missing_locations(new_tree) # fixes line numbers and other metadata for compilation -> cleanup
 
                 env = original.__globals__.copy()
                 local_env: Dict[str, Any] = {}
 
-                compiled = compile(new_tree, filename="<ast>", mode="exec")
-                exec(compiled, env, local_env)
+                compiled = compile(new_tree, filename="<ast>", mode="exec") # convert the new AST into executable python code
+                exec(compiled, env, local_env) # runs in original context to make sure things like "self" still work
 
+                # if compilation succeeds... the new function replaces the old execute
                 new_func = local_env.get(original.__name__)
                 if new_func is not None:
                     new_func.__defaults__ = original.__defaults__
@@ -96,7 +114,7 @@ class CancellableMeta(ABCMeta):
                 else:
                     attrs["execute"] = original
 
-            except (OSError, IOError, TypeError, IndentationError, SyntaxError, ValueError):
-                attrs["execute"] = original
+            except (OSError, IOError, TypeError, IndentationError, SyntaxError, ValueError) as e:
+                attrs["execute"] = original # leave as is if exception is raised
 
         return super().__new__(mcls, name, bases, attrs)

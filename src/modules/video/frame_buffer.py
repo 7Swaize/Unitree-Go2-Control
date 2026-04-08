@@ -1,44 +1,56 @@
-"""Frame Buffer for Video Streaming"""
-
-import threading
-from collections import deque
-from typing import Optional, Any
 import numpy as np
+import queue
+
+from typing import Optional
 
 
 class FrameBuffer:
-    """Thread-safe frame buffer for camera frames."""
-    
-    def __init__(self, max_size: int = 2):
-        """
-        Initialize the frame buffer.
+    """
+    Thread-safe fixed-size buffer for storing video frames.
 
-        Parameters
-        ----------
-        max_size : int, optional
-            Maximum number of frames to buffer (default is 2).
-        """
-        self._buffer = deque(maxlen=max_size)
-        self._lock = threading.Lock()
+    This class wraps a `queue.Queue` to maintain a limited number
+    of frames in memory. Older frames are dropped if the buffer
+    is full. Designed for internal use by camera sources and
+    streaming modules.
 
-    def put(self, frame: Any) -> None:
-        """Add a frame to the buffer."""
-        with self._lock:
-            self._buffer.append(frame)
+    Parameters
+    ----------
+    max_size : int, optional
+        Maximum number of frames to store in the buffer (default is 10).
 
-    def get(self) -> Optional[Any]:
-        """Get the most recent frame from the buffer."""
-        with self._lock:
-            if len(self._buffer) > 0:
-                return self._buffer[-1]
+    Attributes
+    ----------
+    _queue : queue.Queue
+        Internal queue storing NumPy ndarray frames.
+    """
+    def __init__(self, max_size: int = 10):
+        self._queue = queue.Queue(maxsize=max_size)
+
+
+    def put(self, item: np.ndarray) -> None:
+        try:
+            self._queue.put_nowait(item)
+        except queue.Full:
+            _ = self._queue.get_nowait()
+            self._queue.put_nowait(item)
+
+    def get(self) -> Optional[np.ndarray]:
+        try:
+            return self._queue.get_nowait()
+        except queue.Empty:
             return None
 
-    def clear(self) -> None:
-        """Clear all frames from the buffer."""
-        with self._lock:
-            self._buffer.clear()
+    def get_batch(self, batch_size: int) -> list[np.ndarray]:
+        items = []
 
-    def size(self) -> int:
-        """Get the current number of frames in the buffer."""
-        with self._lock:
-            return len(self._buffer)
+        for _ in range(batch_size):
+            try:
+                items.append(self._queue.get_nowait())
+            except queue.Empty:
+                break
+
+        return items
+
+    def clear(self) -> None:
+        while not self._queue.empty():
+            _ = self._queue.get_nowait()

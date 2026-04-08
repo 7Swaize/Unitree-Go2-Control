@@ -1,6 +1,7 @@
 import os
 import signal
 import subprocess
+from typing_extensions import override
 
 from hardware.interfaces.hardware_interface import HardwareInterface
 
@@ -10,7 +11,7 @@ class VirtualHardware(HardwareInterface):
     Virtual hardware backend for development and testing.
      
     This implementation mimics robot functionality using the Unitree provided Mujoco simulator.
-    The simulator is launched during initialization of the hardware.
+    The simulator is launched via seperate process during initialization of the hardware.
 
     Dependencies
     ----------
@@ -24,23 +25,30 @@ class VirtualHardware(HardwareInterface):
 
         self._initialized = True
     
-    def initialize(self) -> None:
+    @override
+    def _initialize(self) -> None:
         self._initialized = True
 
-    def move(self, vx: float, vy: float) -> None:
+    @override
+    def _move(self, vx: float, vy: float) -> None:
         pass
 
-    def rotate(self, vrot: float):
+    @override
+    def _rotate(self, vrot: float):
         pass
     
-    def stand_up(self) -> None:
+    @override
+    def _stand_up(self) -> None:
         pass
     
-    def stand_down(self) -> None:
+    @override
+    def _stand_down(self) -> None:
         pass
     
-    def stop_move(self) -> None:
+    @override
+    def _stop_move(self) -> None:
         pass
 
-    def shutdown(self) -> None:
+    @override
+    def _shutdown(self) -> None:
         self._initialized = False

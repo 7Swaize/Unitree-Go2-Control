@@ -35,7 +35,7 @@ from hardware.virtual.virtual_hardware import VirtualHardware
 # TETHERING + ROS2 SETUP: https://www.youtube.com/watch?v=Q_dqPLJDPms
 
 
-class UnitreeGo2Controller:
+class Go2Controller:
     """    
     Primary control interface for the Unitree Go2 robot.
 
@@ -71,7 +71,7 @@ class UnitreeGo2Controller:
         RuntimeError
             If hardware backend initialization fails.
         """
-        self.use_sdk = use_sdk
+        self._use_sdk = use_sdk
 
         self._shutdown_event = threading.Event()
         self._shutdown_lock = threading.Lock()
@@ -80,7 +80,7 @@ class UnitreeGo2Controller:
         self._hardware: HardwareInterface = (
             NativeHardware() if use_sdk else VirtualHardware()
         )
-        self._hardware.initialize()
+        self._hardware._initialize()
 
         self._modules: Dict[ModuleType, DogModule] = {}
         self._register_default_modules()
@@ -90,7 +90,7 @@ class UnitreeGo2Controller:
 
 
     def _initialize_input_bindings(self):
-        if self.use_sdk:
+        if self._use_sdk:
             self.input.register_callback(
                 InputSignal.BUTTON_A,
                 lambda _: self._shutdown_event.set(),
@@ -101,9 +101,9 @@ class UnitreeGo2Controller:
     def _register_default_modules(self):
         self.add_module(ModuleType.MOVEMENT, hardware=self._hardware)
 
-        if self.use_sdk:
-            self.add_module(ModuleType.INPUT, use_sdk=self.use_sdk)
-            self.add_module(ModuleType.LIDAR, use_sdk=self.use_sdk)
+        if self._use_sdk:
+            self.add_module(ModuleType.INPUT, use_sdk=self._use_sdk)
+            self.add_module(ModuleType.LIDAR, use_sdk=self._use_sdk)
 
 
     def add_module(self, module_type: ModuleType, **kwargs) -> None:
@@ -131,13 +131,13 @@ class UnitreeGo2Controller:
         if descriptor is None:
             raise ValueError(f"[Controller] Module type '{module_type.name}' is not registered")
         
-        if descriptor.requires_sdk and not self.use_sdk:
+        if descriptor._requires_sdk and not self._use_sdk:
             raise ValueError(f"[Controller] Module type '{module_type.name}' requires native hardware support")
         
-        module: DogModule = descriptor.create_instance(**kwargs)
+        module: DogModule = descriptor._create_instance(**kwargs)
         self._modules[module_type] = module
 
-        module.initialize()
+        module._initialize()
     
 
     def has_module(self, module_type: ModuleType) -> bool:
@@ -159,7 +159,7 @@ class UnitreeGo2Controller:
         -------
         list of ModuleType
         """
-        return ModuleRegistry.get_list_available(self.use_sdk)
+        return ModuleRegistry.get_list_available(self._use_sdk)
     
 
     @property
@@ -344,7 +344,7 @@ class UnitreeGo2Controller:
 
             for module_type, module in self._modules.items():
                 try:
-                    module.shutdown()
+                    module._shutdown()
                 except Exception as e:
                     print(f"[Controller] Failed to shutdown {module_type.name}: {e}")
             
@@ -355,7 +355,7 @@ class UnitreeGo2Controller:
                     print(f"[Controller] Cleanup callback failed: {e}")
             
             try:
-                self._hardware.shutdown()
+                self._hardware._shutdown()
             except Exception as e:
                 print(f"[Controller] Hardware shutdown failed: {e}")
             

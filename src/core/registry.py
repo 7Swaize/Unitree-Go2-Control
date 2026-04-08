@@ -37,21 +37,21 @@ class ModuleDescriptor(Generic[T]):
 
     Attributes
     ----------
-    module_type : ModuleType
+    _module_type : ModuleType
         Enum identifying the module.
-    module_class : Type[DogModule]
+    _module_class : Type[DogModule]
         Concrete implementation class.
-    display_name : str
+    _display_name : str
         Human-readable name.
-    requires_sdk : bool, optional
+    _requires_sdk : bool, optional
         Whether this module requires SDK support.
     """
-    module_type: ModuleType
-    module_class: Type[T]
-    display_name: str
-    requires_sdk: bool = False
+    _module_type: ModuleType
+    _module_class: Type[T]
+    _display_name: str
+    _requires_sdk: bool = False
     
-    def create_instance(self, *args, **kwargs) -> T:
+    def _create_instance(self, *args, **kwargs) -> T:
         """
         Instantiate the module.
 
@@ -60,7 +60,7 @@ class ModuleDescriptor(Generic[T]):
         DogModule
             A new module instance.
         """
-        return self.module_class(*args, **kwargs)
+        return self._module_class(*args, **kwargs)
     
 
 class ModuleRegistry:
@@ -79,7 +79,7 @@ class ModuleRegistry:
     _descriptors: Dict[ModuleType, ModuleDescriptor] = {}
 
     @classmethod
-    def register(cls, descriptor: ModuleDescriptor) -> None:
+    def _register(cls, descriptor: ModuleDescriptor) -> None:
         """
         Register a module descriptor.
 
@@ -88,7 +88,7 @@ class ModuleRegistry:
         descriptor : ModuleDescriptor
             Descriptor to register.
         """
-        cls._descriptors[descriptor.module_type] = descriptor
+        cls._descriptors[descriptor._module_type] = descriptor
 
     @classmethod
     def get_descriptor(cls, module_type: ModuleType) -> Optional[ModuleDescriptor]:
@@ -111,7 +111,7 @@ class ModuleRegistry:
         Type[DogModule] or None
         """
         descriptor = cls._descriptors.get(module_type)
-        return descriptor.module_class if descriptor else None
+        return descriptor._module_class if descriptor else None
 
     @classmethod
     def is_registered(cls, module_type: ModuleType) -> bool:
@@ -140,57 +140,57 @@ class ModuleRegistry:
         """
         return [
             mt for mt, desc in cls._descriptors.items()
-            if not desc.requires_sdk or sdk_enabled
+            if not desc._requires_sdk or sdk_enabled
         ]
 
 
-def register_all_default_modules():
+def _register_all_default_modules():
     """
     Register all default system modules.
 
     This function is called automatically at import time to populate the module registry with all built-in modules.
     """
-    ModuleRegistry.register(ModuleDescriptor(
+    ModuleRegistry._register(ModuleDescriptor(
         ModuleType.VIDEO,
         VideoModule,
         "Video Capture",
-        requires_sdk=False
+        _requires_sdk=False
     ))
     
-    ModuleRegistry.register(ModuleDescriptor(
+    ModuleRegistry._register(ModuleDescriptor(
         ModuleType.MOVEMENT,
         MovementModule,
         "Movement Control",
-        requires_sdk=False
+        _requires_sdk=False
     ))
     
-    ModuleRegistry.register(ModuleDescriptor(
+    ModuleRegistry._register(ModuleDescriptor(
         ModuleType.OCR,
         OCRModule,
         "Optical Character Recognition",
-        requires_sdk=False
+        _requires_sdk=False
     ))
     
-    ModuleRegistry.register(ModuleDescriptor(
+    ModuleRegistry._register(ModuleDescriptor(
         ModuleType.AUDIO,
         AudioModule,
         "Text-to-Speech",
-        requires_sdk=False
+        _requires_sdk=False
     ))
     
-    ModuleRegistry.register(ModuleDescriptor(
+    ModuleRegistry._register(ModuleDescriptor(
         ModuleType.INPUT,
         InputModule,
         "Controller Input",
-        requires_sdk=True  
+        _requires_sdk=True  
     ))
 
-    ModuleRegistry.register(ModuleDescriptor(
+    ModuleRegistry._register(ModuleDescriptor(
         ModuleType.LIDAR,
         LIDARModule,
         "LIDAR Capture",
-        requires_sdk=True
+        _requires_sdk=True
     ))
 
 
-register_all_default_modules()
+_register_all_default_modules()

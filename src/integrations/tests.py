@@ -4,7 +4,7 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
-from core.controller import UnitreeGo2Controller
+from core.controller import Go2Controller
 from core.registry import ModuleType
 from modules.video.camera_source_factory import CameraSourceFactory
 
@@ -15,7 +15,7 @@ import numpy as np
 
 class Tests:
     def __init__(self):
-        self.unitree_controller = UnitreeGo2Controller(use_sdk=False)
+        self.unitree_controller = Go2Controller(use_sdk=False)
         self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
 
         self.unitree_controller.add_module(ModuleType.AUDIO)

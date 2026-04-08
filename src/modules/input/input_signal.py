@@ -1,11 +1,11 @@
-"""Input Signal Enumeration"""
-
 from enum import Enum
 
 
 class InputSignal(Enum):
     """
     Enumeration of all possible controller input signals.
+
+    Internal mapping from logical signal names to string identifiers used by the system for tracking and callback triggering.
 
     Members
     -------

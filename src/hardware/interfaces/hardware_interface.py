@@ -17,9 +17,9 @@ class HardwareInterface(ABC):
     """
     
     @abstractmethod
-    def initialize(self) -> None:
+    def _initialize(self) -> None:
         """
-        Initialize the hardware interface. This is handled automatically and shouldn't be called by students.
+        Initialize the hardware interface. This is handled automatically and shouldn't be called by users.
         Hardware initialization is linked to the core controller's initialization. The hardware is guaranteed to be 
         initialized before any other system provided by this package.
 
@@ -28,14 +28,14 @@ class HardwareInterface(ABC):
         pass
     
     @abstractmethod
-    def shutdown(self) -> None:
+    def _shutdown(self) -> None:
         """
-        Cleanly shut down the hardware interface.
+        Cleanly shut down the hardware interface. This should not be called by users.
         """
         pass
     
     @abstractmethod
-    def move(self, vx: float, vy: float) -> None:
+    def _move(self, vx: float, vy: float) -> None:
         """
         Move the dog in the horizontal plane.
 
@@ -49,7 +49,7 @@ class HardwareInterface(ABC):
         pass
 
     @abstractmethod
-    def rotate(self, vrot: float):
+    def _rotate(self, vrot: float):
         """
         Rotate the dog in place.
 
@@ -61,16 +61,16 @@ class HardwareInterface(ABC):
         pass
 
     @abstractmethod
-    def stand_up(self) -> None:
+    def _stand_up(self) -> None:
         """Command the dog to stand up."""
         pass
     
     @abstractmethod
-    def stand_down(self) -> None:
+    def _stand_down(self) -> None:
         """Command the dog to lie down."""
         pass
     
     @abstractmethod
-    def stop_move(self) -> None:
+    def _stop_move(self) -> None:
         """Immediately stop all movement and clear internal movement command buffer."""
         pass

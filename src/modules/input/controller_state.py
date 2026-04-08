@@ -1,5 +1,3 @@
-"""Controller State Representation"""
-
 from dataclasses import dataclass
 
 
@@ -8,20 +6,24 @@ class ControllerState:
     """
     Represents the current state of a controller's inputs.
 
+    Tracks analog and digital values for sticks, triggers, and buttons,
+    along with a flag indicating whether any input has changed since the last update.
+
     Attributes
     ----------
-    lx, ly : float
-        Left stick X/Y axes (-1.0 to 1.0)
-    rx, ry : float
-        Right stick X/Y axes (-1.0 to 1.0)
-    l1, l2, r1, r2 : float
-        Trigger/bumper values (0.0 to 1.0)
-    a, b, x, y : float
-        Face button values (0.0 or 1.0)
-    up, down, left, right : float
-        D-pad values (0.0 or 1.0)
-    select, start, f1, f3 : float
-        System button values (0.0 or 1.0)
+    sticks : dict of str -> float
+        Analog stick positions:
+        - 'lx', 'ly': left stick X/Y axes (-1.0 to 1.0)
+        - 'rx', 'ry': right stick X/Y axes (-1.0 to 1.0)
+    triggers : dict of str -> float
+        Trigger / bumper analog values:
+        - 'l1', 'l2', 'r1', 'r2' (0.0 to 1.0)
+    buttons : dict of str -> float
+        Digital button values (0.0 or 1.0):
+        - Face buttons: 'a', 'b', 'x', 'y'
+        - D-pad: 'up', 'down', 'left', 'right'
+        - System buttons: 'select', 'start'
+        - Function buttons: 'f1', 'f3'
     changed : bool
         True if any value changed since the last update.
     """

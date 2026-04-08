@@ -4,44 +4,34 @@ State Machine Approach for Student Use
 
 Abstract base class for all robot behavior states.
 
-Students create custom states by inheriting from this class and implementing
-the :meth:`execute` method. This framework provides:
+Users create custom states by inheriting from this class and implementing
+the :meth:`execute` method. This approach is completely optional. It is solely available
+for those who are comfortable with a more advanced approach.  
+
+This framework provides:
     - Automatic loop cancellation
     - Safe shutdown handling
     - Consistent state lifecycle hooks
-
-Example
--------
->>> from core import UnitreeGo2Controller
->>> from states import DogStateAbstract
->>>
->>> class RotateInPlaceState(DogStateAbstract):
-...     def __init__(self, controller, steps=100):
-...         super().__init__(controller)
-...         self.steps = steps
-...
-...     def execute(self):
-...         for _ in range(self.steps):
-...             self.unitree_controller.movement.rotate(1.0)
 """
+
 
 from abc import ABC, abstractmethod
 from typing import Any, final
 
-from core.controller import UnitreeGo2Controller
-from states.validation import CancellableMeta
+from core.controller import Go2Controller
+from .validation import CancellableMeta
 
 
 class DogStateAbstract(ABC, metaclass=CancellableMeta):
     """Abstract base class for dog behavior states."""
     
-    def __init__(self, unitree_controller: UnitreeGo2Controller):
+    def __init__(self, unitree_controller: Go2Controller):
         """
         Initialize a dog behavior state.
 
         Parameters
         ----------
-        unitree_controller : UnitreeGo2Controller
+        unitree_controller : Go2Controller
             High-level controller providing robot control APIs
         """
         super().__init__()
@@ -50,7 +40,7 @@ class DogStateAbstract(ABC, metaclass=CancellableMeta):
         self.should_cancel = False
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> Any:
+    def execute(self, *args, **kwargs) -> Any: # might have to preserve var args in source gen?
         """
         Main execution logic for the state.
 
@@ -65,12 +55,20 @@ class DogStateAbstract(ABC, metaclass=CancellableMeta):
         pass
 
     def on_enter(self):
-        """Called when the state becomes active."""
+        """
+        Called when the state becomes active.
+
+        Sets internal running flags.
+        """
         self.is_running = True
         self.should_cancel = False
 
     def on_exit(self):
-        """Called when the state exits."""
+        """
+        Called when the state exits.
+
+        Cleans up internal state.
+        """
         self.is_running = False
 
     @final
@@ -90,5 +88,14 @@ class DogStateAbstract(ABC, metaclass=CancellableMeta):
             raise KeyboardInterrupt()
 
     def cancel(self) -> None:
-        """Request cancellation of the current state."""
+        """
+        Request cancellation of the current state.
+
+        Notes
+        -----
+        - This flag can be checked manually by student logic
+        - Loop-based logic is already auto-cancellable
+        """
         self.should_cancel = True
+
+    

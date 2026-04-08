@@ -10,7 +10,7 @@ sys.path.insert(0, ROOT)
 
 from integrations.aruko_helpers import *
 
-from core.controller import UnitreeGo2Controller
+from core.controller import Go2Controller
 from core.registry import ModuleType
 from states.dog_state import DogStateAbstract
 from modules.video.camera_source_factory import CameraSourceFactory
@@ -313,7 +313,7 @@ class RespondToMarkerState(DogStateAbstract):
 
 class Main:
     def __init__(self):
-        self.unitree_controller = UnitreeGo2Controller(use_sdk=False)
+        self.unitree_controller = Go2Controller(use_sdk=False)
         self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
 
         self.unitree_controller.add_module(ModuleType.AUDIO)

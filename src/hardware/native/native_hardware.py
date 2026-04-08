@@ -1,4 +1,5 @@
 import sys
+from typing_extensions import override
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.go2.sport.sport_client import SportClient
@@ -11,7 +12,7 @@ class NativeHardware(HardwareInterface):
     Hardware interface to execute on the Unitree GO2 itself.
 
     This implementation communicates with the real robot using ``unitree_sdk2py``. 
-    It should only be used for native execution on the robot.
+    It can only used for native execution on the robot.
 
     Warnings
     --------
@@ -22,7 +23,8 @@ class NativeHardware(HardwareInterface):
         self._sport_client = None
         self._initialized = False
     
-    def initialize(self) -> None:
+    @override
+    def _initialize(self) -> None:
         """
         Initialize the Unitree SDK connection.
 
@@ -43,26 +45,32 @@ class NativeHardware(HardwareInterface):
         
         self._initialized = True
     
-    def shutdown(self) -> None:
+    @override
+    def _shutdown(self) -> None:
         if self._sport_client:
             self._sport_client.StopMove()
     
-    def move(self, vx: float, vy: float) -> None:
+    @override
+    def _move(self, vx: float, vy: float) -> None:
         if self._sport_client:
             self._sport_client.Move(vx, vy, 0)
 
-    def rotate(self, vrot: float):
+    @override
+    def _rotate(self, vrot: float):
         if self._sport_client:
             self._sport_client.Move(0, 0, vrot)
     
-    def stand_up(self) -> None:
+    @override
+    def _stand_up(self) -> None:
         if self._sport_client:
             self._sport_client.StandUp()
     
-    def stand_down(self) -> None:
+    @override
+    def _stand_down(self) -> None:
         if self._sport_client:
             self._sport_client.StandDown()
     
-    def stop_move(self) -> None:
+    @override
+    def _stop_move(self) -> None:
         if self._sport_client:
             self._sport_client.StopMove()

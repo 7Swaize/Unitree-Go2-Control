@@ -9,7 +9,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
 from integrations.aruko_helpers import *
-from core.controller import UnitreeGo2Controller
+from core.controller import Go2Controller
 from core.registry import ModuleType
 from modules.video.camera_source_factory import CameraSourceFactory
 
@@ -46,7 +46,7 @@ def setup():
     global unitree_controller
     
     # Create the controller in SDK mode because we want to use functionalities of the robot
-    unitree_controller = UnitreeGo2Controller(use_sdk=False)
+    unitree_controller = Go2Controller(use_sdk=False)
     # Register cleanup function to be called on exit after controller shutdown
     unitree_controller.register_cleanup_callback(cleanup)
     
