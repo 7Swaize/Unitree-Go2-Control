@@ -3,7 +3,7 @@ Video Module
 
 The video control module provides an interface for capturing and streaming video from the Unitree Go2 robot.
 
-.. automodule:: src.video_control.video_module
+.. automodule:: unitree_go2.modules.video
    :members:
    :undoc-members:
    :show-inheritance:

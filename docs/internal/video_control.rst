@@ -10,7 +10,7 @@ Video Control (Internal)
 Camera Source
 -------------
 
-.. automodule:: src.video_control.camera_source
+.. automodule:: unitree_go2.modules.video.camera_source
    :members:
    :private-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ Camera Source
 Frame Buffer
 ------------
 
-.. automodule:: src.video_control.frame_buffer
+.. automodule:: unitree_go2.modules.video.frame_buffer
    :members:
    :private-members:
    :show-inheritance:
@@ -28,7 +28,7 @@ Frame Buffer
 Streamer
 --------
 
-.. automodule:: src.video_control.streamer
+.. automodule:: unitree_go2.modules.video.streamer
    :members:
    :private-members:
    :show-inheritance:

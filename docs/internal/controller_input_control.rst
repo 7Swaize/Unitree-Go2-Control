@@ -10,7 +10,7 @@ Controller Input Control (Internal)
 Controller State
 ----------------
 
-.. automodule:: src.controller_input_control.controller_state
+.. automodule:: unitree_go2.modules.input.controller_state
    :members:
    :private-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ Controller State
 Input Signal
 ------------
 
-.. automodule:: src.controller_input_control.input_signal
+.. automodule:: unitree_go2.modules.input.input_signal
    :members:
    :private-members:
    :show-inheritance:

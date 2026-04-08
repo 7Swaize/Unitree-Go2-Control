@@ -6,7 +6,7 @@ DDS Communication (Internal)
    This section documents internal DDS communication components.
    Students should **not** use these classes directly.
 
-.. automodule:: src.dds.dds_constants
+.. automodule:: unitree_go2.communication.dds
    :members:
    :private-members:
    :show-inheritance:

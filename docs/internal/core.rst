@@ -44,7 +44,7 @@ Virtual Hardware
 Module Registry
 ---------------
 
-.. automodule:: src.core.module_registry
+.. automodule:: unitree_go2.core.registry
    :members:
    :private-members:
    :show-inheritance:

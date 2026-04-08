@@ -3,7 +3,7 @@ LiDAR Control Module - NOT IMPLEMENTED
 
 Access LiDAR sensor data from the Unitree Go2 robot.
 
-.. automodule:: src.lidar_control
+.. automodule:: unitree_go2.modules.lidar
    :members:
    :undoc-members:
    :show-inheritance:

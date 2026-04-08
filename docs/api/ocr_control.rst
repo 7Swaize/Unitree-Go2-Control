@@ -3,7 +3,7 @@ OCR Module
 
 Optical Character Recognition capabilities for the Unitree Go2 robot.
 
-.. automodule:: src.ocr_control.ocr_module
+.. automodule:: unitree_go2.modules.ocr
    :members:
    :undoc-members:
    :show-inheritance:

@@ -7,7 +7,7 @@ State Validation (Internal)
    Students should **not** use these classes directly.
 
 
-.. automodule:: src.states.validation
+.. automodule:: unitree_go2.states.validation
    :members:
    :private-members:
    :show-inheritance:
