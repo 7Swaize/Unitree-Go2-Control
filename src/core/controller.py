@@ -1,13 +1,3 @@
-"""
-Core Controller Module for User Use
-===================================
-
-This module provides the **primary public API** for controlling the Unitree Go2 robot.
-
-Users should interact exclusively with :class:`Go2Controller`, which exposes
-high-level functionality such as movement, video, audio, OCR, input, and LIDAR through properties.
-"""
-
 import threading
 from typing import Callable, List, Dict
 

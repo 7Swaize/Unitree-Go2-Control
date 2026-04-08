@@ -1,7 +1,12 @@
 Video Module
 ============
 
-The video control module provides an interface for capturing and streaming video from the Unitree Go2 robot.
+This module provides a high-level interface for accessing camera frames
+and streaming video from the robot or an attached webcam. Users should
+interact only with :class:`~modules.video.video_module.VideoModule` and should not use lower-level
+camera or streaming classes directly.
+
+Users should not access or construct this class directly. Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
 
 .. automodule:: src.modules.video.video_module
    :members:

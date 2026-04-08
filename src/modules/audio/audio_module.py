@@ -1,14 +1,3 @@
-"""
-Audio Module for User Use
-=========================
-
-This module provides simple text-to-speech functionality for the dog robot. 
-It wraps the underlying pyttsx3 engine and handles thread-safe playback.
-
-Users should not access or construct this class directly. 
-Rather, they should access it through a :class:`~core.controller.Go2Controller` instance.
-"""
-
 import threading
 import pyttsx3
 from typing_extensions import override

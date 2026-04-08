@@ -1,17 +1,3 @@
-"""
-Video Module for User Use
-=========================
-
-This module provides a high-level interface for accessing camera frames
-and streaming video from the robot or an attached webcam. Users should
-interact only with :class:`VideoModule` and should not use lower-level
-camera or streaming classes directly.
-
-Users should not access or construct this class directly. Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
-
-"""
-
-
 from typing import Any, Optional, Tuple
 from typing_extensions import override
 

@@ -1,7 +1,11 @@
 Go2 Controller
 ==============
 
-Main entry point for controlling the Unitree-Go2 robot and accessing various functionalities.
+This module provides the **primary public API** for controlling the Unitree Go2 robot.
+
+Users should interact exclusively with :class:`~core.controller.Go2Controller`, which exposes
+high-level functionality such as movement, video, audio, OCR, input, and LIDAR through properties.
+
 
 .. automodule:: src.core.controller
    :members:
