@@ -1,13 +1,13 @@
 """
-Video Module for Student Use
-============================
+Video Module for User Use
+=========================
 
 This module provides a high-level interface for accessing camera frames
 and streaming video from the robot or an attached webcam. Users should
 interact only with :class:`VideoModule` and should not use lower-level
 camera or streaming classes directly.
 
-Users should not access or construct this class directly. Rather, they should access it through the :class:`~src.core.unitree_control_core.UnitreeGo2Controller` instance.
+Users should not access or construct this class directly. Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
 
 """
 
@@ -37,7 +37,7 @@ class VideoModule(DogModule):
     ----------
     camera_source : CameraSource
         A camera source provided by the system (e.g. dog camera,
-        webcam, or depth camera). Requires a :class:`~src.video_control.camera_source.CameraSource` instance.
+        webcam, or depth camera). Requires a :class:`~modules.video.camera_source.CameraSource` instance.
 
     Notes
     -----
@@ -66,7 +66,7 @@ class VideoModule(DogModule):
         if self._initialized:
             return
         
-        self._camera_source.initialize()
+        self._camera_source._initialize()
         self._streamer = WebRTCStreamer()
         self._streaming = False
         
@@ -94,23 +94,8 @@ class VideoModule(DogModule):
                     * ``numpy.ndarray`` — a single color image
                     * ``Tuple[numpy.ndarray, numpy.ndarray]`` — ``(color, depth)``
                     * ``None`` — if no frame is available
-
-        Examples
-        --------
-        Single-frame usage (most cameras):
-
-        >>> status, frame = unitree_controller.video.get_frames()
-        >>> if status == 0 and isinstance(frame, np.ndarray):
-        ...     print(frame.shape)
-
-        Depth-camera usage:
-
-        >>> status, frames = unitree_controller.video.get_frames()
-        >>> if status == 0 and isinstance(frames, tuple):
-        ...     color, depth = frames
-        ...     print(color.shape, depth.shape)
         """
-        return self._camera_source.get_frames()
+        return self._camera_source._get_frames()
 
 
     def start_stream_server(self) -> None:
@@ -129,7 +114,7 @@ class VideoModule(DogModule):
         if self._streaming:
             raise RuntimeError("[Video] Stream server already started.")
         
-        self._streamer.start_in_thread()
+        self._streamer._start_in_thread()
         self._streaming = True
 
     def send_frame(self, frame: np.ndarray) -> None:
@@ -146,17 +131,11 @@ class VideoModule(DogModule):
         ------
         RuntimeError
             If the stream server has not been started.
-
-        Examples
-        --------
-        >>> status, frame = unitree_controller.video.get_frames()
-        >>> if status == 0:
-        ...     unitree_controller.video.send_frame(frame)
         """
         if not self._streaming:
             raise RuntimeError("[Video] Stream server not started. Please start the stream server before sending frames.")
 
-        self._streamer.send(frame)
+        self._streamer._send(frame)
 
     def get_stream_server_local_ip(self) -> str:
         """
@@ -175,7 +154,7 @@ class VideoModule(DogModule):
         if not self._streaming:
             raise RuntimeError("[Video] Stream server not started. Please start the stream server before getting its local IP")
         
-        return self._streamer.get_local_ip_address()
+        return self._streamer._get_local_ip_address()
     
     def get_stream_server_port(self) -> int:
         """
@@ -194,7 +173,7 @@ class VideoModule(DogModule):
         if not self._streaming:
             raise RuntimeError("[Video] Stream server not started. Please start the stream server before getting its port")
         
-        return self._streamer.get_port()
+        return self._streamer._get_port()
         
 
     @override
@@ -208,10 +187,10 @@ class VideoModule(DogModule):
         if not self._initialized:
             return
         
-        self._camera_source.shutdown()
+        self._camera_source._shutdown()
 
         if self._streamer:
-            self._streamer.shutdown()
+            self._streamer._shutdown()
             self._streamer = None
 
         self._streaming = False

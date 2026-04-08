@@ -3,7 +3,7 @@ Defines DDS topic names used internally by the system
 for inter-process communication. These topics are used by ROS2 bridges,
 LIDAR processing, and state monitoring.
 
-Students should **not** use these directly; they are for internal
+Users should **not** use these directly; they are for internal
 infrastructure and low-level module integration only.
 
 DDS_TOPICS : dict

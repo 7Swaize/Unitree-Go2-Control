@@ -8,12 +8,12 @@ inside all `for` and `while` loops.
 
 Purpose
 -------
-- Prevent infinite or blocking loops in student-written state logic
+- Prevent infinite or blocking loops in user-written state logic
 - Allow graceful shutdown when the robot or controller exits
-- Avoid requiring students to manually check shutdown flags
+- Avoid requiring users to manually check shutdown flags
 
 This is an **internal system** and should not be directly used or modified
-by student code.
+by user code.
 """
 
 from abc import ABCMeta

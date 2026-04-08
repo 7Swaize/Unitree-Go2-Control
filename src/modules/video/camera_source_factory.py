@@ -1,11 +1,11 @@
-from camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCamera, SDKCameraSource
+from .camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCamera, NativeCameraSource
 
 
 class CameraSourceFactory:
     """
     Factory class for creating camera sources.
 
-    ``CameraSourceFactory`` provides a simple, safe way for students to
+    ``CameraSourceFactory`` provides a simple, safe way for users to
     select which camera hardware to use without needing to understand
     low-level camera implementations.
 
@@ -14,7 +14,7 @@ class CameraSourceFactory:
 
     Notes
     -----
-    Students should **not** instantiate camera source classes directly.
+    Users should **not** instantiate camera source classes directly.
     Always use this factory instead.
     """
 
@@ -31,17 +31,8 @@ class CameraSourceFactory:
         -------
         CameraSource
             A camera source compatible with :class:`VideoModule`.
-
-        Example
-        -------
-        >>> from src.core.unitree_control_core import UnitreeGo2Controller
-        >>> from src.core.module_registry import ModuleType
-        >>> from src.video_control.camera_source_factory import CameraSourceFactory
-        >>>
-        >>> unitree_controller = UnitreeGo2Controller(sdk_enabled=True)
-        >>> unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_sdk_camera()) # Add video module with SDK camera
         """
-        return SDKCameraSource()
+        return NativeCameraSource()
 
 
     @staticmethod
@@ -63,15 +54,6 @@ class CameraSourceFactory:
         -------
         CameraSource
             A camera source compatible with :class:`VideoModule`.
-
-        Example
-        -------
-        >>> from src.core.unitree_control_core import UnitreeGo2Controller
-        >>> from src.core.module_registry import ModuleType
-        >>> from src.video_control.camera_source_factory import CameraSourceFactory
-        >>>
-        >>> unitree_controller = UnitreeGo2Controller(sdk_enabled=False)
-        >>> unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_opencv_camera(0)) # Add video module with default webcam
         """
         return OpenCVCameraSource(camera_index)
 
@@ -92,14 +74,5 @@ class CameraSourceFactory:
         Notes
         -----
         Requires an Intel RealSense camera and the RealSense SDK.
-
-        Example
-        -------
-        >>> from src.core.unitree_control_core import UnitreeGo2Controller
-        >>> from src.core.module_registry import ModuleType
-        >>> from src.video_control.camera_source_factory import CameraSourceFactory
-        >>>
-        >>> unitree_controller = UnitreeGo2Controller(sdk_enabled=True)
-        >>> unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_depth_camera()) # Add video module with depth camera
         """
         return RealSenseDepthCamera()

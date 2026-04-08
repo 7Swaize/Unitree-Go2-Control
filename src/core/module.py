@@ -7,7 +7,7 @@ class DogModule(ABC):
 
     This class defines the common lifecycle shared by all internal modules (e.g., movement, video, etc.).
     Modules are not meant to be interacted with or instaniated directly. Users should only interact with initialized modules 
-    via :class:`~core.Go2Controller`.
+    via :class:`~core.controller.Go2Controller`.
 
     Notes
     -----
@@ -34,7 +34,7 @@ class DogModule(ABC):
         """
         Initialize the module.
 
-        This method is called once during module registration to a :class:`~core.Go2Controller` instance. This should not be called by users.
+        This method is called once during module registration to a :class:`~core.controller.Go2Controller` instance. This should not be called by users.
         """
         pass
 

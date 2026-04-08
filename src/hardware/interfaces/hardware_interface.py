@@ -13,7 +13,7 @@ class HardwareInterface(ABC):
     Notes
     -----
     - This is an internal abstraction.
-    - Students should not subclass this directly.
+    - Users should not subclass this directly.
     """
     
     @abstractmethod

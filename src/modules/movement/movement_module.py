@@ -1,6 +1,6 @@
 """
-Movement Module for Student Use
-===============================
+Movement Module for User Use
+============================
 
 This module provides high-level movement controls for the dog robot.
 
@@ -9,7 +9,7 @@ command the robot. It wraps the underlying hardware interface and
 performs safety checks to prevent unsafe motions.
 
 Users should not access or construct this class directly.
-Rather, they should access it through the :class:`~src.core.controller.Go2Controller` instance.
+Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
 """
 
 from typing_extensions import override

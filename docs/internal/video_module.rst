@@ -4,13 +4,13 @@ Video Control (Internal)
 .. warning::
 
    This section documents internal video control components.
-   Students should **not** use these classes directly.
+   Users should **not** use these classes directly.
 
 
 Camera Source
 -------------
 
-.. automodule:: unitree_go2.modules.video.camera_source
+.. automodule:: src.modules.video.camera_source
    :members:
    :private-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ Camera Source
 Frame Buffer
 ------------
 
-.. automodule:: unitree_go2.modules.video.frame_buffer
+.. automodule:: src.modules.video.frame_buffer
    :members:
    :private-members:
    :show-inheritance:
@@ -28,7 +28,7 @@ Frame Buffer
 Streamer
 --------
 
-.. automodule:: unitree_go2.modules.video.streamer
+.. automodule:: src.modules.video.streamer
    :members:
    :private-members:
    :show-inheritance:

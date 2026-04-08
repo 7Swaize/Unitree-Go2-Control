@@ -4,9 +4,9 @@ DDS Communication (Internal)
 .. warning::
 
    This section documents internal DDS communication components.
-   Students should **not** use these classes directly.
+   Users should **not** use these classes directly.
 
-.. automodule:: unitree_go2.communication.dds
+.. automodule:: src.communication.dds.dds
    :members:
    :private-members:
    :show-inheritance:

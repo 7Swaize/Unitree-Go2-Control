@@ -2,8 +2,8 @@ from dataclasses import dataclass
 import struct
 from typing import Callable, Dict, List, Optional
 
-from controller_state import ControllerState
-from input_signal import InputSignal
+from .controller_state import ControllerState
+from .input_signal import InputSignal
 
 
 _ANALOG_SIGNALS = {
@@ -201,7 +201,7 @@ class InputSignalCallbackManager:
 
 class UnitreeRemoteControllerInputParser:
     """
-    Parses raw remote controller data into :class:`~input.controller_state.ControllerState`.
+    Parses raw remote controller data into :class:`~modules.input.controller_state.ControllerState`.
 
     Notes
     -----
@@ -254,7 +254,7 @@ class UnitreeRemoteControllerInputParser:
     # remote_data is some type that is an array of 8-bit-seqs
     def _parse(self, remote_data) -> ControllerState:
         """
-        Parse raw remote input into :class:`~input.controller_state.ControllerState`.
+        Parse raw remote input into :class:`~modules.input.controller_state.ControllerState`.
 
         Parameters
         ----------

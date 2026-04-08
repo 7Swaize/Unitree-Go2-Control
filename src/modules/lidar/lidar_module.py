@@ -6,8 +6,8 @@ from typing import Callable, Any
 from typing_extensions import override
 
 from core.module import DogModule
-from callback_dispatcher import CallbackDispatcher
-from zmq_receiver import ZMQReceiver
+from .callback_dispatcher import CallbackDispatcher
+from .zmq_receiver import ZMQReceiver
 
 class LIDARModule(DogModule):
     def __init__(self, use_sdk: bool = True):
@@ -71,5 +71,4 @@ class LIDARModule(DogModule):
             self.zmq_receiver.join(timeout=2)
 
         if self.dispatcher:
-            self.zmq_receiver.shutdown()
-            self.zmq_receiver.join(timeout=2)
+            self.dispatcher.shutdown()

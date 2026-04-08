@@ -20,7 +20,7 @@ class Tests:
 
         self.unitree_controller.add_module(ModuleType.AUDIO)
         self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_opencv_camera())
-        self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
+        # self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
         
         self.unitree_controller.video.start_stream_server()
         self.unitree_controller.video.get_stream_server_local_ip()

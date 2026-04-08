@@ -14,8 +14,8 @@ class VirtualHardware(HardwareInterface):
     The simulator is launched via seperate process during initialization of the hardware.
 
     Dependencies
-    ----------
-    - Unitree MuJoCo library: https://github.com/7Swaize/unitree_mujoco.git
+    ------------
+    - `Unitree MuJoCo library <https://github.com/7Swaize/unitree_mujoco.git>`_
     """
     
     def __init__(self):

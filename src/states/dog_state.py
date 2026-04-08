@@ -1,6 +1,6 @@
 """
-State Machine Approach for Student Use
-======================================
+State Machine Approach for User Use
+===================================
 
 Abstract base class for all robot behavior states.
 
@@ -93,7 +93,7 @@ class DogStateAbstract(ABC, metaclass=CancellableMeta):
 
         Notes
         -----
-        - This flag can be checked manually by student logic
+        - This flag can be checked manually by user logic
         - Loop-based logic is already auto-cancellable
         """
         self.should_cancel = True

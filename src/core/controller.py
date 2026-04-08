@@ -1,10 +1,10 @@
 """
-Core Controller Module for Student Use
-======================================
+Core Controller Module for User Use
+===================================
 
 This module provides the **primary public API** for controlling the Unitree Go2 robot.
 
-Users should interact exclusively with :class:`UnitreeGo2Controller`, which exposes
+Users should interact exclusively with :class:`Go2Controller`, which exposes
 high-level functionality such as movement, video, audio, OCR, input, and LIDAR through properties.
 """
 

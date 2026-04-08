@@ -2,11 +2,12 @@ import threading
 import queue
 import numpy as np
 from typing import Any, Callable
+from typing_extensions import override
 
 
 class CallbackDispatcher(threading.Thread):
     def __init__(self):
-        super.__init__(daemon=True)
+        super().__init__(daemon=True)
         self._decoded_callbacks: list[Callable[[int, np.ndarray], Any]] = []
         self._filtered_callbacks: list[Callable[[int, np.ndarray], Any]] = []
 
@@ -35,6 +36,7 @@ class CallbackDispatcher(threading.Thread):
             pass # I currently just drop because of backlog
 
 
+    @override
     def run(self) -> None:
         while self._running.is_set():
             self._drain_queue(self._decoded_queue, self._decoded_callbacks)

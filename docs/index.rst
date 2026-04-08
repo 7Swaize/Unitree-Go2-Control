@@ -11,6 +11,5 @@ Unitree-Go2-Control Documentation - Part of GSMST
    :maxdepth: 2
    :caption: Contents:
 
-   usage/index
    api/index
    internal/index

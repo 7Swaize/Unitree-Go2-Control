@@ -1,8 +1,9 @@
 import zmq
 import threading
 import numpy as np
+from typing_extensions import override
 
-from callback_dispatcher import CallbackDispatcher
+from .callback_dispatcher import CallbackDispatcher
 
 
 # pip install pyzmq
@@ -21,6 +22,7 @@ class ZMQReceiver(threading.Thread):
         self._running = threading.Event()
         self._running.set()
 
+    @override
     def run(self) -> None:
         self._running = True
         

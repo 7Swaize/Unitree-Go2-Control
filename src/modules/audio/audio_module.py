@@ -1,6 +1,6 @@
 """
-Audio Module for Student Use
-============================
+Audio Module for User Use
+=========================
 
 This module provides simple text-to-speech functionality for the dog robot. 
 It wraps the underlying pyttsx3 engine and handles thread-safe playback.
@@ -17,10 +17,10 @@ from core.module import DogModule
 
 class AudioModule(DogModule):
     """
-    High-level text-to-speech interface for students. This is called internally,
+    High-level text-to-speech interface for users. This is called internally,
     and should not be accessed directly by users.
 
-    ``AudioModule`` allows students to easily play audio or speech
+    ``AudioModule`` allows users to easily play audio or speech
     using simple text commands. It supports both **blocking** and **asynchronous** playback.
 
     Notes
@@ -79,7 +79,7 @@ class AudioModule(DogModule):
 
         Notes
         -----
-        This method is primarily for advanced use cases. Students typically
+        This method is primarily for advanced use cases. Users typically
         do not need to call this directly. Unless they want to modify the 
         configuration of the text-to-speech
         """
@@ -92,7 +92,7 @@ class AudioModule(DogModule):
     @override
     def _shutdown(self) -> None:
         """
-        Shut down the audio module. This is handled automatically and shouldn't be called by students.
+        Shut down the audio module. This is handled automatically and shouldn't be called by users.
 
         Stops the text-to-speech engine and marks the module
         as uninitialized.

@@ -1,11 +1,11 @@
 """
-Input Module for Student Use
-============================
+Input Module for User Use
+=========================
 
 Handles remote controller input for the robot. This module can only function on the Unitree-Go2, with a correctly paired remote controller. 
 
 Users should not access or construct this class directly.
-Rather, they should access it through the :class:`~src.core.controller.Go2Controller` instance.
+Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
 
 
 This module allows users to:
@@ -21,9 +21,9 @@ interact only with the high-level :class:`InputModule` interface.
 from typing import Callable, Optional
 from typing_extensions import override
 
-from callback_manager import InputSignalCallbackManager, UnitreeRemoteControllerInputParser
-from controller_state import ControllerState
-from input_signal import InputSignal
+from .callback_manager import InputSignalCallbackManager, UnitreeRemoteControllerInputParser
+from .controller_state import ControllerState
+from .input_signal import InputSignal
 
 from core.module import DogModule
 from communication.dds.dds import DDS_TOPICS

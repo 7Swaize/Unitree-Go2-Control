@@ -1,3 +1,3 @@
 # Unitree Go2 Control
 
-API for students to program against. Work in progress. 
+API for users to program against. Work in progress. 
