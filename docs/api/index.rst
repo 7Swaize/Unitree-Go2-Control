@@ -6,7 +6,7 @@ This section contains the public API documentation for users working with the Un
 Core
 ----
 
-The entry point for all robot control:
+The entry point for all robot control.
 
 .. toctree::
    :maxdepth: 2
