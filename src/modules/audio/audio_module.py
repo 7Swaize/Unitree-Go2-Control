@@ -1,7 +1,7 @@
 import threading
 import pyttsx3
 from typing_extensions import override
-from core.module import DogModule
+from ...core.module import DogModule
 
 
 class AudioModule(DogModule):

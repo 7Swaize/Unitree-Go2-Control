@@ -4,9 +4,9 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
-from core.controller import Go2Controller
-from core.registry import ModuleType
-from modules.video.camera_source_factory import CameraSourceFactory
+from ..core.controller import Go2Controller
+from ..core.registry import ModuleType
+from ..modules.video.camera_source_factory import CameraSourceFactory
 
 import time
 import cv2

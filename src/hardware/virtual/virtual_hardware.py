@@ -3,7 +3,7 @@ import signal
 import subprocess
 from typing_extensions import override
 
-from hardware.interfaces.hardware_interface import HardwareInterface
+from ..interfaces.hardware_interface import HardwareInterface
 
 
 class VirtualHardware(HardwareInterface):

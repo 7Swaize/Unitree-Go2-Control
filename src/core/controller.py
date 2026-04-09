@@ -1,18 +1,18 @@
 import threading
 from typing import Callable, List, Dict
 
-from modules.input import InputSignal
-from core.module import DogModule
-from core.registry import ModuleRegistry, ModuleType
-from modules.audio import AudioModule
-from modules.input import InputModule
-from modules.movement import MovementModule
-from modules.ocr import OCRModule
-from modules.video import VideoModule
-from modules.lidar import LIDARModule
-from hardware.interfaces.hardware_interface import HardwareInterface
-from hardware.native.native_hardware import NativeHardware
-from hardware.virtual.virtual_hardware import VirtualHardware
+from ..modules.input import InputSignal
+from .module import DogModule
+from .registry import ModuleRegistry, ModuleType
+from ..modules.audio import AudioModule
+from ..modules.input import InputModule
+from ..modules.movement import MovementModule
+from ..modules.ocr import OCRModule
+from ..modules.video import VideoModule
+from ..modules.lidar import LIDARModule
+from ..hardware.interfaces.hardware_interface import HardwareInterface
+from ..hardware.native.native_hardware import NativeHardware
+from ..hardware.virtual.virtual_hardware import VirtualHardware
 
 
 # TTS: https://medium.com/@vndee.huynh/build-your-own-voice-assistant-and-run-it-locally-whisper-ollama-bark-c80e6f815cba
