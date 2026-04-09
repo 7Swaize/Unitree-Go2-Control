@@ -10,7 +10,7 @@ Internal Implementation Documentation
    :maxdepth: 3
    :caption: Internal Components:
 
-   controller
+   core
    dds
    validation
    video_module

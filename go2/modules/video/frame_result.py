@@ -5,19 +5,10 @@ from dataclasses import dataclass
 
 @dataclass
 class FrameResult:
-    """
-    Holds the output of a single camera capture.
+    """Holds the output of a single camera capture."""
 
-    Attributes
-    ----------
-    color : Optional[np.ndarray]
-        BGR color image (H, W, 3). Always present for color/RGB cameras.
-    depth : Optional[np.ndarray]
-        Depth image (H, W) in uint16. Only present for depth cameras.
-    """
-
-    color: Optional[np.ndarray] = None
-    depth: Optional[np.ndarray] = None
+    color: Optional[np.ndarray] = None  #: BGR color image (H, W, 3). Always present for color/RGB cameras.
+    depth: Optional[np.ndarray] = None  #: Depth image (H, W) in uint16. Only present for depth cameras.
 
     @property
     def has_any(self) -> bool:

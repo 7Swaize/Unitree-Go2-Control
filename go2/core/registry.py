@@ -28,28 +28,19 @@ class ModuleType(Enum):
     LIDAR = auto()
 
 
+
 @dataclass
 class ModuleDescriptor(Generic[T]):
     """
     Descriptor linking a module type to its implementation.
 
-    A descriptor contains all metadata required to construct and display a module in the system.
-
-    Attributes
-    ----------
-    _module_type : ModuleType
-        Enum identifying the module.
-    _module_class : Type[DogModule]
-        Concrete implementation class.
-    _display_name : str
-        Human-readable name.
-    _requires_sdk : bool, optional
-        Whether this module requires SDK support.
+    Contains all metadata required to construct and display a module in the system.
     """
-    _module_type: ModuleType
-    _module_class: Type[T]
-    _display_name: str
-    _requires_sdk: bool = False
+
+    _module_type: ModuleType  #: Enum identifying the module
+    _module_class: Type[T]  #: Concrete implementation class
+    _display_name: str  #: Human-readable name
+    _requires_sdk: bool = False  #: Whether this module requires SDK support
     
     def _create_instance(self, *args, **kwargs) -> T:
         """

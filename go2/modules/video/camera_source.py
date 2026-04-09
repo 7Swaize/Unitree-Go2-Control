@@ -218,7 +218,7 @@ class OpenCVCameraSource(CameraSource):
 # Align: https://github.com/realsenseai/librealsense/blob/master/wrappers/python/examples/align-depth2color.py
 # Optimzation/Configs: https://dev.realsenseai.com/docs/tuning-depth-cameras-for-best-performance
 
-class RealSenseDepthCamera(CameraSource):
+class RealSenseDepthCameraSource(CameraSource):
     """
     Intel RealSense RGB-D camera source.
 

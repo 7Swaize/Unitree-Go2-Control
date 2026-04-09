@@ -7,28 +7,48 @@ Video Control (Internal)
    Users should **not** use these classes directly.
 
 
-Camera Source
--------------
+Camera Sources
+--------------
 
-.. automodule:: go2.modules.video.camera_source
+.. autoclass:: go2.modules.video.camera_source.CameraSource
+   :members:
+   :private-members:
+   :show-inheritance:
+
+.. autoclass:: go2.modules.video.camera_source.NativeCameraSource
+   :members:
+   :private-members:
+   :show-inheritance:
+
+.. autoclass:: go2.modules.video.camera_source.OpenCVCameraSource
+   :members:
+   :private-members:
+   :show-inheritance:
+
+.. autoclass:: go2.modules.video.camera_source.RealSenseDepthCameraSource
    :members:
    :private-members:
    :show-inheritance:
 
 
-Frame Buffer
-------------
+Video streaming
+---------------
 
-.. automodule:: go2.modules.video.frame_buffer
+.. autoclass:: go2.modules.video.streamer.OpenCVStreamTrack
+   :members:
+   :private-members:
+   :show-inheritance:
+
+.. autoclass:: go2.modules.video.streamer.WebRTCStreamer
    :members:
    :private-members:
    :show-inheritance:
 
 
-Streamer
---------
+Utilities
+---------
 
-.. automodule:: go2.modules.video.streamer
+.. autoclass:: go2.modules.video.frame_buffer.FrameBuffer
    :members:
    :private-members:
    :show-inheritance:

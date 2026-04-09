@@ -8,25 +8,17 @@ camera or streaming classes directly.
 
 Users should not access or construct this class directly. Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
 
-.. automodule:: go2.modules.video.video_module
+.. autoclass:: go2.modules.video.video_module.VideoModule
    :members:
    :undoc-members:
    :show-inheritance:
 
-
-Camera Source Factory
-=====================
-
-.. automodule:: go2.modules.video.camera_source_factory
+.. autoclass:: go2.modules.video.camera_source_factory.CameraSourceFactory
    :members:
    :undoc-members:
    :show-inheritance:
 
-
-Frame Result
-============
-
-.. automodule:: go2.modules.video.frame_result
+.. autoclass:: go2.modules.video.frame_result.FrameResult
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,8 +1,4 @@
-import os
-from typing import Optional
-
 import asyncio
-import json
 import queue
 import threading
 import socket

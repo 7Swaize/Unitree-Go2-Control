@@ -7,29 +7,12 @@ Controller Input Control (Internal)
    Users should **not** use these classes directly.
 
 
-Controller State
-----------------
-
-.. automodule:: go2.modules.input.controller_state
+.. autoclass:: go2.modules.input.callback_manager.InputSignalCallbackManager
    :members:
    :private-members:
    :show-inheritance:
 
-
-Input Signal
-------------
-
-.. automodule:: go2.modules.input.input_signal
+.. autoclass:: go2.modules.input.callback_manager.Callback
    :members:
    :private-members:
    :show-inheritance:
-
-
-Callback Manager
-----------------
-
-.. automodule:: go2.modules.input.callback_manager
-   :members:
-   :private-members:
-   :show-inheritance:
-

@@ -11,7 +11,7 @@ The entry point for all robot control.
 .. toctree::
    :maxdepth: 2
 
-   controller
+   core
 
 Default Modules
 ---------------

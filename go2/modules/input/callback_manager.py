@@ -13,26 +13,15 @@ _ANALOG_SIGNALS = {
 }
 
 
-@dataclass
 class Callback:
     """
     Represents a registered callback for a controller input signal.
-
-    Attributes
-    ----------
-    callback : Callable[[ControllerState], None]
-        Function to call when the signal triggers
-    signal : InputSignal
-        Signal associated with this callback
-    name : Optional[str]
-        Human-readable identifier for the callback
-    threshold : float
-        Minimum change required to trigger for analog inputs
     """
-    callback: Callable[[ControllerState], None]
-    signal: InputSignal
-    name: Optional[str] = None
-    threshold: float = 0.1
+
+    callback: Callable[[ControllerState], None]  #: Function to call when the signal triggers
+    signal: InputSignal  #: Signal associated with this callback
+    name: Optional[str] = None  #: Human-readable identifier for the callback
+    threshold: float = 0.1  #: Minimum change required to trigger for analog inputs
 
 
 class InputSignalCallbackManager:

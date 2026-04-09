@@ -20,7 +20,6 @@ Hardware Control
 
 Hardware Interface
 ~~~~~~~~~~~~~~~~~~
-
 .. automodule:: go2.hardware.interfaces.hardware_interface
    :members:
    :private-members:
@@ -41,10 +40,11 @@ Virtual Hardware
    :show-inheritance:
 
 
-Module Registry
----------------
+Module Management
+-----------------
 
-.. automodule:: go2.core.registry
+.. autoclass:: go2.core.registry.ModuleDescriptor
    :members:
-   :private-members:
+   :undoc-members:
    :show-inheritance:
+

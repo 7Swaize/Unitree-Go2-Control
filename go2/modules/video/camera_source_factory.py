@@ -1,4 +1,4 @@
-from .camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCamera, NativeCameraSource
+from .camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCameraSource, NativeCameraSource
 
 
 class CameraSourceFactory:
@@ -75,4 +75,4 @@ class CameraSourceFactory:
         -----
         Requires an Intel RealSense camera and the RealSense SDK.
         """
-        return RealSenseDepthCamera()
+        return RealSenseDepthCameraSource()
