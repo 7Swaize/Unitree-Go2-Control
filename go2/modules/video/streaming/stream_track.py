@@ -1,54 +1,63 @@
+import asyncio
+import threading
+from fractions import Fraction
+from typing import Optional
+ 
+import cv2
+import numpy as np
 from aiortc import VideoStreamTrack
 from av import VideoFrame
 
-import numpy as np
-import queue
-
+from .stream_config import StreamConfig
 
 # command to install rtc: pip install aiortc opencv-python
 
 class OpenCVStreamTrack(VideoStreamTrack):
-    """
-    Video stream track that supplies frames from a local queue to WebRTC.
-
-    This class wraps a `queue.Queue` of frames and presents them as
-    an `aiortc.VideoStreamTrack`. It is designed for internal use
-    by `WebRTCStreamer`.
-
-    Parameters
-    ----------
-    frame_queue : queue.Queue
-        A thread-safe queue containing frames to stream.
-    """
-    def __init__(self, frame_queue):
+    def __init__(self, stream_config: StreamConfig) -> None:
         super().__init__()
-        self._frame_queue = frame_queue
-        self._last_frame = np.zeros((480, 640, 3), dtype=np.uint8)
-        self._frame_count = 0
+        self._stream_config = stream_config
 
-    async def recv(self):
-        """
-        Receive the next video frame for WebRTC.
+        yuv_height = stream_config.height * 3 // 2
+        self._bufs = [
+            np.zeros((yuv_height, stream_config.width), dtype=np.uint8),
+            np.zeros((yuv_height, stream_config.width), dtype=np.uint8),
+        ]
+        self._write_idx: int = 0
+        self._lock = threading.Lock()
+        self._start_time: Optional[float] = None
 
-        Retrieves the latest frame from the internal queue. If no
-        frame is available, the last frame is repeated.
-        """
-        pts, time_base = await self.next_timestamp()
 
-        frame = None
-        while True:
-            try:
-                frame = self._frame_queue.get_nowait()
-            except queue.Empty:
-                break
-        
-        if frame is not None:
-            self._last_frame = frame
-            self._frame_count += 1
+    def push_frame(self, bgr_frame: np.ndarray) -> None:
+        if bgr_frame is None:
+            return
+ 
+        h, w = bgr_frame.shape[:2]
+        if w != self._stream_config.width or h != self._stream_config.height:
+            bgr_frame = cv2.resize(
+                bgr_frame, (self._stream_config.width, self._stream_config.height), interpolation=cv2.INTER_LINEAR
+            )
+ 
+        yuv = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2YUV_I420)
+ 
+        inactive = 1 - self._write_idx
+        np.copyto(self._bufs[inactive], yuv)
+        with self._lock:
+            self._write_idx = inactive
 
-        frame = self._last_frame.copy()
 
-        av_frame = VideoFrame.from_ndarray(frame, format="bgr24")
-        av_frame.pts = pts
-        av_frame.time_base = time_base
+    async def recv(self) -> VideoFrame:
+        loop = asyncio.get_event_loop()
+ 
+        if self._start_time is None:
+            self._start_time = loop.time()
+ 
+        elapsed = loop.time() - self._start_time
+        frame_idx = int(elapsed * self._stream_config.fps)
+ 
+        with self._lock:
+            read_idx = self._write_idx
+ 
+        av_frame = VideoFrame.from_ndarray(self._bufs[read_idx], format="yuv420p")
+        av_frame.pts = frame_idx
+        av_frame.time_base = Fraction(1, self._stream_config.fps) # weird
         return av_frame

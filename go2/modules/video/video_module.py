@@ -4,6 +4,7 @@ import numpy as np
 
 from ...core.module import DogModule
 from .streaming.streamer import WebRTCStreamer
+from .streaming.stream_config import StreamConfig
 from .camera_source import CameraSource
 from .camera_group import CameraGroup
 from .frame_result import FrameResult, MultiFrameResult
@@ -25,17 +26,20 @@ class VideoModule(DogModule):
     camera_source : CameraSource or CameraGroup
         - A :class:`~modules.video.camera_source.CameraSource` instance provided by :class:`~modules.video.camera_source_factory.CameraSourceFactory`
         - A :class:`~modules.video.camera_group.CameraGroup` instance provided by :class:`~modules.video.camera_source_factory.CameraSourceFactory`
+    stream_config : StreamConfig
+        - A :class:`~modules.video.streaming.stream_config.StreamConfig` instance provided by the user
+
 
     Notes
     -----
-    - Camera initialization is handled automatically.
-    - Frames are retrieved using :meth:`get_frame`.
-    - Streaming must be explicitly started before sending frames.
+    - Call :meth:`start_stream_server` before :meth:`send_frame`.
+    - :meth:`get_frames` is non-blocking and may return an empty :class:`FrameResult` if the camera has not produced a frame yet.
     """
 
-    def __init__(self, camera_source: Union[CameraSource, CameraGroup]) -> None:
+    def __init__(self, camera_source: Union[CameraSource, CameraGroup], stream_config: StreamConfig = StreamConfig()) -> None:
         super().__init__("Video")
         self._camera_source = camera_source
+        self._stream_config = stream_config
         self._streamer = None
         self._streaming = False
         
@@ -54,7 +58,7 @@ class VideoModule(DogModule):
             return
         
         self._camera_source._initialize()
-        self._streamer = WebRTCStreamer()
+        self._streamer = WebRTCStreamer(self._stream_config)
         self._streaming = False
         self._initialized = True
 
@@ -111,6 +115,22 @@ class VideoModule(DogModule):
             raise RuntimeError("[Video] Stream server not started. Please start the stream server before sending frames.")
 
         self._streamer._send(frame)
+
+
+    def get_stream_url(self) -> str:
+        """
+        Return the full WebRTC stream URL for this machine.
+ 
+        Raises
+        ------
+        RuntimeError
+            If the server has not been started.
+        """
+        if not self._streaming:
+            raise RuntimeError("[Video] Stream server is not running.")
+        
+        ip = self._streamer._get_local_ip_address()
+        return f"http://{ip}:{self._stream_config.port}/"
 
     def get_stream_server_local_ip(self) -> str:
         """

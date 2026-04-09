@@ -1,56 +1,28 @@
 import numpy as np
-import queue
+import threading
 
 from typing import Optional
 
 
 class FrameBuffer:
-    """
-    Thread-safe fixed-size buffer for storing video frames.
-
-    This class wraps a `queue.Queue` to maintain a limited number
-    of frames in memory. Older frames are dropped if the buffer
-    is full. Designed for internal use by camera sources and
-    streaming modules.
-
-    Parameters
-    ----------
-    max_size : int, optional
-        Maximum number of frames to store in the buffer (default is 10).
-
-    Attributes
-    ----------
-    _queue : queue.Queue
-        Internal queue storing NumPy ndarray frames.
-    """
-    def __init__(self, max_size: int = 10) -> None:
-        self._queue = queue.Queue(maxsize=max_size)
-
-
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._frame: Optional[np.ndarray] = None
+ 
     def put(self, item: np.ndarray) -> None:
-        try:
-            self._queue.put_nowait(item)
-        except queue.Full:
-            _ = self._queue.get_nowait()
-            self._queue.put_nowait(item)
-
+        with self._lock:
+            self._frame = item
+ 
     def get(self) -> Optional[np.ndarray]:
-        try:
-            return self._queue.get_nowait()
-        except queue.Empty:
-            return None
-
-    def get_batch(self, batch_size: int) -> list[np.ndarray]:
-        items = []
-
-        for _ in range(batch_size):
-            try:
-                items.append(self._queue.get_nowait())
-            except queue.Empty:
-                break
-
-        return items
-
+        with self._lock:
+            frame = self._frame
+            self._frame = None
+            return frame
+ 
+    def peek(self) -> Optional[np.ndarray]:
+        with self._lock:
+            return self._frame
+ 
     def clear(self) -> None:
-        while not self._queue.empty():
-            _ = self._queue.get_nowait()
+        with self._lock:
+            self._frame = None
