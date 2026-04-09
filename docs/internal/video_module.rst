@@ -10,7 +10,7 @@ Video Control (Internal)
 Camera Source
 -------------
 
-.. automodule:: src.modules.video.camera_source
+.. automodule:: go2.modules.video.camera_source
    :members:
    :private-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ Camera Source
 Frame Buffer
 ------------
 
-.. automodule:: src.modules.video.frame_buffer
+.. automodule:: go2.modules.video.frame_buffer
    :members:
    :private-members:
    :show-inheritance:
@@ -28,7 +28,7 @@ Frame Buffer
 Streamer
 --------
 
-.. automodule:: src.modules.video.streamer
+.. automodule:: go2.modules.video.streamer
    :members:
    :private-members:
    :show-inheritance:

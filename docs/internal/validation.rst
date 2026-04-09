@@ -7,7 +7,7 @@ State Validation (Internal)
    Users should **not** use these classes directly.
 
 
-.. automodule:: src.states.validation
+.. automodule:: go2.states.validation
    :members:
    :private-members:
    :show-inheritance:

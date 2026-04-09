@@ -15,7 +15,7 @@ Internally, it wraps the low-level Unitree SDK or controller parser, but users
 interact only with the high-level :class:`~modules.input.input_module.InputModule` interface.
 
 
-.. automodule:: src.modules.input.input_module
+.. automodule:: go2.modules.input.input_module
    :members:
    :undoc-members:
    :show-inheritance:

@@ -36,7 +36,6 @@ These modules must be **explicitly added** using ``controller.add_module()``.
    audio_module
    lidar_module
    ocr_module
-   aruko_helpers
 
 State Machine & Architecture
 -----------------------------

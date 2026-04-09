@@ -9,7 +9,7 @@ Core Framework (Internal)
 Base Module
 -----------
 
-.. automodule:: src.core.module
+.. automodule:: go2.core.module
    :members:
    :private-members:
    :show-inheritance:
@@ -21,21 +21,21 @@ Hardware Control
 Hardware Interface
 ~~~~~~~~~~~~~~~~~~
 
-.. automodule:: src.hardware.interfaces.hardware_interface
+.. automodule:: go2.hardware.interfaces.hardware_interface
    :members:
    :private-members:
    :show-inheritance:
 
 Native Hardware
 ~~~~~~~~~~~~~~~
-.. automodule:: src.hardware.native.native_hardware
+.. automodule:: go2.hardware.native.native_hardware
    :members:
    :private-members:
    :show-inheritance:
 
 Virtual Hardware
 ~~~~~~~~~~~~~~~~
-.. automodule:: src.hardware.virtual.virtual_hardware
+.. automodule:: go2.hardware.virtual.virtual_hardware
    :members:
    :private-members:
    :show-inheritance:
@@ -44,7 +44,7 @@ Virtual Hardware
 Module Registry
 ---------------
 
-.. automodule:: src.core.registry
+.. automodule:: go2.core.registry
    :members:
    :private-members:
    :show-inheritance:

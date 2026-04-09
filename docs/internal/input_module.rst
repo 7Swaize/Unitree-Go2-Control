@@ -10,7 +10,7 @@ Controller Input Control (Internal)
 Controller State
 ----------------
 
-.. automodule:: src.modules.input.controller_state
+.. automodule:: go2.modules.input.controller_state
    :members:
    :private-members:
    :show-inheritance:
@@ -19,7 +19,7 @@ Controller State
 Input Signal
 ------------
 
-.. automodule:: src.modules.input.input_signal
+.. automodule:: go2.modules.input.input_signal
    :members:
    :private-members:
    :show-inheritance:
@@ -28,7 +28,7 @@ Input Signal
 Callback Manager
 ----------------
 
-.. automodule:: src.modules.input.callback_manager
+.. automodule:: go2.modules.input.callback_manager
    :members:
    :private-members:
    :show-inheritance:

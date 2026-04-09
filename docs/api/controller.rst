@@ -7,7 +7,7 @@ Users should interact exclusively with :class:`~core.controller.Go2Controller`, 
 high-level functionality such as movement, video, audio, OCR, input, and LIDAR through properties.
 
 
-.. automodule:: src.core.controller
+.. automodule:: go2.core.controller
    :members:
    :undoc-members:
    :show-inheritance:

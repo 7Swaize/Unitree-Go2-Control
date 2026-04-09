@@ -2,6 +2,7 @@
 requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 
 [project]
 name = "unitree-go2"
@@ -32,4 +33,4 @@ test = ["pytest"]
 
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["go2"]
