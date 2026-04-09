@@ -22,3 +22,13 @@ Users should not access or construct this class directly. Rather, they should ac
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. autoclass:: go2.modules.video.frame_result.MultiFrameResult
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: go2.modules.video.streaming.stream_config.StreamConfig
+   :members:
+   :undoc-members:
+   :show-inheritance:

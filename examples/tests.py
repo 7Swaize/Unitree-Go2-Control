@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from go2.core import Go2Controller, ModuleType
-from go2.modules.video import CameraSourceFactory
+from go2.modules.video import CameraSourceFactory, StreamConfig
 
 
 

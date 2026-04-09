@@ -31,9 +31,7 @@ class FrameResult:
 
 @dataclass
 class MultiFrameResult:
-    """
-    Holds frame results from a group of named cameras.
-    """
+    """Holds frame results from a group of named cameras."""
 
     frames: Dict[str, FrameResult] #: Maps camera name to its latest FrameResult, or an empty FrameResult if that camera had no frame ready this cycle.
 

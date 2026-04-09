@@ -31,6 +31,12 @@ Camera Sources
    :show-inheritance:
 
 
+.. autoclass:: go2.modules.video.camera_group.CameraGroup
+   :members:
+   :private-members:
+   :show-inheritance:
+
+
 Video streaming
 ---------------
 

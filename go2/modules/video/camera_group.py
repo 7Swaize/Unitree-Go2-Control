@@ -5,16 +5,6 @@ from .frame_result import MultiFrameResult
 
 
 class CameraGroup:
-    """
-    Manages a named collection of camera sources as a single unit.
-    Frames from all cameras are returned together as a :class:`MultiFrameResult` keyed by the names you assign.
-
-    Parameters
-    ----------
-    sources : Dict[str, CameraSource]
-        A mapping of camera name to camera source.
-    """
-
     def __init__(self, sources: Dict[str, CameraSource]) -> None:
         if not sources:
             raise ValueError("[Video] CameraGroup requires atleast one camera source")
