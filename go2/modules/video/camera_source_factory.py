@@ -1,3 +1,5 @@
+from typing import Dict
+from .camera_group import CameraGroup
 from .camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCameraSource, NativeCameraSource
 
 
@@ -61,3 +63,17 @@ class CameraSourceFactory:
         Requires an Intel RealSense camera and the RealSense SDK.
         """
         return RealSenseDepthCameraSource()
+    
+
+    @staticmethod
+    def create_camera_group(sources: Dict[str, CameraSource]) -> CameraGroup:
+        """
+        Create a named group of camera sources for multi-camera setups.
+
+        Parameters
+        ----------
+        sources : Dict[str, CameraSource]
+            Mapping of camera name to camera source. Names are used
+            to key frames in the returned MultiFrameResult.
+        """
+        return CameraGroup(sources)

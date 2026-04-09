@@ -43,14 +43,14 @@ class CameraSource(ABC):
         pass
     
     @abstractmethod
-    def _get_frame(self) -> FrameResult:
+    def _get_frames(self) -> FrameResult:
         """
-        Retrieve the next frame from the camera source
+        Retrieve the next frame(s) (represented as a ``FrameResult`` object) from the camera source
 
         Notes
         -----
         - This method does **not** block.
-        - Implementations typically return the latest frame stored in a buffer.
+        - Implementations typically return the latest ``FrameResult`` object stored in a buffer.
         """
         pass
 
@@ -111,7 +111,7 @@ class NativeCameraSource(CameraSource):
                 continue
 
     @override
-    def _get_frame(self) -> FrameResult:
+    def _get_frames(self) -> FrameResult:
         """Retrieve the latest frame from the Unitree Go2's internal camera source."""
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
@@ -179,7 +179,7 @@ class OpenCVCameraSource(CameraSource):
         self._capture.release()
 
     @override
-    def _get_frame(self) -> FrameResult:
+    def _get_frames(self) -> FrameResult:
         """Retrieve the latest frame from the OpenCV camera source."""
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
@@ -261,7 +261,7 @@ class RealSenseDepthCameraSource(CameraSource):
 
 
     @override
-    def _get_frame(self) -> FrameResult:
+    def _get_frames(self) -> FrameResult:
         """Retrieve the latest aligned color and depth frames."""
         with self._lock:
             latest_color = self._color_frame_buffer.get()

@@ -13,7 +13,10 @@ class Tests:
         self.unitree_controller.register_cleanup_callback(self.shutdown_callback)
 
         self.unitree_controller.add_module(ModuleType.AUDIO)
-        self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_opencv_camera())
+        self.unitree_controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
+            "depth": CameraSourceFactory.create_depth_camera(),
+            "opencv": CameraSourceFactory.create_opencv_camera()
+        }))
         # self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
         
         self.unitree_controller.video.start_stream_server()
@@ -24,7 +27,7 @@ class Tests:
     def test_depth_camera(self):
         try:
             while True:
-                frame_result = self.unitree_controller.video.get_frame()
+                frame_result = self.unitree_controller.video.get_frames()
                 print(frame_result)
 
                 if frame_result.has_any:
@@ -53,7 +56,7 @@ class Tests:
     
     def test_streaming(self):
         while True:
-            frame_result = self.unitree_controller.video.get_frame()
+            frame_result = self.unitree_controller.video.get_frames()["opencv"]
             if not frame_result.has_color:
                 continue
             

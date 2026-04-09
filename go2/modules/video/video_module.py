@@ -1,10 +1,12 @@
-from typing_extensions import override
+from typing import Union
+from typing_extensions import override, overload
 import numpy as np
 
 from ...core.module import DogModule
-from .streamer import WebRTCStreamer
+from .streaming.streamer import WebRTCStreamer
 from .camera_source import CameraSource
-from .frame_result import FrameResult
+from .camera_group import CameraGroup
+from .frame_result import FrameResult, MultiFrameResult
 
 
 class VideoModule(DogModule):
@@ -20,9 +22,9 @@ class VideoModule(DogModule):
 
     Parameters
     ----------
-    camera_source : CameraSource
-        A camera source provided by the system (e.g. dog camera,
-        webcam, or depth camera). Requires a :class:`~modules.video.camera_source.CameraSource` instance.
+    camera_source : CameraSource or CameraGroup
+        - A :class:`~modules.video.camera_source.CameraSource` instance provided by :class:`~modules.video.camera_source_factory.CameraSourceFactory`
+        - A :class:`~modules.video.camera_group.CameraGroup` instance provided by :class:`~modules.video.camera_source_factory.CameraSourceFactory`
 
     Notes
     -----
@@ -30,9 +32,9 @@ class VideoModule(DogModule):
     - Frames are retrieved using :meth:`get_frame`.
     - Streaming must be explicitly started before sending frames.
     """
-    def __init__(self, camera_source: CameraSource) -> None:
+
+    def __init__(self, camera_source: Union[CameraSource, CameraGroup]) -> None:
         super().__init__("Video")
-        
         self._camera_source = camera_source
         self._streamer = None
         self._streaming = False
@@ -54,21 +56,22 @@ class VideoModule(DogModule):
         self._camera_source._initialize()
         self._streamer = WebRTCStreamer()
         self._streaming = False
-        
         self._initialized = True
 
 
-    def get_frame(self) -> FrameResult:
+    def get_frames(self) -> Union[FrameResult, MultiFrameResult]:
         """
-        Retrieve the latest camera frame.
+        Retrieve the latest frame(s) from all cameras. ``FrameResult`` objects will be empty 
+        if no frame was currently available.
 
         Returns
         -------
         FrameResult
-            A FrameResult containing color and/or depth data. 
-            An empty FrameResult object is returned if no frame is currently available
+            If constructed with a single ``CameraSource``.
+        MultiFrameResult
+            If constructed with a ``CameraGroup``.
         """
-        return self._camera_source._get_frame()
+        return self._camera_source._get_frames()
 
 
     def start_stream_server(self) -> None:
@@ -85,7 +88,7 @@ class VideoModule(DogModule):
         """
         if self._streaming:
             raise RuntimeError("[Video] Stream server already started.")
-        
+
         self._streamer._start_in_thread()
         self._streaming = True
 

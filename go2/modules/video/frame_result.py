@@ -1,8 +1,7 @@
-from ast import List
 from collections.abc import Iterator
 
 import numpy as np
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 
@@ -55,7 +54,7 @@ class MultiFrameResult:
     def available_frames(self) -> Iterator[tuple[str, FrameResult]]:
         """An iterable collection of (name, result) pairs where a frame was actually captured."""
         for name, result in self.frames.items():
-            if result is not None and result.available:
+            if result.has_any:
                 yield name, result
 
     def all_available(self) -> bool:

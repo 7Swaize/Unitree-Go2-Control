@@ -34,12 +34,12 @@ Camera Sources
 Video streaming
 ---------------
 
-.. autoclass:: go2.modules.video.streamer.OpenCVStreamTrack
+.. autoclass:: go2.modules.video.streaming.streamer.WebRTCStreamer
    :members:
    :private-members:
    :show-inheritance:
 
-.. autoclass:: go2.modules.video.streamer.WebRTCStreamer
+.. autoclass:: go2.modules.video.streaming.stream_track.OpenCVStreamTrack
    :members:
    :private-members:
    :show-inheritance:
