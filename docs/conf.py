@@ -5,21 +5,18 @@ import sys
 
 sys.path.insert(0, os.path.abspath('..'))
 
-# -- Project information -----------------------------------------------------
 
 project = 'Unitree-Go2-Control'
 copyright = '2026, Sachit Raheja'
 author = 'Sachit Raheja'
 release = '0.0.1'
 
-# -- General configuration ---------------------------------------------------
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosummary',
-    'sphinx_copybutton',
+    'sphinx_copybutton'
 ]
 
 # Mock imports for modules that may not be available

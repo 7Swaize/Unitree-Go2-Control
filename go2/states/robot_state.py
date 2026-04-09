@@ -22,12 +22,12 @@ from ..core.controller import Go2Controller
 from .validation import CancellableMeta
 
 
-class DogStateAbstract(ABC, metaclass=CancellableMeta):
-    """Abstract base class for dog behavior states."""
+class Go2StateAbstract(ABC, metaclass=CancellableMeta):
+    """Abstract base class for robot behavior states."""
     
     def __init__(self, unitree_controller: Go2Controller):
         """
-        Initialize a dog behavior state.
+        Initialize a robot behavior state.
 
         Parameters
         ----------

@@ -45,4 +45,4 @@ For building behavior using a state machine pattern:
 .. toctree::
    :maxdepth: 2
 
-   dog_state
+   robot_state

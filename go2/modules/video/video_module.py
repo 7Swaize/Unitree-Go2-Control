@@ -1,11 +1,10 @@
-from typing import Any, Optional, Tuple
 from typing_extensions import override
-
 import numpy as np
 
 from ...core.module import DogModule
 from .streamer import WebRTCStreamer
 from .camera_source import CameraSource
+from .frame_result import FrameResult
 
 
 class VideoModule(DogModule):
@@ -28,7 +27,7 @@ class VideoModule(DogModule):
     Notes
     -----
     - Camera initialization is handled automatically.
-    - Frames are retrieved using :meth:`get_frames`.
+    - Frames are retrieved using :meth:`get_frame`.
     - Streaming must be explicitly started before sending frames.
     """
     def __init__(self, camera_source: CameraSource):
@@ -59,38 +58,25 @@ class VideoModule(DogModule):
         self._initialized = True
 
 
-    def get_frames(self) -> Tuple[int, Optional[Any]]:
+    def get_frame(self) -> FrameResult:
         """
-        Retrieve the latest camera frame(s).
-
-        Depending on the camera type, this method may return:
-            - A single color image (RGB/BGR)
-            - A tuple ``(color_frame, depth_frame)`` for depth cameras
-
+        Retrieve the latest camera frame.
 
         Returns
         -------
-        Tuple[int, Optional[Any]]
-            A tuple ``(status, frames)`` where:
-
-                - ``status`` is ``0`` if frame data is available
-                - ``status`` is ``-1`` if no frame data is available
-                - ``frames`` is one of:
-                
-                    * ``numpy.ndarray`` — a single color image
-                    * ``Tuple[numpy.ndarray, numpy.ndarray]`` — ``(color, depth)``
-                    * ``None`` — if no frame is available
+        FrameResult
+            A FrameResult containing color and/or depth data. 
+            An empty FrameResult object is returned if no frame is currently available
         """
-        return self._camera_source._get_frames()
+        return self._camera_source._get_frame()
 
 
     def start_stream_server(self) -> None:
         """
         Start the video streaming server.
 
-        This launches a local WebRTC server that allows video frames
-        to be viewed in a browser. Only clients connected to the same
-        subnet as the robot can access the stream.
+        This launches a local WebRTC server that allows video frames to be viewed in a browser.
+        Only clients connected to the same subnet as the robot can access the stream.
 
         Raises
         ------
@@ -111,7 +97,7 @@ class VideoModule(DogModule):
         ----------
         frame : numpy.ndarray
             An image frame to stream (typically obtained from
-            :meth:`get_frames`).
+            :meth:`get_frame`).
 
         Raises
         ------

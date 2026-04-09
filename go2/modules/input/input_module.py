@@ -44,8 +44,6 @@ class InputModule(DogModule):
 
         self._input_parser = UnitreeRemoteControllerInputParser()
         self._callback_manager = InputSignalCallbackManager()
-        self._ControllerState = ControllerState
-        self._InputSignal = InputSignal
 
         self._lowstate_subscriber = ChannelSubscriber(DDS_TOPICS['LOW_STATE'], LowState_)
         self._lowstate_subscriber.Init(self._process_input, 10)

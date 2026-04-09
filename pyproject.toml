@@ -32,5 +32,5 @@ docs = ["sphinx"]
 test = ["pytest"]
 
 
-[tool.setuptools.packages.find]
-where = ["go2"]
+[tool.setuptools]
+packages = ["go2"]

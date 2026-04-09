@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 import threading
-from typing import Optional, Tuple, Any
 from typing_extensions import override
 
 import cv2
 import numpy as np
 import pyrealsense2 as rs
+from unitree_sdk2py.go2.video.video_client import VideoClient
 
 from .frame_buffer import FrameBuffer
+from .frame_result import FrameResult
 
 class CameraSource(ABC):
     """
@@ -19,7 +20,7 @@ class CameraSource(ABC):
 
     All concrete camera implementations must implement:
         - ``initialize``: start the camera and any background threads
-        - ``get_frames``: retrieve the latest available frame(s)
+        - ``get_frames``: retrieve the latest available frame(s) in a :class:`video.FrameResult` object
         - ``shutdown``: safely stop the camera and release resources
 
     This abstraction allows higher-level modules (e.g. VideoModule)
@@ -42,19 +43,14 @@ class CameraSource(ABC):
         pass
     
     @abstractmethod
-    def _get_frames(self) -> Tuple[int, Optional[Any]]:
+    def _get_frame(self) -> FrameResult:
         """
-        Retrieve the next frame(s) from the camera source. The amount of frames
-        returned are implementation-dependent (e.g., single frame, color+depth
-        pair, etc.).
+        Retrieve the next frame from the camera source
 
         Returns
         -------
-        Tuple[int, Optional[Any]]
-            A tuple containing:
-
-                - An integer timestamp or frame index.
-                - The frame data, which can be in any format depending on the implementation (e.g., NumPy array, OpenCV frame, etc.). Returns None if no frame is available.
+        Optional[FrameResult]
+            A populated FrameResult if frames are available, otherwise None.
 
         Notes
         -----
@@ -90,11 +86,12 @@ class NativeCameraSource(CameraSource):
     Frames are captured in a background thread and stored in a frame buffer.
     '''
     def __init__(self):
-        self._video_client = None
+        self._video_client = VideoClient()
+        self._video_client.SetTimeout(3.0)
+        self._video_client.Init()
 
         self._thread = None
         self._stop_event = threading.Event()
-
         self._frame_buffer = FrameBuffer()
 
     @override
@@ -103,11 +100,6 @@ class NativeCameraSource(CameraSource):
         self._thread.start()
 
     def _capture_thread(self):
-        from unitree_sdk2py.go2.video.video_client import VideoClient
-        self._video_client = VideoClient()
-        self._video_client.SetTimeout(3.0)
-        self._video_client.Init()
-
         while not self._stop_event.is_set():
             try:
                 code, data = self._video_client.GetImageSample()
@@ -124,21 +116,19 @@ class NativeCameraSource(CameraSource):
                 continue
 
     @override
-    def _get_frames(self) -> Tuple[int, Optional[np.ndarray]]:
+    def _get_frame(self) -> FrameResult:
         '''
         Retrieve the latest frame from the Unitree Go2's internal camera source.
 
         Returns
         -------
-        Tuple[int, Optional[np.ndarray]]
-            ``(0, frame)`` if a frame is available
-            ``(-1, None)`` if no frame is available.
+        FrameResult
         '''
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
-            return -1, None
+            return FrameResult()
         
-        return 0, latest_frame.copy()
+        return FrameResult(color=latest_frame.copy())
         
     @override
     def _shutdown(self) -> None:
@@ -174,7 +164,6 @@ class OpenCVCameraSource(CameraSource):
 
         self._thread = None
         self._stop_event = threading.Event()
-
         self._frame_buffer = FrameBuffer()
 
     @override
@@ -184,7 +173,6 @@ class OpenCVCameraSource(CameraSource):
 
     def _capture_thread(self):
         self._capture = cv2.VideoCapture(self._camera_index)
-
         if not self._capture.isOpened():
             return
 
@@ -193,7 +181,6 @@ class OpenCVCameraSource(CameraSource):
                 ret, frame = self._capture.read()
                 if not ret:
                     continue
-
                 self._frame_buffer.put(frame)
 
             except Exception as e:
@@ -203,24 +190,19 @@ class OpenCVCameraSource(CameraSource):
         self._capture.release()
 
     @override
-    def _get_frames(self) -> Tuple[int, Optional[np.ndarray]]:
+    def _get_frame(self) -> FrameResult:
         '''
         Retrieve the latest frame from the OpenCV camera source.
 
         Returns
         -------
-        Tuple[int, Optional[np.ndarray]]
-            A tuple containing:
-
-            - ``(0, frame)`` if a frame is available
-            - ``(-1, None)`` if no frame is available.
+        FrameResult
         '''
         latest_frame = self._frame_buffer.get()
-        
         if latest_frame is None:
-            return -1, None
+            return FrameResult()
         
-        return 0, latest_frame.copy()
+        return FrameResult(color=latest_frame.copy())
     
     @override
     def _shutdown(self) -> None:
@@ -240,15 +222,9 @@ class RealSenseDepthCamera(CameraSource):
     """
     Intel RealSense RGB-D camera source.
 
-    This camera provides **aligned color and depth frames** using
-    the RealSense SDK. Frames are captured asynchronously in a
-    background thread.
-
-    ``get_frames`` returns a tuple ``(color, depth)`` where:
-        - ``color`` is a BGR image (H, W, 3)
-        - ``depth`` is a uint16 depth image (H, W)
+    This camera provides **aligned color and depth frames** using the RealSense SDK.
+    Frames are captured asynchronously in a background thread.
     """
-        
     def __init__(self):
         self._width: int = 848
         self._height: int = 480
@@ -302,24 +278,21 @@ class RealSenseDepthCamera(CameraSource):
 
 
     @override
-    def _get_frames(self) -> Tuple[int, Optional[Tuple[np.ndarray, np.ndarray]]]:
+    def _get_frame(self) -> FrameResult:
         """
         Retrieve the latest aligned color and depth frames.
 
         Returns
         -------
-        Tuple[int, Optional[Tuple[np.ndarray, np.ndarray]]]
-            ``(0, (color, depth))`` if frames are available, otherwise
-            ``(-1, None)``.
+        FrameResult
         """
         with self._lock:
             latest_color = self._color_frame_buffer.get()
             latest_depth = self._depth_frame_buffer.get()
-
             if latest_color is None or latest_depth is None:
-                return -1, None
+                return FrameResult()
         
-            return 0, (latest_color.copy(), latest_depth.copy())
+            return FrameResult(color=latest_color, depth=latest_depth)
 
 
     @override

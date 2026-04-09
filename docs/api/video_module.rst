@@ -17,9 +17,16 @@ Users should not access or construct this class directly. Rather, they should ac
 Camera Source Factory
 =====================
 
-A factory class for creating different types of camera sources for video capture.
-
 .. automodule:: go2.modules.video.camera_source_factory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Frame Result
+============
+
+.. automodule:: go2.modules.video.frame_result
    :members:
    :undoc-members:
    :show-inheritance:

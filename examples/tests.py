@@ -2,9 +2,9 @@ import time
 import cv2
 import numpy as np
 
-from go2.core.controller import Go2Controller
-from go2.core.registry import ModuleType
-from go2.modules.video.camera_source_factory import CameraSourceFactory
+from go2.core import Go2Controller, ModuleType
+from go2.modules.video import CameraSourceFactory
+
 
 
 class Tests:
@@ -24,10 +24,11 @@ class Tests:
     def test_depth_camera(self):
         try:
             while True:
-                status, frames = self.unitree_controller.video.get_frames()
+                frame_result = self.unitree_controller.video.get_frame()
+                print(frame_result)
 
-                if status == 0 and frames is not None:
-                    color, depth = frames
+                if frame_result.has_any:
+                    color, depth = frame_result.color, frame_result.depth
 
                     depth_colormap = cv2.applyColorMap(
                         cv2.convertScaleAbs(depth, alpha=0.03),
@@ -52,11 +53,11 @@ class Tests:
     
     def test_streaming(self):
         while True:
-            status, image = self.unitree_controller.video.get_frames()
-            if status != 0 or image is None:
+            frame_result = self.unitree_controller.video.get_frame()
+            if not frame_result.has_color:
                 continue
             
-            self.unitree_controller.video.send_frame(image)
+            self.unitree_controller.video.send_frame(frame_result.color)
 
     
     def test_audio(self):
