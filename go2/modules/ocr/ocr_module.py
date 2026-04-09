@@ -9,7 +9,7 @@ from ...core.module import DogModule
 class OCRModule(DogModule):
     """Handles optical character recognition"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("OCR")
 
 

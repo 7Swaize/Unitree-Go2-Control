@@ -14,7 +14,7 @@ class MovementModule(DogModule):
         The underlying hardware interface that communicates with the robot.
     """
 
-    def __init__(self, hardware: HardwareInterface):
+    def __init__(self, hardware: HardwareInterface) -> None:
         """
         Create the MovementModule. 
 

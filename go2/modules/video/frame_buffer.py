@@ -23,7 +23,7 @@ class FrameBuffer:
     _queue : queue.Queue
         Internal queue storing NumPy ndarray frames.
     """
-    def __init__(self, max_size: int = 10):
+    def __init__(self, max_size: int = 10) -> None:
         self._queue = queue.Queue(maxsize=max_size)
 
 

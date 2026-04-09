@@ -43,14 +43,7 @@ class ModuleDescriptor(Generic[T]):
     _requires_sdk: bool = False  #: Whether this module requires SDK support
     
     def _create_instance(self, *args, **kwargs) -> T:
-        """
-        Instantiate the module.
-
-        Returns
-        -------
-        DogModule
-            A new module instance.
-        """
+        """Instantiate the module."""
         return self._module_class(*args, **kwargs)
     
 
@@ -83,36 +76,18 @@ class ModuleRegistry:
 
     @classmethod
     def get_descriptor(cls, module_type: ModuleType) -> Optional[ModuleDescriptor]:
-        """
-        Retrieve the descriptor for a module type.
-
-        Returns
-        -------
-        ModuleDescriptor or None
-        """
+        """Retrieve the descriptor for a module type."""
         return cls._descriptors.get(module_type)
 
     @classmethod
     def get_class(cls, module_type: ModuleType) -> Optional[Type[DogModule]]:
-        """
-        Retrieve the implementation class for a module type.
-
-        Returns
-        -------
-        Type[DogModule] or None
-        """
+        """Retrieve the implementation class for a module type."""
         descriptor = cls._descriptors.get(module_type)
         return descriptor._module_class if descriptor else None
 
     @classmethod
     def is_registered(cls, module_type: ModuleType) -> bool:
-        """
-        Check whether a module type is registered.
-
-        Returns
-        -------
-        bool
-        """
+        """Check whether a module type is registered."""
         return module_type in cls._descriptors
 
     @classmethod
@@ -124,10 +99,6 @@ class ModuleRegistry:
         ----------
         sdk_enabled : bool, optional
             Whether SDK-dependent modules should be included.
-
-        Returns
-        -------
-        list of ModuleType
         """
         return [
             mt for mt, desc in cls._descriptors.items()

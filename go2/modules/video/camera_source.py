@@ -47,11 +47,6 @@ class CameraSource(ABC):
         """
         Retrieve the next frame from the camera source
 
-        Returns
-        -------
-        Optional[FrameResult]
-            A populated FrameResult if frames are available, otherwise None.
-
         Notes
         -----
         - This method does **not** block.
@@ -77,15 +72,15 @@ class CameraSource(ABC):
 
 
 class NativeCameraSource(CameraSource):
-    '''
+    """
     Native camera source backed by Unitree's VideoClient.
 
     This implementation is intended for:
         - Unitree Go2 robot cameras
 
     Frames are captured in a background thread and stored in a frame buffer.
-    '''
-    def __init__(self):
+    """
+    def __init__(self) -> None:
         self._video_client = VideoClient()
         self._video_client.SetTimeout(3.0)
         self._video_client.Init()
@@ -117,13 +112,7 @@ class NativeCameraSource(CameraSource):
 
     @override
     def _get_frame(self) -> FrameResult:
-        '''
-        Retrieve the latest frame from the Unitree Go2's internal camera source.
-
-        Returns
-        -------
-        FrameResult
-        '''
+        """Retrieve the latest frame from the Unitree Go2's internal camera source."""
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
             return FrameResult()
@@ -152,7 +141,7 @@ class OpenCVCameraSource(CameraSource):
     Frames are captured in a background thread and stored in a frame buffer.
     """
         
-    def __init__(self, camera_index: int = 0):
+    def __init__(self, camera_index: int = 0) -> None:
         """
         Parameters
         ----------
@@ -191,13 +180,7 @@ class OpenCVCameraSource(CameraSource):
 
     @override
     def _get_frame(self) -> FrameResult:
-        '''
-        Retrieve the latest frame from the OpenCV camera source.
-
-        Returns
-        -------
-        FrameResult
-        '''
+        """Retrieve the latest frame from the OpenCV camera source."""
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
             return FrameResult()
@@ -225,7 +208,7 @@ class RealSenseDepthCameraSource(CameraSource):
     This camera provides **aligned color and depth frames** using the RealSense SDK.
     Frames are captured asynchronously in a background thread.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self._width: int = 848
         self._height: int = 480
         self._fps: int = 30
@@ -279,13 +262,7 @@ class RealSenseDepthCameraSource(CameraSource):
 
     @override
     def _get_frame(self) -> FrameResult:
-        """
-        Retrieve the latest aligned color and depth frames.
-
-        Returns
-        -------
-        FrameResult
-        """
+        """Retrieve the latest aligned color and depth frames."""
         with self._lock:
             latest_color = self._color_frame_buffer.get()
             latest_depth = self._depth_frame_buffer.get()

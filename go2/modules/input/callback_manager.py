@@ -39,7 +39,7 @@ class InputSignalCallbackManager:
     - Stick movement is measured as vector distance
     - Call ``handle(state)`` with the latest ControllerState each update
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self._callbacks: Dict[InputSignal, List[Callback]] = {}
         self._previous_state = ControllerState()
 
@@ -138,11 +138,6 @@ class InputSignalCallbackManager:
         signal : InputSignal
         cb : Callback
         current_state : ControllerState
-
-        Returns
-        -------
-        bool
-            True if the signal change exceeds threshold
         """
         if signal == InputSignal.LEFT_STICK:
             return self._stick_changed('l', current_state, cb.threshold)
@@ -197,10 +192,10 @@ class UnitreeRemoteControllerInputParser:
     - Internal module only
     - Works with Unitree remote controller data format via Cyclonedds
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self._state = ControllerState()
 
-    def _parse_buttons(self, data1: int, data2: int):
+    def _parse_buttons(self, data1: int, data2: int) -> None:
         """
         Decode digital buttons from two byte sequences.
 

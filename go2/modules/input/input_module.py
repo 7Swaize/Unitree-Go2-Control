@@ -20,7 +20,7 @@ class InputModule(DogModule):
         Whether to use the Unitree SDK for input.
     """
     
-    def __init__(self, use_sdk: bool = False):
+    def __init__(self, use_sdk: bool = False) -> None:
         super().__init__("Input")
         self.use_sdk = use_sdk
 

@@ -30,7 +30,7 @@ class VideoModule(DogModule):
     - Frames are retrieved using :meth:`get_frame`.
     - Streaming must be explicitly started before sending frames.
     """
-    def __init__(self, camera_source: CameraSource):
+    def __init__(self, camera_source: CameraSource) -> None:
         super().__init__("Video")
         
         self._camera_source = camera_source
@@ -113,11 +113,6 @@ class VideoModule(DogModule):
         """
         Get the local IP address of the stream server.
 
-        Returns
-        -------
-        str
-            Local IP address where the stream is hosted.
-
         Raises
         ------
         RuntimeError
@@ -131,11 +126,6 @@ class VideoModule(DogModule):
     def get_stream_server_port(self) -> int:
         """
         Get the port number of the stream server.
-
-        Returns
-        -------
-        int
-            Port number used by the stream server.
 
         Raises
         ------

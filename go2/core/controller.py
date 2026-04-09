@@ -46,7 +46,7 @@ class Go2Controller:
     ModuleRegistry
     """
 
-    def __init__(self, use_sdk: bool):
+    def __init__(self, use_sdk: bool) -> None:
         """
         Create a new controller instance.
 
@@ -79,7 +79,7 @@ class Go2Controller:
         print(f"[Controller] Initialized in {'SDK' if use_sdk else 'SIMULATION'} mode\n")
 
 
-    def _initialize_input_bindings(self):
+    def _initialize_input_bindings(self) -> None:
         if self._use_sdk:
             self.input.register_callback(
                 InputSignal.BUTTON_A,
@@ -88,7 +88,7 @@ class Go2Controller:
             )
 
 
-    def _register_default_modules(self):
+    def _register_default_modules(self) -> None:
         self.add_module(ModuleType.MOVEMENT, hardware=self._hardware)
 
         if self._use_sdk:
@@ -131,24 +131,12 @@ class Go2Controller:
     
 
     def has_module(self, module_type: ModuleType) -> bool:
-        """
-        Check whether a module is currently loaded.
-
-        Returns
-        -------
-        bool
-        """
+        """Check whether a module is currently loaded."""
         return module_type in self._modules
     
     
     def get_available_modules(self) -> list[ModuleType]:
-        """
-        List all module types available in the current mode.
-
-        Returns
-        -------
-        list of ModuleType
-        """
+        """List all module types available in the current mode."""
         return ModuleRegistry.get_list_available(self._use_sdk)
     
 
@@ -156,10 +144,6 @@ class Go2Controller:
     def video(self) -> VideoModule:
         """
         Access the video capture module.
-
-        Returns
-        -------
-        VideoModule
 
         Raises
         ------
@@ -181,10 +165,6 @@ class Go2Controller:
         """
         Access the movement control module.
 
-        Returns
-        -------
-        MovementModule
-
         Raises
         ------
         RuntimeError
@@ -204,10 +184,6 @@ class Go2Controller:
     def ocr(self) -> OCRModule:
         """
         Access the ocr control module.
-
-        Returns
-        -------
-        OCRModule
 
         Raises
         ------
@@ -229,10 +205,6 @@ class Go2Controller:
         """
         Access the audio control module.
 
-        Returns
-        -------
-        AudioModule
-
         Raises
         ------
         RuntimeError
@@ -253,10 +225,6 @@ class Go2Controller:
         """
         Access the input control module.
 
-        Returns
-        -------
-        InputModule
-
         Raises
         ------
         RuntimeError
@@ -276,10 +244,6 @@ class Go2Controller:
     def lidar(self) -> LIDARModule:
         """
         Access the lidar control module.
-
-        Returns
-        -------
-        LIDARModule
 
         Raises
         ------
@@ -353,11 +317,5 @@ class Go2Controller:
 
 
     def is_shutdown_requested(self) -> bool:
-        """
-        Check if shutdown has been requested
-        
-        Returns
-        -------
-        bool
-        """
+        """Check if shutdown has been requested"""
         return self._shutdown_event.is_set()

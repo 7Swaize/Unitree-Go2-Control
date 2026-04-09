@@ -26,11 +26,6 @@ class CameraSourceFactory:
 
         This camera is typically used when running code directly on
         the robot hardware.
-
-        Returns
-        -------
-        CameraSource
-            A camera source compatible with :class:`VideoModule`.
         """
         return NativeCameraSource()
 
@@ -49,11 +44,6 @@ class CameraSourceFactory:
         ----------
         camera_index : int, optional
             Index of the OpenCV camera (default is 0).
-
-        Returns
-        -------
-        CameraSource
-            A camera source compatible with :class:`VideoModule`.
         """
         return OpenCVCameraSource(camera_index)
 
@@ -65,11 +55,6 @@ class CameraSourceFactory:
 
         This camera provides both color and depth frames. The returned
         camera source automatically aligns depth data to the color frame.
-
-        Returns
-        -------
-        CameraSource
-            A camera source compatible with :class:`VideoModule`.
 
         Notes
         -----

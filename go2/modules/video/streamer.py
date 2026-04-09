@@ -37,12 +37,6 @@ class OpenCVStreamTrack(VideoStreamTrack):
 
         Retrieves the latest frame from the internal queue. If no
         frame is available, the last frame is repeated.
-
-        Returns
-        -------
-        av.VideoFrame
-            The video frame in BGR24 format, ready to be sent
-            over WebRTC.
         """
         pts, time_base = await self.next_timestamp()
 
