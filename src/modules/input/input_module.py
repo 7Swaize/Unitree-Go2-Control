@@ -5,8 +5,8 @@ from .callback_manager import InputSignalCallbackManager, UnitreeRemoteControlle
 from .controller_state import ControllerState
 from .input_signal import InputSignal
 
-from core.module import DogModule
-from communication.dds.dds import DDS_TOPICS
+from ...core.module import DogModule
+from ...communication.dds.dds import DDS_TOPICS
 
 
 class InputModule(DogModule):

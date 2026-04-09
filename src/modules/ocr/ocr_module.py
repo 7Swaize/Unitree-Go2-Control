@@ -3,7 +3,7 @@ import numpy as np
 import pytesseract
 from typing_extensions import override
 
-from core.module import DogModule
+from ...core.module import DogModule
 
 
 class OCRModule(DogModule):

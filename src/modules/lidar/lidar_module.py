@@ -5,7 +5,7 @@ import numpy as np
 from typing import Callable, Any
 from typing_extensions import override
 
-from core.module import DogModule
+from ...core.module import DogModule
 from .callback_dispatcher import CallbackDispatcher
 from .zmq_receiver import ZMQReceiver
 

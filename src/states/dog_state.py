@@ -18,7 +18,7 @@ This framework provides:
 from abc import ABC, abstractmethod
 from typing import Any, final
 
-from core.controller import Go2Controller
+from ..core.controller import Go2Controller
 from .validation import CancellableMeta
 
 

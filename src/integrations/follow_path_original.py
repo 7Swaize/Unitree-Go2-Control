@@ -8,12 +8,12 @@ import cv2
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
 
-from integrations.aruko_helpers import *
+from .aruko_helpers import *
 
-from core.controller import Go2Controller
-from core.registry import ModuleType
-from states.dog_state import DogStateAbstract
-from modules.video.camera_source_factory import CameraSourceFactory
+from ..core.controller import Go2Controller
+from ..core.registry import ModuleType
+from ..states.dog_state import DogStateAbstract
+from ..modules.video.camera_source_factory import CameraSourceFactory
 
 
 class MarkerMappings(Enum):

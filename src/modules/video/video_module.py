@@ -3,7 +3,7 @@ from typing_extensions import override
 
 import numpy as np
 
-from core.module import DogModule
+from ...core.module import DogModule
 from .streamer import WebRTCStreamer
 from .camera_source import CameraSource
 

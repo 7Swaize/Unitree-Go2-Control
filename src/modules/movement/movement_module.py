@@ -1,7 +1,7 @@
 from typing_extensions import override
 
-from core.module import DogModule
-from hardware.interfaces.hardware_interface import HardwareInterface
+from ...core.module import DogModule
+from ...hardware.interfaces.hardware_interface import HardwareInterface
 
 
 class MovementModule(DogModule):
