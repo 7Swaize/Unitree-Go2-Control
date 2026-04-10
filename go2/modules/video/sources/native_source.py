@@ -21,34 +21,30 @@ class NativeCameraSource(CameraSource):
         self._frame_buffer = FrameBuffer()
 
     @override
-    def _initialize(self) -> None:
+    def _start(self) -> None:
         self._thread = threading.Thread(target=self._capture_thread, daemon=True)
         self._thread.start()
 
     def _capture_thread(self):
         while not self._stop_event.is_set():
-            try:
-                code, data = self._video_client.GetImageSample()
-                if code != 0 or data is None:
-                    continue
-
-                image_data = np.frombuffer(bytes(data), dtype=np.uint8)
-                image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
-
-                self._frame_buffer.put(image)
-
-            except Exception as e:
-                print(f"[NativeCamera] Error in thread: {e}")
+            code, data = self._video_client.GetImageSample()
+            if code != 0 or data is None:
                 continue
+
+            image_data = np.frombuffer(bytes(data), dtype=np.uint8)
+            image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
+
+            self._frame_buffer.put(image)
+
 
     @override
     def _get_frames(self) -> FrameResult:
         latest_frame = self._frame_buffer.get()
         if latest_frame is None:
-            return FrameResult()
+            return FrameResult.pending()
 
-        return FrameResult(color=latest_frame.copy())
-
+        return FrameResult.color_only(latest_frame.copy())
+    
     @override
     def _shutdown(self) -> None:
         self._stop_event.set()

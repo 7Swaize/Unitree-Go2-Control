@@ -4,7 +4,7 @@ from ..frame_result import FrameResult
 
 class CameraSource(ABC):
     @abstractmethod
-    def _initialize(self) -> None:
+    def _start(self) -> None:
         pass
     
     @abstractmethod

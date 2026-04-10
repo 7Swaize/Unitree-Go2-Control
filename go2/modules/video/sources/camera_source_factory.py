@@ -73,7 +73,14 @@ class CameraSourceFactory:
     @staticmethod
     def create_virtual_camera() -> CameraSource:
         """
-        Create a camera source inside of the robot simulation. RGB-Depth camera source 
+        Create an RGB-Depth camera source inside of the robot simulation.
+
+        This camera provides both color and depth frames. The returned
+        camera source automatically aligns depth data to the color frame.
+
+        Notes
+        -----
+        Runs only within the Mujoco Simulation.
         """
 
 

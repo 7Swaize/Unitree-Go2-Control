@@ -13,7 +13,12 @@ Users should not access or construct this class directly. Rather, they should ac
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: go2.modules.video.camera_source_factory.CameraSourceFactory
+.. autoclass:: go2.modules.video.sources.camera_source_factory.CameraSourceFactory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: go2.modules.video.frame_result.FrameStatus
    :members:
    :undoc-members:
    :show-inheritance:

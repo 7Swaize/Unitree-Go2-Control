@@ -57,7 +57,7 @@ class VideoModule(DogModule):
         if self._initialized:
             return
         
-        self._camera_source._initialize()
+        self._camera_source._start()
         self._streamer = WebRTCStreamer(self._stream_config)
         self._streaming = False
         self._initialized = True

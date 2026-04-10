@@ -1,27 +1,79 @@
-from collections.abc import Iterator
-
 import numpy as np
+from enum import Enum, auto
+from collections.abc import Iterator
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 
+class FrameStatus(Enum):
+    """Describes the state of a :class:`FrameResult` object."""
+    OK = auto() #: Frame data is present and usable
+    PENDING = auto() #: Source initialised but no frame was currently available in a frame buffer
+
+
 @dataclass
 class FrameResult:
-    """Holds the output of a single camera capture."""
+    """Holds one captured moment from a single camera source."""
 
+    status: FrameStatus = FrameStatus.PENDING
     color: Optional[np.ndarray] = None  #: BGR color image (H, W, 3). Always present for color/RGB cameras.
     depth: Optional[np.ndarray] = None  #: Depth image (H, W) in uint16. Only present for depth cameras.
 
-    def has_any(self) -> bool:
-        """True if any frame is present."""
-        return any(f is not None for f in (self.color, self.depth))
+    @classmethod
+    def color_only(cls, color: np.ndarray) -> "FrameResult":
+        """
+        Source is RGB-only; depth will never be present.
+
+        Notes
+        -----
+        Static factory method for internal use only. Should not be called by the user.
+        """
+        return cls(status=FrameStatus.OK, color=color)
+
+    @classmethod
+    def depth_only(cls, depth: np.ndarray) -> "FrameResult":
+        """
+        Source is depth-only; color will never be present.
+        
+        Notes
+        -----
+        Static factory method for internal use only. Should not be called by the user.
+        """
+        return cls(status=FrameStatus.OK, depth=depth)
+
+    @classmethod
+    def color_and_depth(cls, color: np.ndarray, depth: np.ndarray) -> "FrameResult":
+        """
+        Source provides both channels (e.g. RealSense aligned frames).
+        
+        Notes
+        -----
+        Static factory method for internal use only. Should not be called by the user.
+        """
+        return cls(status=FrameStatus.OK, color=color, depth=depth)
+
+    @classmethod
+    def pending(cls) -> "FrameResult":
+        """
+        Source is initialised but the capture buffer hasn't filled yet.
+
+        Notes
+        -----
+        Static factory method for internal use only. Should not be called by the user.
+        """
+        return cls(status=FrameStatus.PENDING)
+
+
+    def is_fully_valid(self) -> bool:
+        """True only when status is OK and all channels are present."""
+        return self.status is FrameStatus.OK and (self.color is not None and self.depth is not None)
 
     def has_color(self) -> bool:
-        """True if a rgb frame is present."""
+        """True if a valid rgb frame is present."""
         return self.color is not None
 
     def has_depth(self) -> bool:
-        """True if a depth frame is present."""
+        """True if a valid depth frame is present."""
         return self.depth is not None
     
 
@@ -46,25 +98,16 @@ class MultiFrameResult:
     def __iter__(self) -> Iterator[str]:
         return iter(self.frames)
     
-    def available_frames(self) -> Iterator[tuple[str, FrameResult]]:
-        """An iterable collection of (name, result) pairs where a frame was actually captured."""
-        for name, result in self.frames.items():
-            if result.has_any:
-                yield name, result
+    def valid_frames(self) -> dict[str, FrameResult]:
+        """Only slots whose FrameResult.is_valid is True."""
+        return {name: fr for name, fr in self.frames.items() if fr.is_fully_valid}
 
-    def all_available(self) -> bool:
-        """True only if every camera in the group has a frame ready."""
-        return all(
-            result.has_any for result in self.frames.values()
-        )
-    
-    def missing(self) -> List[str]:
-        """Return names of cameras that had no frame this cycle."""
+    def is_fully_valid(self) -> bool:
+        """True only when every slot has all valid frames"""
+        return all(fr.is_fully_valid for fr in self.frames.values())
+
+    def pending_slots(self) -> list[str]:
+        """Slots that are initialised but haven't produced a frame yet."""
         return [
-            name for name, result in self.frames.items() if not result.has_any
+            name for name, fr in self.frames.items() if fr.status is FrameStatus.PENDING
         ]
-    
-    @property
-    def camera_names(self) -> List[str]:
-        return list(self.frames.keys())
-    

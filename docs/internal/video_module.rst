@@ -10,28 +10,32 @@ Video Control (Internal)
 Camera Sources
 --------------
 
-.. autoclass:: go2.modules.video.camera_source.CameraSource
+.. autoclass:: go2.modules.video.sources.camera_source.CameraSource
    :members:
    :private-members:
    :show-inheritance:
 
-.. autoclass:: go2.modules.video.camera_source.NativeCameraSource
+.. autoclass:: go2.modules.video.sources.native_source.NativeCameraSource
    :members:
    :private-members:
    :show-inheritance:
 
-.. autoclass:: go2.modules.video.camera_source.OpenCVCameraSource
+.. autoclass:: go2.modules.video.sources.opencv_source.OpenCVCameraSource
    :members:
    :private-members:
    :show-inheritance:
 
-.. autoclass:: go2.modules.video.camera_source.RealSenseDepthCameraSource
+.. autoclass:: go2.modules.video.sources.realsense_source.RealSenseDepthCameraSource
    :members:
    :private-members:
    :show-inheritance:
 
+.. autoclass:: go2.modules.video.sources.virtual_source.VirtualCameraSource
+   :members:
+   :private-members:
+   :show-inheritance:
 
-.. autoclass:: go2.modules.video.camera_group.CameraGroup
+.. autoclass:: go2.modules.video.sources.camera_group.CameraGroup
    :members:
    :private-members:
    :show-inheritance:

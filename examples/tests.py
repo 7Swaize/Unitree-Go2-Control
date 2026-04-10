@@ -27,10 +27,9 @@ class Tests:
     def test_depth_camera(self):
         try:
             while True:
-                frame_result = self.controller.video.get_frames()
-                print(frame_result)
+                frame_result = self.controller.video.get_frames()["depth"]
 
-                if frame_result.has_any():
+                if frame_result.is_fully_valid():
                     color, depth = frame_result.color, frame_result.depth
 
                     depth_colormap = cv2.applyColorMap(
@@ -56,7 +55,7 @@ class Tests:
     
     def test_streaming(self):
         while True:
-            frame_result = self.controller.video.get_frames()["opencv"]
+            frame_result = self.controller.video.get_frames()["depth"]
             if not frame_result.has_color():
                 continue
             

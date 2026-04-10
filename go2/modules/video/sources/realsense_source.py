@@ -17,49 +17,43 @@ class RealSenseDepthCameraSource(CameraSource):
         self._height: int = 480
         self._fps: int = 30
 
-        self._pipeline = None
-        self._align = None
-
         self._thread = None
         self._lock = threading.Lock() # need lock because there are 2 frame buffers
         self._stop_event = threading.Event()
 
-        self._color_frame_buffer = FrameBuffer()
+        self._rgb_frame_buffer = FrameBuffer()
         self._depth_frame_buffer = FrameBuffer()
+        self._initialize_pipeline()
+
+    def _initialize_pipeline(self) -> None:
+        self._pipeline = rs.pipeline()
+        self._config = rs.config()
+        self._config.enable_stream(rs.stream.depth, self._width, self._height, rs.format.z16, self._fps)
+        self._config.enable_stream(rs.stream.color, self._width, self._height, rs.format.bgr8, self._fps)
+
 
     @override
-    def _initialize(self) -> None:
+    def _start(self) -> None:
         self._thread = threading.Thread(target=self._rs_thread, daemon=True)
         self._thread.start()
 
     def _rs_thread(self):
-        self._pipeline = rs.pipeline()
-
-        config = rs.config()
-        config.enable_stream(rs.stream.depth, self._width, self._height, rs.format.z16, self._fps)
-        config.enable_stream(rs.stream.color, self._width, self._height, rs.format.bgr8, self._fps)
-
-        self._pipeline.start(config)
-        self._align = rs.align(rs.stream.color)
+        self._pipeline.start(self._config)
+        align = rs.align(rs.stream.color)
 
         while not self._stop_event.is_set():
-            try:
-                frames = self._pipeline.wait_for_frames()
-                aligned = self._align.process(frames)
+            frames = self._pipeline.wait_for_frames()
+            aligned = align.process(frames)
 
-                color_frame = aligned.get_color_frame()
-                depth_frame = aligned.get_depth_frame()
+            color_frame = aligned.get_color_frame()
+            depth_frame = aligned.get_depth_frame()
 
-                if not color_frame or not depth_frame:
-                    continue
-
-                with self._lock:
-                    self._color_frame_buffer.put(np.asanyarray(color_frame.get_data()))
-                    self._depth_frame_buffer.put(np.asanyarray(depth_frame.get_data()))
-
-            except Exception as e:
-                print(f"[RealSense] Error in thread: {e}")
+            if not color_frame or not depth_frame:
                 continue
+
+            with self._lock:
+                self._rgb_frame_buffer.put(np.asanyarray(color_frame.get_data()))
+                self._depth_frame_buffer.put(np.asanyarray(depth_frame.get_data()))
 
         self._pipeline.stop()
 
@@ -67,18 +61,18 @@ class RealSenseDepthCameraSource(CameraSource):
     @override
     def _get_frames(self) -> FrameResult:
         with self._lock:
-            latest_color = self._color_frame_buffer.get()
+            latest_color = self._rgb_frame_buffer.get()
             latest_depth = self._depth_frame_buffer.get()
             if latest_color is None or latest_depth is None:
-                return FrameResult()
+                return FrameResult.pending()
 
-            return FrameResult(color=latest_color, depth=latest_depth)
+            return FrameResult.color_and_depth(color=latest_color, depth=latest_depth)
 
 
     @override
     def _shutdown(self) -> None:
         self._stop_event.set()
-        self._color_frame_buffer.clear()
+        self._rgb_frame_buffer.clear()
         self._depth_frame_buffer.clear()
 
         if self._thread:
