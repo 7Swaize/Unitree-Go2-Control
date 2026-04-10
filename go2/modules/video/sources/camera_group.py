@@ -1,7 +1,7 @@
 from typing import Dict
 
 from .camera_source import CameraSource
-from .frame_result import MultiFrameResult
+from ..frame_result import MultiFrameResult
 
 
 class CameraGroup:

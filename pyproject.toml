@@ -32,5 +32,7 @@ docs = ["sphinx"]
 test = ["pytest"]
 
 
-[tool.setuptools]
-packages = ["go2"]
+# https://setuptools.pypa.io/en/latest/userguide/quickstart.html
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["go2*"]

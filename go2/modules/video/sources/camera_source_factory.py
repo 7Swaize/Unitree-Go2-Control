@@ -1,6 +1,11 @@
 from typing import Dict
+
+from .camera_source import CameraSource
+from .realsense_source import RealSenseDepthCameraSource
+from .opencv_source import OpenCVCameraSource
+from .native_source import NativeCameraSource
+from .virtual_source import VirtualCameraSource
 from .camera_group import CameraGroup
-from .camera_source import CameraSource, OpenCVCameraSource, RealSenseDepthCameraSource, NativeCameraSource
 
 
 class CameraSourceFactory:
@@ -53,7 +58,7 @@ class CameraSourceFactory:
     @staticmethod
     def create_depth_camera() -> CameraSource:
         """
-        Create an RGB-D camera source using an Intel RealSense device.
+        Create an RGB-Depth camera source using an Intel RealSense device.
 
         This camera provides both color and depth frames. The returned
         camera source automatically aligns depth data to the color frame.
@@ -64,6 +69,13 @@ class CameraSourceFactory:
         """
         return RealSenseDepthCameraSource()
     
+
+    @staticmethod
+    def create_virtual_camera() -> CameraSource:
+        """
+        Create a camera source inside of the robot simulation. RGB-Depth camera source 
+        """
+
 
     @staticmethod
     def create_camera_group(sources: Dict[str, CameraSource]) -> CameraGroup:

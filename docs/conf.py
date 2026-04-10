@@ -7,9 +7,9 @@ sys.path.insert(0, os.path.abspath('..'))
 
 
 project = 'Unitree-Go2-Control'
-copyright = '2026, Sachit Raheja'
-author = 'Sachit Raheja'
-release = '0.0.1'
+copyright = '2026, 7Swaize'
+author = '7Swaize'
+release = '0.1.0'
 
 extensions = [
     'sphinx.ext.autodoc',

@@ -5,8 +5,8 @@ import numpy as np
 from ...core.module import DogModule
 from .streaming.streamer import WebRTCStreamer
 from .streaming.stream_config import StreamConfig
-from .camera_source import CameraSource
-from .camera_group import CameraGroup
+from .sources.camera_source import CameraSource
+from .sources.camera_group import CameraGroup
 from .frame_result import FrameResult, MultiFrameResult
 
 
