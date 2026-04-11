@@ -26,7 +26,11 @@ class VirtualCameraSource(CameraSource):
     def _initialize_iox_services(self) -> None:
         iox2.set_log_level_from_env_or(iox2.LogLevel.Error)
         
-        self._node = iox2.NodeBuilder.new().create(iox2.ServiceType.Ipc)
+        # Kill signal handling: https://github.com/eclipse-iceoryx/iceoryx2/issues/528
+        self._node = iox2.NodeBuilder.new() \
+                        .signal_handling_mode(iox2.SignalHandlingMode.Disabled) \
+                        .create(iox2.ServiceType.Ipc)
+        
         self._depth_service = self._node.service_builder(iox2.ServiceName.new(CameraQoS.TOPIC_SIM_CAMERA_DEPTH)) \
                                 .publish_subscribe(DepthFrameData_) \
                                 .max_publishers(CameraQoS.MAX_PUBLISHERS) \
@@ -75,7 +79,6 @@ class VirtualCameraSource(CameraSource):
                 self._add_rgb_to_buffer(
                     np.array(msg.data, copy=True, dtype=np.uint8).reshape((msg.height, msg.width, 3))
                 )
-
 
     def _add_rgb_to_buffer(self, rgb_np: np.ndarray) -> None:
         rgb_frame = cv2.cvtColor(rgb_np[::-1], cv2.COLOR_RGB2BGR)

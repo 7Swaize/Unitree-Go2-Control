@@ -15,8 +15,6 @@ class Tests:
         self.controller.add_module(ModuleType.AUDIO)
         self.controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
             "sim": CameraSourceFactory.create_virtual_camera(),
-            "depth": CameraSourceFactory.create_depth_camera(),
-            "opencv": CameraSourceFactory.create_opencv_camera()
         }))
         # self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
         
@@ -28,7 +26,7 @@ class Tests:
     def test_depth_camera(self):
         try:
             while True:
-                frame_result = self.controller.video.get_frames()["depth"]
+                frame_result = self.controller.video.get_frames()["sim"]
 
                 if frame_result.is_fully_valid():
                     color, depth = frame_result.color, frame_result.depth
@@ -55,21 +53,21 @@ class Tests:
 
     
     def test_streaming(self):
-        while True:
-            frame_result = self.controller.video.get_frames()["depth"]
+        try:
+            while True:
+                frame_result = self.controller.video.get_frames()["sim"]
 
-            if not frame_result.has_color():
-                continue
+                if not frame_result.has_depth():
+                    continue
 
-            cv2.imshow("Camera Stream", frame_result.color)
+                self.controller.video.send_frame(frame_result.depth)
+        
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.controller.safe_shutdown()
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
-                break
 
-            self.controller.video.send_frame(frame_result.color)
-
-    
     def test_audio(self):
         while True:
             self.controller.audio.play_audio("Hello World")
