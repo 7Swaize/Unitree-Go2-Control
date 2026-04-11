@@ -2,21 +2,20 @@ import time
 import cv2
 import numpy as np
 
-from go2.core import Go2Controller, ModuleType
+from go2.core import Go2Controller, ModuleType, HardwareType
 from go2.modules.video import CameraSourceFactory
 
 
 
 class Tests:
     def __init__(self):
-        self.controller = Go2Controller(use_sdk=False)
+        self.controller = Go2Controller(hardware_type=HardwareType.VIRTUAL)
         self.controller.register_cleanup_callback(self.shutdown_callback)
 
         self.controller.add_module(ModuleType.AUDIO)
         self.controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
             "sim": CameraSourceFactory.create_virtual_camera(),
         }))
-        # self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
         
         self.controller.video.start_stream_server()
         self.controller.video.get_stream_server_local_ip()
@@ -57,10 +56,10 @@ class Tests:
             while True:
                 frame_result = self.controller.video.get_frames()["sim"]
 
-                if not frame_result.has_depth():
+                if not frame_result.has_color():
                     continue
 
-                self.controller.video.send_frame(frame_result.depth)
+                self.controller.video.send_frame(frame_result.color)
         
         except KeyboardInterrupt:
             pass

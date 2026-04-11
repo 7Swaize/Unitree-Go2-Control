@@ -9,6 +9,7 @@ from ..modules.lidar import LIDARModule
 from ..modules.movement import MovementModule
 from ..modules.ocr import OCRModule
 from ..modules.video import VideoModule
+from ..hardware.interfaces.hardware_type import HardwareType
 
 
 T = TypeVar('T', bound=DogModule)
@@ -40,7 +41,7 @@ class ModuleDescriptor(Generic[T]):
     _module_type: ModuleType  #: Enum identifying the module
     _module_class: Type[T]  #: Concrete implementation class
     _display_name: str  #: Human-readable name
-    _requires_sdk: bool = False  #: Whether this module requires SDK support
+    _requires_native_hardware: bool = False  #: Whether this module requires native hardware support
     
     def _create_instance(self, *args, **kwargs) -> T:
         """Instantiate the module."""
@@ -90,21 +91,6 @@ class ModuleRegistry:
         """Check whether a module type is registered."""
         return module_type in cls._descriptors
 
-    @classmethod
-    def get_list_available(cls, sdk_enabled: bool = False) -> list[ModuleType]:
-        """
-        List available module types for the current configuration.
-
-        Parameters
-        ----------
-        sdk_enabled : bool, optional
-            Whether SDK-dependent modules should be included.
-        """
-        return [
-            mt for mt, desc in cls._descriptors.items()
-            if not desc._requires_sdk or sdk_enabled
-        ]
-
 
 def _register_all_default_modules():
     """
@@ -116,42 +102,42 @@ def _register_all_default_modules():
         ModuleType.VIDEO,
         VideoModule,
         "Video Capture",
-        _requires_sdk=False
+        _requires_native_hardware=False
     ))
     
     ModuleRegistry._register(ModuleDescriptor(
         ModuleType.MOVEMENT,
         MovementModule,
         "Movement Control",
-        _requires_sdk=False
+        _requires_native_hardware=False
     ))
     
     ModuleRegistry._register(ModuleDescriptor(
         ModuleType.OCR,
         OCRModule,
         "Optical Character Recognition",
-        _requires_sdk=False
+        _requires_native_hardware=False
     ))
     
     ModuleRegistry._register(ModuleDescriptor(
         ModuleType.AUDIO,
         AudioModule,
         "Text-to-Speech",
-        _requires_sdk=False
+        _requires_native_hardware=False
     ))
     
     ModuleRegistry._register(ModuleDescriptor(
         ModuleType.INPUT,
         InputModule,
         "Controller Input",
-        _requires_sdk=True  
+        _requires_native_hardware=True  
     ))
 
     ModuleRegistry._register(ModuleDescriptor(
         ModuleType.LIDAR,
         LIDARModule,
         "LIDAR Capture",
-        _requires_sdk=True
+        _requires_native_hardware=True
     ))
 
 

@@ -10,6 +10,7 @@ from ..modules.movement import MovementModule
 from ..modules.ocr import OCRModule
 from ..modules.video import VideoModule
 from ..modules.lidar import LIDARModule
+from ..hardware.interfaces.hardware_type import HardwareType
 from ..hardware.interfaces.hardware_interface import HardwareInterface
 from ..hardware.native.native_hardware import NativeHardware
 from ..hardware.virtual.virtual_hardware import VirtualHardware
@@ -46,7 +47,7 @@ class Go2Controller:
     ModuleRegistry
     """
 
-    def __init__(self, use_sdk: bool) -> None:
+    def __init__(self, hardware_type: HardwareType) -> None:
         """
         Create a new controller instance.
 
@@ -61,14 +62,14 @@ class Go2Controller:
         RuntimeError
             If hardware backend initialization fails.
         """
-        self._use_sdk = use_sdk
+        self._hardware_type = hardware_type
 
         self._shutdown_event = threading.Event()
         self._shutdown_lock = threading.Lock()
         self._cleanup_callbacks: List[Callable[[], None]] = []
 
         self._hardware: HardwareInterface = (
-            NativeHardware() if use_sdk else VirtualHardware()
+            NativeHardware() if hardware_type == HardwareType.NATIVE else VirtualHardware()
         )
         self._hardware._initialize()
 
@@ -76,11 +77,11 @@ class Go2Controller:
         self._register_default_modules()
         self._initialize_input_bindings()
 
-        print(f"[Controller] Initialized in {'SDK' if use_sdk else 'SIMULATION'} mode\n")
+        print(f"[Controller] Initialized in {'NATIVE' if hardware_type == HardwareType.NATIVE else 'SIMULATION'} mode\n")
 
 
     def _initialize_input_bindings(self) -> None:
-        if self._use_sdk:
+        if self._hardware_type == HardwareType.NATIVE:
             self.input.register_callback(
                 InputSignal.BUTTON_A,
                 lambda _: self._shutdown_event.set(),
@@ -91,10 +92,9 @@ class Go2Controller:
     def _register_default_modules(self) -> None:
         self.add_module(ModuleType.MOVEMENT, hardware=self._hardware)
 
-        if self._use_sdk:
-            self.add_module(ModuleType.INPUT, use_sdk=self._use_sdk)
-            self.add_module(ModuleType.LIDAR, use_sdk=self._use_sdk)
-
+        if self._hardware_type == HardwareType.NATIVE:
+            self.add_module(ModuleType.INPUT)
+            
 
     def add_module(self, module_type: ModuleType, **kwargs) -> None:
         """
@@ -121,23 +121,19 @@ class Go2Controller:
         if descriptor is None:
             raise ValueError(f"[Controller] Module type '{module_type.name}' is not registered")
         
-        if descriptor._requires_sdk and not self._use_sdk:
+        if descriptor._requires_native_hardware and self._hardware_type == HardwareType.VIRTUAL:
             raise ValueError(f"[Controller] Module type '{module_type.name}' requires native hardware support")
         
         module: DogModule = descriptor._create_instance(**kwargs)
         self._modules[module_type] = module
 
+        module._set_hardware_internal(hardware_type=self._hardware_type)
         module._initialize()
     
 
     def has_module(self, module_type: ModuleType) -> bool:
         """Check whether a module is currently loaded."""
         return module_type in self._modules
-    
-    
-    def get_available_modules(self) -> list[ModuleType]:
-        """List all module types available in the current mode."""
-        return ModuleRegistry.get_list_available(self._use_sdk)
     
 
     @property

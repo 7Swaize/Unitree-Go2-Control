@@ -10,9 +10,8 @@ from .callback_dispatcher import CallbackDispatcher
 from .zmq_receiver import ZMQReceiver
 
 class LIDARModule(DogModule):
-    def __init__(self, use_sdk: bool = True):
+    def __init__(self):
         super().__init__("LIDAR")
-        self.use_sdk = use_sdk
         self.ros_proc = None
         self.dispatcher = None
         self.zmq_receiver = None
@@ -22,9 +21,6 @@ class LIDARModule(DogModule):
     def _initialize(self):
         if self._initialized:
             return
-        
-        if not self.use_sdk:
-            raise RuntimeError("[LIDAR] Cannot utilize LIDAR module without Unitree SDK")
     
         self.launch_ros2_internal()
         self.launch_ros2_bridge()

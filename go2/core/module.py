@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import final
+
+from ..hardware.interfaces.hardware_type import HardwareType
 
 
 class DogModule(ABC):
@@ -28,6 +31,13 @@ class DogModule(ABC):
         """
         self.name = name
         self._initialized = False
+
+    @final 
+    def _set_hardware_internal(self, hardware_type: HardwareType) -> None:
+        """
+        Intitializes the module to use a specific :class:`HardwareType`. This should not be called by users.
+        """
+        self._hardware_type = hardware_type
 
     @abstractmethod
     def _initialize(self) -> None:

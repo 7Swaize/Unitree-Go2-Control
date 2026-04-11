@@ -8,7 +8,6 @@ from .input_signal import InputSignal
 from ...core.module import DogModule
 from ...communication.dds.dds import DDS_TOPICS
 
-
 class InputModule(DogModule):
     """
     High-level interface for handling controller input. 
@@ -20,10 +19,8 @@ class InputModule(DogModule):
         Whether to use the Unitree SDK for input.
     """
     
-    def __init__(self, use_sdk: bool = False) -> None:
+    def __init__(self) -> None:
         super().__init__("Input")
-        self.use_sdk = use_sdk
-
 
     @override
     def _initialize(self) -> None:
@@ -36,9 +33,6 @@ class InputModule(DogModule):
         - If `use_sdk` is False, no live input is initialized
         - Internal: subscribes to DDS LOW_STATE topic for live controller messages
         """
-        if self._initialized or not self.use_sdk:
-            return
-        
         from unitree_sdk2py.idl.unitree_go.msg.dds_ import LowState_
         from unitree_sdk2py.core.channel import ChannelSubscriber
 
