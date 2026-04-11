@@ -6,7 +6,6 @@ from typing_extensions import override
 
 from unitree_sdk2py.go2.video.video_client import VideoClient
 
-from ..frame_buffer import FrameBuffer
 from ..frame_result import FrameResult
 from .camera_source import CameraSource
 

@@ -4,7 +4,6 @@ import numpy as np
 from typing import Optional
 from typing_extensions import override
 
-from ..frame_buffer import FrameBuffer
 from ..frame_result import FrameResult
 from .camera_source import CameraSource
 
