@@ -20,7 +20,7 @@ Hardware Control
 
 Hardware Interface
 ~~~~~~~~~~~~~~~~~~
-.. automodule:: go2.hardware.interfaces.hardware_interface
+.. automodule:: go2.hardware.hardware_interface
    :members:
    :private-members:
    :show-inheritance:

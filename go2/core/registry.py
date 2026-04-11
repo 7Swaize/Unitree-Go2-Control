@@ -9,7 +9,7 @@ from ..modules.lidar import LIDARModule
 from ..modules.movement import MovementModule
 from ..modules.ocr import OCRModule
 from ..modules.video import VideoModule
-from ..hardware.interfaces.hardware_type import HardwareType
+from ..hardware.hardware_type import HardwareType
 
 
 T = TypeVar('T', bound=DogModule)

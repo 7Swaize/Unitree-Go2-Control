@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import final
 
-from ..hardware.interfaces.hardware_type import HardwareType
+from ..hardware.hardware_type import HardwareType
 
 
 class DogModule(ABC):

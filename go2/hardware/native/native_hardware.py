@@ -4,7 +4,7 @@ from typing_extensions import override
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
 from unitree_sdk2py.go2.sport.sport_client import SportClient
 
-from ..interfaces.hardware_interface import HardwareInterface
+from ..hardware_interface import HardwareInterface
 
 
 class NativeHardware(HardwareInterface):

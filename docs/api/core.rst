@@ -12,6 +12,15 @@ high-level functionality such as movement, video, audio, OCR, input, and LIDAR t
    :show-inheritance:
 
 
+Hardware Support Types
+======================
+
+.. autoclass:: go2.hardware.hardware_type.HardwareType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 Module Management
 =================
 

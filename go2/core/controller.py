@@ -10,8 +10,8 @@ from ..modules.movement import MovementModule
 from ..modules.ocr import OCRModule
 from ..modules.video import VideoModule
 from ..modules.lidar import LIDARModule
-from ..hardware.interfaces.hardware_type import HardwareType
-from ..hardware.interfaces.hardware_interface import HardwareInterface
+from ..hardware.hardware_type import HardwareType
+from ..hardware.hardware_interface import HardwareInterface
 from ..hardware.native.native_hardware import NativeHardware
 from ..hardware.virtual.virtual_hardware import VirtualHardware
 
