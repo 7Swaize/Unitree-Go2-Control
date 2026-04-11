@@ -1,5 +1,7 @@
 import cv2
 import threading
+import numpy as np
+from typing import Optional
 from typing_extensions import override
 
 from ..frame_buffer import FrameBuffer
@@ -14,7 +16,7 @@ class OpenCVCameraSource(CameraSource):
 
         self._thread = None
         self._stop_event = threading.Event()
-        self._frame_buffer = FrameBuffer()
+        self._latest_rgb: Optional[np.ndarray] = None
         self._initialize_source()
 
     def _initialize_source(self) -> None:
@@ -32,23 +34,20 @@ class OpenCVCameraSource(CameraSource):
             ret, frame = self._capture.read()
             if not ret:
                 continue
-            self._frame_buffer.put(frame)
+            self._latest_rgb = frame
             
         self._capture.release()
 
     @override
     def _get_frames(self) -> FrameResult:
-        latest_frame = self._frame_buffer.get()
-        if latest_frame is None:
+        if self._latest_rgb is None:
             return FrameResult.pending()
 
-        return FrameResult.color_only(latest_frame.copy())
+        return FrameResult.color_only(self._latest_rgb.copy())
 
     @override
     def _shutdown(self) -> None:
         self._stop_event.set()
-        self._frame_buffer.clear()
-
         if self._thread:
             self._thread.join()
             self._thread = None

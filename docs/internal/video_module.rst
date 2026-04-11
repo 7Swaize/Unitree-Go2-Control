@@ -53,12 +53,3 @@ Video streaming
    :members:
    :private-members:
    :show-inheritance:
-
-
-Utilities
----------
-
-.. autoclass:: go2.modules.video.frame_buffer.FrameBuffer
-   :members:
-   :private-members:
-   :show-inheritance:

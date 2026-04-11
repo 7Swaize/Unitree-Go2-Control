@@ -1,9 +1,9 @@
 import threading
-from typing_extensions import override
 import numpy as np
 import pyrealsense2 as rs
+from typing import Optional
+from typing_extensions import override
 
-from ..frame_buffer import FrameBuffer
 from ..frame_result import FrameResult
 from .camera_source import CameraSource
 
@@ -21,8 +21,8 @@ class RealSenseDepthCameraSource(CameraSource):
         self._lock = threading.Lock() # need lock because there are 2 frame buffers
         self._stop_event = threading.Event()
 
-        self._rgb_frame_buffer = FrameBuffer()
-        self._depth_frame_buffer = FrameBuffer()
+        self._latest_rgb: Optional[np.ndarray] = None
+        self._latest_depth: Optional[np.ndarray] = None
         self._initialize_pipeline()
 
     def _initialize_pipeline(self) -> None:
@@ -52,8 +52,8 @@ class RealSenseDepthCameraSource(CameraSource):
                 continue
 
             with self._lock:
-                self._rgb_frame_buffer.put(np.asanyarray(color_frame.get_data()))
-                self._depth_frame_buffer.put(np.asanyarray(depth_frame.get_data()))
+                self._latest_rgb = np.asanyarray(color_frame.get_data())
+                self._latest_depth = np.asanyarray(depth_frame.get_data())
 
         self._pipeline.stop()
 
@@ -61,19 +61,15 @@ class RealSenseDepthCameraSource(CameraSource):
     @override
     def _get_frames(self) -> FrameResult:
         with self._lock:
-            latest_color = self._rgb_frame_buffer.get()
-            latest_depth = self._depth_frame_buffer.get()
-            if latest_color is None or latest_depth is None:
+            if self._latest_rgb is None or self._latest_depth is None:
                 return FrameResult.pending()
 
-            return FrameResult.color_and_depth(color=latest_color, depth=latest_depth)
+            return FrameResult.color_and_depth(color=self._latest_rgb.copy(), depth=self._latest_depth.copy())
 
 
     @override
     def _shutdown(self) -> None:
         self._stop_event.set()
-        self._rgb_frame_buffer.clear()
-        self._depth_frame_buffer.clear()
 
         if self._thread:
             self._thread.join()

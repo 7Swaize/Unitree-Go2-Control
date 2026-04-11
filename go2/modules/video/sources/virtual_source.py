@@ -2,20 +2,20 @@ import cv2
 import threading
 import numpy as np
 import iceoryx2 as iox2
+from typing import Optional
 from typing_extensions import override
 from iceoryx_interfaces.camera_data import DepthFrameData_, RGBFrameData_
 from iceoryx_interfaces.qos import CameraQoS
 
 from .camera_source import CameraSource
-from ..frame_buffer import FrameBuffer
 from ..frame_result import FrameResult
 
 class VirtualCameraSource(CameraSource):
     def __init__(self) -> None:
         self._thread = None
         self._stop_event = threading.Event()
-        self._rgb_frame_buffer = FrameBuffer()
-        self._depth_frame_buffer = FrameBuffer()
+        self._latest_rgb: Optional[np.ndarray] = None
+        self._latest_depth: Optional[np.ndarray] = None
         self._initialize_iox_services()
 
     @override
@@ -79,11 +79,11 @@ class VirtualCameraSource(CameraSource):
 
     def _add_rgb_to_buffer(self, rgb_np: np.ndarray) -> None:
         rgb_frame = cv2.cvtColor(rgb_np[::-1], cv2.COLOR_RGB2BGR)
-        self._rgb_frame_buffer.put(rgb_frame)
+        self._latest_rgb = rgb_frame
 
     def _add_depth_to_buffer(self, depth_np: np.ndarray, depth_min: float, depth_max: float) -> None:
         depth_frame = self._depth_to_colormap(depth_np[::-1], depth_min, depth_max)
-        self._depth_frame_buffer.put(depth_frame)
+        self._latest_depth = depth_frame
 
     def _depth_to_colormap(self, depth_np: np.ndarray, depth_min: float, depth_max: float) -> np.ndarray:
         rng = depth_max - depth_min or 1.0
@@ -100,19 +100,14 @@ class VirtualCameraSource(CameraSource):
 
     @override
     def _get_frames(self) -> FrameResult:
-        latest_color = self._rgb_frame_buffer.get()
-        latest_depth = self._depth_frame_buffer.get()
-        if latest_color is None or latest_depth is None:
+        if self._latest_rgb is None or self._latest_depth is None:
             return FrameResult.pending()
 
-        return FrameResult.color_and_depth(color=latest_color, depth=latest_depth)
+        return FrameResult.color_and_depth(color=self._latest_rgb.copy(), depth=self._latest_depth.copy())
 
     @override
     def _shutdown(self) -> None:
         self._stop_event.set()
-        self._rgb_frame_buffer.clear()
-        self._depth_frame_buffer.clear()
-
         if self._thread:
             self._thread.join()
             self._thread = None

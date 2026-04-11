@@ -1,6 +1,7 @@
 import cv2
-import numpy as np
 import threading
+import numpy as np
+from typing import Optional
 from typing_extensions import override
 
 from unitree_sdk2py.go2.video.video_client import VideoClient
@@ -18,7 +19,7 @@ class NativeCameraSource(CameraSource):
 
         self._thread = None
         self._stop_event = threading.Event()
-        self._frame_buffer = FrameBuffer()
+        self._latest_rgb: Optional[np.ndarray] = None
 
     @override
     def _start(self) -> None:
@@ -34,22 +35,19 @@ class NativeCameraSource(CameraSource):
             image_data = np.frombuffer(bytes(data), dtype=np.uint8)
             image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 
-            self._frame_buffer.put(image)
+            self._latest_rgb = image
 
 
     @override
     def _get_frames(self) -> FrameResult:
-        latest_frame = self._frame_buffer.get()
-        if latest_frame is None:
+        if self._latest_rgb is None:
             return FrameResult.pending()
 
-        return FrameResult.color_only(latest_frame.copy())
+        return FrameResult.color_only(self._latest_rgb.copy())
     
     @override
     def _shutdown(self) -> None:
         self._stop_event.set()
-        self._frame_buffer.clear()
-
         if self._thread:
             self._thread.join()
             self._thread = None

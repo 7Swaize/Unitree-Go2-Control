@@ -14,10 +14,10 @@ class Tests:
 
         self.controller.add_module(ModuleType.AUDIO)
         self.controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
+            "sim": CameraSourceFactory.create_virtual_camera(),
             "depth": CameraSourceFactory.create_depth_camera(),
             "opencv": CameraSourceFactory.create_opencv_camera()
-        }))
-        # self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
+        }))        # self.unitree_controller.add_module(ModuleType.LIDAR, use_sdk=True)
         
         self.controller.video.start_stream_server()
         self.controller.video.get_stream_server_local_ip()
@@ -55,10 +55,18 @@ class Tests:
     
     def test_streaming(self):
         while True:
-            frame_result = self.controller.video.get_frames()["depth"]
+            frame_result = self.controller.video.get_frames()["sim"]
+
             if not frame_result.has_color():
                 continue
-            
+
+            # Display locally
+            cv2.imshow("Sim Camera Stream", frame_result.color)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                break
+
             self.controller.video.send_frame(frame_result.color)
 
     

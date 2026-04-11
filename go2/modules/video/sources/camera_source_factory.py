@@ -82,7 +82,7 @@ class CameraSourceFactory:
         -----
         Runs only within the Mujoco Simulation.
         """
-
+        return VirtualCameraSource()
 
     @staticmethod
     def create_camera_group(sources: Dict[str, CameraSource]) -> CameraGroup:
