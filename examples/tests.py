@@ -72,6 +72,11 @@ class Tests:
             self.controller.audio.play_audio("Hello World")
             time.sleep(1)
 
+    def test_movement(self):
+        time.sleep(3)
+        self.controller.movement.stand_up()
+        time.sleep(5)
+        self.controller.movement.stand_down()
 
     def shutdown_callback(self):
         cv2.destroyAllWindows()
@@ -80,4 +85,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_streaming()
+    tests.test_movement()

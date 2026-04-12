@@ -54,7 +54,7 @@ class VirtualHardware(HardwareInterface):
         sample = self._floatargs_pub.loan_uninit()
         
         sample.user_header().contents.command = SportCommand.MOVE
-        sample.write_payload(
+        sample = sample.write_payload(
             FloatArgsData_(arg1=vx, arg2=vy)
         )
 
@@ -65,7 +65,7 @@ class VirtualHardware(HardwareInterface):
         sample = self._floatargs_pub.loan_uninit()
 
         sample.user_header().contents.command = SportCommand.ROTATE
-        sample.write_payload(
+        sample = sample.write_payload(
             FloatArgsData_(arg1=vrot, arg2=0)
         )
 
@@ -76,22 +76,22 @@ class VirtualHardware(HardwareInterface):
         sample = self._noargs_pub.loan_uninit()
 
         sample.user_header().contents.command = SportCommand.STAND_UP
-        sample.write_payload(
-            NoArgsData_()
+        sample = sample.write_payload(
+            NoArgsData_(null=0)
         )
 
-        sample.send
+        sample.send()
     
     @override
     def _stand_down(self) -> None:
         sample = self._noargs_pub.loan_uninit()
 
         sample.user_header().contents.command = SportCommand.STAND_DOWN
-        sample.write_payload(
-            NoArgsData_()
+        sample = sample.write_payload(
+            NoArgsData_(null=0)
         )
 
-        sample.send
+        sample.send()
    
     
     @override
@@ -99,13 +99,14 @@ class VirtualHardware(HardwareInterface):
         sample = self._noargs_pub.loan_uninit()
 
         sample.user_header().contents.command = SportCommand.STOP
-        sample.write_payload(
-            NoArgsData_()
+        sample = sample.write_payload(
+            NoArgsData_(null=0)
         )
 
-        sample.send
+        sample.send()
    
 
     @override
     def _shutdown(self) -> None:
+        self._sim_proc_handler._shutdown()
         self._initialized = False

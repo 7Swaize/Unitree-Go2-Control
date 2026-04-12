@@ -15,4 +15,12 @@ class SimProcHandler:
 
 
     def _shutdown(self) -> None:
-        pass
+        if self._sim_proc and self._sim_proc.poll() is None:
+            try:
+                os.killpg(os.getpgid(self._sim_proc.pid), signal.SIGINT)
+                self._sim_proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                os.killpg(os.getpgid(self._sim_proc.pid), signal.SIGTERM)
+                self._sim_proc.wait(timeout=5)
+        
+        self._sim_proc = None
