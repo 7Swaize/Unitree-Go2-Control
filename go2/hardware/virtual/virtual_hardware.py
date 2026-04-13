@@ -9,7 +9,6 @@ from iceoryx_interfaces.sport_cmds import (
 )
 
 from ..hardware_interface import HardwareInterface
-from .sim_proc_handler import SimProcHandler
 
 
 class VirtualHardware(HardwareInterface):
@@ -25,12 +24,10 @@ class VirtualHardware(HardwareInterface):
     """
     
     def __init__(self):
-        self._sim_proc_handler = SimProcHandler()
         iox2.set_log_level_from_env_or(iox2.LogLevel.Error)
     
     @override
     def _initialize(self) -> None:
-        self._sim_proc_handler._start_sim()
         self._node = iox2.NodeBuilder.new() \
                         .signal_handling_mode(iox2.SignalHandlingMode.Disabled) \
                         .create(iox2.ServiceType.Ipc)
@@ -108,5 +105,4 @@ class VirtualHardware(HardwareInterface):
 
     @override
     def _shutdown(self) -> None:
-        self._sim_proc_handler._shutdown()
         self._initialized = False

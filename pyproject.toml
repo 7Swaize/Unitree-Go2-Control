@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 # https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 
 [project]
-name = "unitree-go2"
+name = "go2"
 version = "0.1.0"
 description = "Python API for Unitree Go2 robot control"
 readme = "README.md"

@@ -1,3 +1,4 @@
+import time
 import cv2
 import threading
 import numpy as np
@@ -17,6 +18,7 @@ class NativeCameraSource(CameraSource):
         self._video_client.Init()
 
         self._thread = None
+        self._lock = threading.Lock()
         self._stop_event = threading.Event()
         self._latest_rgb: Optional[np.ndarray] = None
 
@@ -34,15 +36,18 @@ class NativeCameraSource(CameraSource):
             image_data = np.frombuffer(bytes(data), dtype=np.uint8)
             image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 
-            self._latest_rgb = image
+            with self._lock:
+                self._latest_rgb = image
 
 
     @override
     def _get_frames(self) -> FrameResult:
-        if self._latest_rgb is None:
-            return FrameResult.pending()
-
-        return FrameResult.color_only(self._latest_rgb.copy())
+        with self._lock:
+            if (ret := self._latest_rgb) is None:
+                return FrameResult.pending()
+            self._latest_rgb = None
+        
+        return FrameResult.color_only(ret)
     
     @override
     def _shutdown(self) -> None:

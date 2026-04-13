@@ -25,12 +25,14 @@ Hardware Interface
    :private-members:
    :show-inheritance:
 
+
 Native Hardware
 ~~~~~~~~~~~~~~~
 .. automodule:: go2.hardware.native.native_hardware
    :members:
    :private-members:
    :show-inheritance:
+
 
 Virtual Hardware
 ~~~~~~~~~~~~~~~~

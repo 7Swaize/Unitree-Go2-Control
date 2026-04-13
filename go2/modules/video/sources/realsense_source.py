@@ -1,3 +1,4 @@
+import time
 import threading
 import numpy as np
 import pyrealsense2 as rs
@@ -52,8 +53,8 @@ class RealSenseDepthCameraSource(CameraSource):
                 continue
 
             with self._lock:
-                self._latest_rgb = np.asanyarray(color_frame.get_data())
-                self._latest_depth = np.asanyarray(depth_frame.get_data())
+                self._latest_rgb = np.asanyarray(color_frame.get_data(), copy=True)
+                self._latest_depth = np.asanyarray(depth_frame.get_data(), copy=True)
 
         self._pipeline.stop()
 
@@ -61,11 +62,14 @@ class RealSenseDepthCameraSource(CameraSource):
     @override
     def _get_frames(self) -> FrameResult:
         with self._lock:
-            if self._latest_rgb is None or self._latest_depth is None:
+            if (ret_rgb := self._latest_rgb) is None or (ret_depth := self._latest_depth) is None:
                 return FrameResult.pending()
 
-            return FrameResult.color_and_depth(color=self._latest_rgb.copy(), depth=self._latest_depth.copy())
+            self._latest_rgb = None
+            self._latest_depth = None
 
+        return FrameResult.color_and_depth(color=ret_rgb, depth=ret_depth)
+        
 
     @override
     def _shutdown(self) -> None:

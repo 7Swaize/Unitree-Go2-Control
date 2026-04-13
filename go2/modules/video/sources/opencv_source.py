@@ -1,3 +1,4 @@
+import time
 import cv2
 import threading
 import numpy as np
@@ -14,6 +15,7 @@ class OpenCVCameraSource(CameraSource):
         self._camera_index = camera_index
 
         self._thread = None
+        self._lock = threading.Lock()
         self._stop_event = threading.Event()
         self._latest_rgb: Optional[np.ndarray] = None
         self._initialize_source()
@@ -33,16 +35,20 @@ class OpenCVCameraSource(CameraSource):
             ret, frame = self._capture.read()
             if not ret:
                 continue
-            self._latest_rgb = frame
+            
+            with self._lock:
+                self._latest_rgb = frame
             
         self._capture.release()
 
     @override
     def _get_frames(self) -> FrameResult:
-        if self._latest_rgb is None:
-            return FrameResult.pending()
-
-        return FrameResult.color_only(self._latest_rgb.copy())
+        with self._lock:
+            if (ret := self._latest_rgb) is None:
+                return FrameResult.pending()
+            self._latest_rgb = None
+            
+        return FrameResult.color_only(ret)
 
     @override
     def _shutdown(self) -> None:

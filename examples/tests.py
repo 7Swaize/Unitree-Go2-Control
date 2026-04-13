@@ -14,7 +14,7 @@ class Tests:
 
         self.controller.add_module(ModuleType.AUDIO)
         self.controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
-            "sim": CameraSourceFactory.create_virtual_camera(),
+            "sim": CameraSourceFactory.create_depth_camera()
         }))
         
         self.controller.video.start_stream_server()
@@ -25,7 +25,7 @@ class Tests:
     def test_depth_camera(self):
         try:
             while True:
-                frame_result = self.controller.video.get_frames()["sim"]
+                frame_result = self.controller.video.get_frames()["depth"]
 
                 if frame_result.is_fully_valid():
                     color, depth = frame_result.color, frame_result.depth
@@ -58,8 +58,13 @@ class Tests:
 
                 if not frame_result.has_color():
                     continue
-
+                
+                cv2.imshow("RealSense Depth Camera", frame_result.color)
                 self.controller.video.send_frame(frame_result.color)
+
+                key = cv2.waitKey(10) & 0xFF
+                if key == ord('q'):
+                    break
         
         except KeyboardInterrupt:
             pass
@@ -85,4 +90,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_movement()
+    tests.test_streaming()
