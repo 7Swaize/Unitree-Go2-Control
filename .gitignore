@@ -1,13 +1,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pytest_cache/
 
 *.env
 *.venv
 *.egg-info/
 *.vscode/
 
-docs/_build/
+*_build/
 
 
 ros2_ws/build/
