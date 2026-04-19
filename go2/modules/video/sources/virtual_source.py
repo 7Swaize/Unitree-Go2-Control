@@ -65,9 +65,7 @@ class VirtualCameraSource(CameraSource):
 
                 msg = sample.payload().contents
                 self._add_depth_to_buffer(
-                    np.array(msg.data, copy=True, dtype=np.float32).reshape((msg.height, msg.width)),
-                    msg.depth_min,
-                    msg.depth_max
+                    np.array(msg.data, copy=True, dtype=np.uint16).reshape((msg.height, msg.width))
                 )
 
             while True:
@@ -84,22 +82,8 @@ class VirtualCameraSource(CameraSource):
         rgb_frame = cv2.cvtColor(rgb_np[::-1], cv2.COLOR_RGB2BGR)
         self._latest_rgb = rgb_frame
 
-    def _add_depth_to_buffer(self, depth_np: np.ndarray, depth_min: float, depth_max: float) -> None:
-        depth_frame = self._depth_to_colormap(depth_np[::-1], depth_min, depth_max)
-        self._latest_depth = depth_frame
-
-    def _depth_to_colormap(self, depth_np: np.ndarray, depth_min: float, depth_max: float) -> np.ndarray:
-        rng = depth_max - depth_min or 1.0
-        alpha = 255.0 / rng
-        beta = -depth_min * alpha
-
-        u8 = cv2.convertScaleAbs(depth_np, alpha=alpha, beta=beta)
-        colormap = cv2.applyColorMap(u8, cv2.COLORMAP_TURBO) # TODO: Maybe its COLORMAP_JET -> see what d345i uses.
-
-        # Black out pixels that carried no valid depth return.
-        colormap[(depth_np <= 0.0) | ~np.isfinite(depth_np)] = 0
-
-        return colormap
+    def _add_depth_to_buffer(self, depth_np: np.ndarray) -> None:
+        self._latest_depth = depth_np[::-1]
 
     @override
     def _get_frames(self) -> FrameResult:
