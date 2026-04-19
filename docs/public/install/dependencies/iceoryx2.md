@@ -13,7 +13,7 @@ cd iceoryx2
 git checkout v0.8.1
 ```
 
-## Build Instructions - CXX
+## Build Instructions - C++
 
 Assuming you are at the repository root.
 
