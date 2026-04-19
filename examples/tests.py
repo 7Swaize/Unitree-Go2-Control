@@ -14,7 +14,7 @@ class Tests:
 
         self.controller.add_module(ModuleType.AUDIO)
         self.controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
-            "depth": CameraSourceFactory.create_depth_camera()
+            "sim": CameraSourceFactory.create_virtual_camera()
         }))
         
         self.controller.video.start_stream_server()
@@ -60,7 +60,7 @@ class Tests:
                     continue
                 
                 cv2.imshow("RealSense Depth Camera", frame_result.color)
-                #self.controller.video.send_frame(frame_result.depth)
+                self.controller.video.send_frame(frame_result.color)
 
                 key = cv2.waitKey(10) & 0xFF
                 if key == ord('q'):
@@ -81,8 +81,8 @@ class Tests:
         time.sleep(3)
         self.controller.movement.stand_up()
         time.sleep(5)
-        self.controller.movement.rotate(4)
-        self.controller.movement.rotate(4)
+        self.controller.movement.move(1)
+        time.sleep(3)
         self.controller.movement.rotate(4)
 
     def shutdown_callback(self):
@@ -92,4 +92,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_streaming()
+    tests.test_movement()
