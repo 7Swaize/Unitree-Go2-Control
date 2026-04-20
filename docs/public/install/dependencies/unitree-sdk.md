@@ -2,7 +2,7 @@
 
 Installation directions adapted from: [Unitree SDK2 Python README](https://github.com/unitreerobotics/unitree_sdk2_python/blob/master/README.md)
 
-## Clone the repository
+## Clone the Repository
 
 ```bash
 git clone https://github.com/unitreerobotics/unitree_sdk2_python.git
