@@ -1,7 +1,9 @@
+import math
 import time
 import cv2
 import numpy as np
 
+from go2sim import TerrainGenerator, GeometryType
 from go2.core import Go2Controller, ModuleType, HardwareType
 from go2.modules.video import CameraSourceFactory
 
@@ -85,6 +87,24 @@ class Tests:
         time.sleep(3)
         self.controller.movement.rotate(4)
 
+    def test_scene_construction(self):
+        tg = TerrainGenerator()
+
+        tg.reset_to_base()
+
+        # Slope
+        tg.add_geometry(position=[2.0, 2.0, 0.5], euler=[0.0, 30, 0.0], size=[3, 1.5, 0.1], geo_type=GeometryType.BOX)
+
+        tg.add_stairs(init_pos=[1.0, 4.0, 0.0], yaw=0.0)
+        tg.add_suspend_stairs(init_pos=[1.0, 6.0, 0.0], yaw=0.0)
+
+        tg.add_rough_ground(init_pos=[-2.5, 5.0, 0.0], euler=[0, 0, 0.0], nums=[10, 8])
+
+        # rotation represented as XYZ degrees input. 
+        tg.add_aruco_marker(position=[2, 0.0, 0.5], euler=[0, 90, 0], size=[1, 1.5, 0.1], marker_num=2)
+
+        tg.save()
+
     def shutdown_callback(self):
         cv2.destroyAllWindows()
         time.sleep(1)
@@ -92,4 +112,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_movement()
+    tests.test_scene_construction()
