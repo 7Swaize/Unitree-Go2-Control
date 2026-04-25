@@ -1,4 +1,5 @@
 import iceoryx2 as iox2
+from typing import Tuple
 from typing_extensions import override
 from iceoryx_interfaces.mappings import SportCommand
 from iceoryx_interfaces.qos import SportQoS
@@ -102,6 +103,142 @@ class VirtualHardware(HardwareInterface):
 
         sample.send()
    
+
+    @override
+    def _damp(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _balance_stand(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _recovery_stand(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _euler(self, roll: float, pitch: float, yaw: float) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _sit(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _rise_sit(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _speed_level(self, level: int) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _hello(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _stretch(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _content(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _dance1(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _dance2(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _switch_joystick(self, on: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _pose(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _scrape(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _front_flip(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _front_jump(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _front_pounce(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _heart(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _left_flip(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _back_flip(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _free_walk(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _free_bound(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _free_jump(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _free_avoid(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _walk_upright(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _cross_step(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _static_walk(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _trot_run(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _hand_stand(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _classic_walk(self, flag: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _auto_recovery_set(self, enabled: bool) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _auto_recovery_get(self) -> Tuple[int, bool | None]:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
+
+    @override
+    def _switch_avoid_mode(self) -> None:
+        raise NotImplementedError("Virtual hardware does not support this command yet.")
 
     @override
     def _shutdown(self) -> None:

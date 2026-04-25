@@ -1,4 +1,5 @@
 import sys
+from typing import Tuple
 from typing_extensions import override
 
 from unitree_sdk2py.core.channel import ChannelFactoryInitialize
@@ -74,3 +75,176 @@ class NativeHardware(HardwareInterface):
     def _stop_move(self) -> None:
         if self._sport_client:
             self._sport_client.StopMove()
+
+    @override
+    def _damp(self) -> None:
+        if self._sport_client:
+            self._sport_client.Damp()
+
+    @override
+    def _balance_stand(self) -> None:
+        if self._sport_client:
+            self._sport_client.BalanceStand()
+
+    @override
+    def _recovery_stand(self) -> None:
+        if self._sport_client:
+            self._sport_client.RecoveryStand()
+
+    @override
+    def _euler(self, roll: float, pitch: float, yaw: float) -> None:
+        if self._sport_client:
+            self._sport_client.Euler(roll, pitch, yaw)
+
+    @override
+    def _sit(self) -> None:
+        if self._sport_client:
+            self._sport_client.Sit()
+
+    @override
+    def _rise_sit(self) -> None:
+        if self._sport_client:
+            self._sport_client.RiseSit()
+
+    @override
+    def _speed_level(self, level: int) -> None:
+        if self._sport_client:
+            self._sport_client.SpeedLevel(level)
+
+    @override
+    def _hello(self) -> None:
+        if self._sport_client:
+            self._sport_client.Hello()
+
+    @override
+    def _stretch(self) -> None:
+        if self._sport_client:
+            self._sport_client.Stretch()
+
+    @override
+    def _content(self) -> None:
+        if self._sport_client:
+            self._sport_client.Content()
+
+    @override
+    def _dance1(self) -> None:
+        if self._sport_client:
+            self._sport_client.Dance1()
+
+    @override
+    def _dance2(self) -> None:
+        if self._sport_client:
+            self._sport_client.Dance2()
+
+    @override
+    def _switch_joystick(self, on: bool) -> None:
+        if self._sport_client:
+            self._sport_client.SwitchJoystick(on)
+
+    @override
+    def _pose(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.Pose(flag)
+
+    @override
+    def _scrape(self) -> None:
+        if self._sport_client:
+            self._sport_client.Scrape()
+
+    @override
+    def _front_flip(self) -> None:
+        if self._sport_client:
+            self._sport_client.FrontFlip()
+
+    @override
+    def _front_jump(self) -> None:
+        if self._sport_client:
+            self._sport_client.FrontJump()
+
+    @override
+    def _front_pounce(self) -> None:
+        if self._sport_client:
+            self._sport_client.FrontPounce()
+
+    @override
+    def _heart(self) -> None:
+        if self._sport_client:
+            self._sport_client.Heart()
+
+    @override
+    def _left_flip(self) -> None:
+        if self._sport_client:
+            self._sport_client.LeftFlip()
+
+    @override
+    def _back_flip(self) -> None:
+        if self._sport_client:
+            self._sport_client.BackFlip()
+
+    @override
+    def _free_walk(self) -> None:
+        if self._sport_client:
+            self._sport_client.FreeWalk()
+
+    @override
+    def _free_bound(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.FreeBound(flag)
+
+    @override
+    def _free_jump(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.FreeJump(flag)
+
+    @override
+    def _free_avoid(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.FreeAvoid(flag)
+
+    @override
+    def _walk_upright(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.WalkUpright(flag)
+
+    @override
+    def _cross_step(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.CrossStep(flag)
+
+    @override
+    def _static_walk(self) -> None:
+        if self._sport_client:
+            self._sport_client.StaticWalk()
+
+    @override
+    def _trot_run(self) -> None:
+        if self._sport_client:
+            self._sport_client.TrotRun()
+
+    @override
+    def _hand_stand(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.HandStand(flag)
+
+    @override
+    def _classic_walk(self, flag: bool) -> None:
+        if self._sport_client:
+            self._sport_client.ClassicWalk(flag)
+
+    @override
+    def _auto_recovery_set(self, enabled: bool) -> None:
+        if self._sport_client:
+            self._sport_client.AutoRecoverySet(enabled)
+
+    @override
+    def _auto_recovery_get(self) -> Tuple[int, bool | None]:
+        if self._sport_client:
+            return self._sport_client.AutoRecoveryGet()
+        return 1, None
+
+    @override
+    def _switch_avoid_mode(self) -> None:
+        if self._sport_client:
+            self._sport_client.SwitchAvoidMode()
+        
+    
