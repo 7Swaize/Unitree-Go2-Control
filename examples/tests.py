@@ -1,4 +1,4 @@
-import math
+import os
 import time
 import cv2
 import numpy as np
@@ -105,6 +105,12 @@ class Tests:
 
         tg.save()
 
+    def test_scene_import(self):
+        tg = TerrainGenerator()
+        tg.reset_to_base()
+
+        tg.load_scene_from_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scene.xml"))
+
     def shutdown_callback(self):
         cv2.destroyAllWindows()
         time.sleep(1)
@@ -112,4 +118,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_scene_construction()
+    tests.test_scene_import()
