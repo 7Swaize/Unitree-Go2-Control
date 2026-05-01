@@ -80,7 +80,7 @@ apt-get install -y cmake g++ build-essential libyaml-cpp-dev libeigen3-dev libbo
 Clone the repository.
 
 ```bash
-https://github.com/unitreerobotics/unitree_sdk2.git
+git clone https://github.com/unitreerobotics/unitree_sdk2.git
 cd unitree_sdk2
 ```
 

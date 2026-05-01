@@ -25,7 +25,10 @@ if os.environ.get("DEBUG") == "1":
         "-fsanitize=address,undefined",
     ]
 else:
-    extra_compile_args += ["-O3"]
+    extra_compile_args += [
+        "-Ofast",
+        "-fopenmp-simd"
+    ]
 
 
 # https://numpy.org/devdocs/user/c-info.ufunc-tutorial.html

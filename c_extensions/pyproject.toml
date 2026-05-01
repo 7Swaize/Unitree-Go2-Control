@@ -13,6 +13,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fast_pointcloud"
 version = "0.1.0"
+description = "PointCloud filtering utility written in C"
+authors = [
+    { name="7Swaize" }
+]
 dependencies = [
     "numpy>=2.0"
 ]

@@ -25,15 +25,14 @@ void build_histogram(const uint64_t* keys, Py_ssize_t N, int pass, Py_ssize_t* h
         }
 
         #pragma omp for schedule(static)
-        for (int b = 0; b < RADIX; b += 2) { // NEON supports 128-bit vectors. Code just converted from AVX 256-bit register impl
-            uint64x2_t sum = vdupq_n_u64(0);
+        for (int b = 0; b < RADIX; b++) { // NEON supports 128-bit vectors. Code just converted from AVX 256-bit register impl
+            Py_ssize_t sum = 0;
 
             for (int t = 0; t < nthreads; t++) {
-                uint64x2_t tmp = vld1q_u64((uint64_t*)&thist[t * RADIX + b]);
-                sum = vaddq_u64(sum, tmp);
+                sum += thist[t * RADIX + b];
             }
 
-            vst1q_u64((uint64_t*)&hist[b], sum);
+            hist[b] = sum;
         }
     }
 
