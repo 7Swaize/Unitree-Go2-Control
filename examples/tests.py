@@ -86,6 +86,8 @@ class Tests:
         self.controller.movement.move(1)
         time.sleep(3)
         self.controller.movement.rotate(4)
+        time.sleep(5)
+        self.controller.movement.stand_down()
 
     def test_scene_construction(self):
         tg = TerrainGenerator()
@@ -105,11 +107,6 @@ class Tests:
 
         tg.save()
 
-    def test_scene_import(self):
-        tg = TerrainGenerator()
-        tg.reset_to_base()
-
-        tg.load_scene_from_path(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scene.xml"))
 
     def shutdown_callback(self):
         cv2.destroyAllWindows()
@@ -118,4 +115,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_scene_import()
+    tests.test_movement()
