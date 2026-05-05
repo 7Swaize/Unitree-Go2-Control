@@ -114,21 +114,3 @@ class LidarFilterNode(Node):
     def send_to_bridge(self, cloud_filtered: np.ndarray, src_pc_header: Header) -> None:
         stamp_ns = src_pc_header.stamp.sec * 1_000_000_000 + src_pc_header.stamp.nanosec
         self._bridge.send_filtered(stamp_ns, cloud_filtered)
-
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    try:
-        node = LidarFilterNode()
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    except Exception as e:
-        print(f"Error running lidar processor: {e}")
-    finally:
-        rclpy.shutdown()
-
-
-if __name__ == "__main__":
-    main()

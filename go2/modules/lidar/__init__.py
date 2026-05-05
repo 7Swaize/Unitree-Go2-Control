@@ -1,3 +1,5 @@
 from .lidar_module import LIDARModule
 
-__all__ = ["LIDARModule"]
+__all__ = [
+	"LIDARModule"
+]

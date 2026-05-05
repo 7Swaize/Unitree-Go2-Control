@@ -1,4 +1,5 @@
 import os
+import sys
 import signal
 import subprocess
 import numpy as np
@@ -7,64 +8,70 @@ from typing_extensions import override
 
 from ...core.module import DogModule
 from .callback_dispatcher import CallbackDispatcher
-from .zmq_receiver import ZMQReceiver
+from .iox_receiver import IoxReceiver
+
 
 class LIDARModule(DogModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("LIDAR")
-        self.ros_proc = None
-        self.dispatcher = None
-        self.zmq_receiver = None
-
+        self._ros_proc = None
+        self._dispatcher = None
+        self._iox_receiver = None
 
     @override
-    def _initialize(self):
+    def _initialize(self) -> None:
         if self._initialized:
             return
-    
-        self.launch_ros2_internal()
-        self.launch_ros2_bridge()
+
+        self._launch_ros()
+        self._launch_bridge()
+
         self._initialized = True
 
-    
-    def launch_ros2_bridge(self) -> None:
-        self.dispatcher = CallbackDispatcher()
-        self.zmq_receiver = ZMQReceiver("tcp://localhost:5555", self.dispatcher)
+    def _launch_ros(self) -> None:
+        kwargs = dict()
+        if sys.platform == "win32":
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        else:
+            # To detach child process: https://stackoverflow.com/questions/45911705/why-use-os-setsid-in-python
+            kwargs["start_new_session"] = True 
 
-        self.dispatcher.start()
-        self.zmq_receiver.start()
-
-
-    def launch_ros2_internal(self) -> None:
-        self.ros_proc = subprocess.Popen(
+        self._ros_proc = subprocess.Popen(
             ["ros2", "launch", "bringup", "lidar_processor.launch.py"],
-            preexec_fn=os.setsid # TODO: Remove: https://stackoverflow.com/questions/42257512/difference-between-subprocess-popen-preexec-fn-and-start-new-session-in-python
+            **kwargs
         )
 
+    def _launch_bridge(self) -> None:
+        self._dispatcher = CallbackDispatcher()
+        self._iox_receiver = IoxReceiver(self._dispatcher)
 
-    def register_decoded_pointcloud_callback(self, callback: Callable[[int, np.ndarray], Any]) -> None:
-        self.dispatcher.register_decoded(callback)
+        self._iox_receiver.start()
 
-    
-    def register_filtered_pointcloud_callback(self, callback: Callable[[int, np.ndarray], Any]) -> None:
-        self.dispatcher.register_filtered(callback)
-        
+
+    def register_decoded_pointcloud_callback(self, callback: Callable[[int, np.ndarray], None]) -> None:
+        self._dispatcher._register_decoded(callback)
+
+    def register_filtered_pointcloud_callback(self, callback: Callable[[int, np.ndarray], None]) -> None:
+        self._dispatcher._register_filtered(callback)
+
+    def register_synced_pointcloud_callback(self, callback: Callable[[int, np.ndarray, np.ndarray], None]) -> None:
+        self._dispatcher._register_synced(callback)
+
 
     @override
-    def _shutdown(self):
-        if self.ros_proc and self.ros_proc.poll() is None:
+    def _shutdown(self) -> None:
+        if self._ros_proc and self._ros_proc.poll() is None:
             try:
-                os.killpg(os.getpgid(self.ros_proc.pid), signal.SIGINT)
-                self.ros_proc.wait(timeout=5)
+                if sys.platform == "win32":
+                    proc.send_signal(signal.CTRL_BREAK_EVENT)
+                else:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGINT)
+                self._ros_proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                os.killpg(os.getpgid(self.ros_proc.pid), signal.SIGTERM)
-                self.ros_proc.wait(timeout=5)  
-        
-        self.ros_proc = None
-        
-        if self.zmq_receiver:
-            self.zmq_receiver.shutdown()
-            self.zmq_receiver.join(timeout=2)
+                proc.terminate()
+                self._ros_proc.wait(timeout=5)
 
-        if self.dispatcher:
-            self.dispatcher.shutdown()
+        if self._iox_receiver:
+            self._iox_receiver.shutdown()
+            self._iox_receiver.join(timeout=2)
+

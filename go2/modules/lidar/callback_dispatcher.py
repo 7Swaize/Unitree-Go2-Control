@@ -1,60 +1,43 @@
 import threading
 import queue
 import numpy as np
+
 from typing import Any, Callable
 from typing_extensions import override
 
-
-class CallbackDispatcher(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True)
-        self._decoded_callbacks: list[Callable[[int, np.ndarray], Any]] = []
-        self._filtered_callbacks: list[Callable[[int, np.ndarray], Any]] = []
-
-        self._decoded_queue: queue.Queue[tuple[int, np.ndarray]] = queue.Queue(maxsize=5)
-        self._filtered_queue: queue.Queue[tuple[int, np.ndarray]] = queue.Queue(maxsize=5)
-
-        self._running = threading.Event()
-        self._running.set()
+from .utils.exact_synchronizer import ExactSynchronizer
 
 
-    def register_decoded(self, cb: Callable[[int, np.ndarray], Any]) -> None:
+class CallbackDispatcher:
+    def __init__(self) -> None:
+        self._decoded_callbacks: list[Callable[[int, np.ndarray], None]] = []
+        self._filtered_callbacks: list[Callable[[int, np.ndarray], None]] = []
+        self._sync_callbacks: list[Callable[[int, np.ndarray, np.ndarray], None]]
+
+        self._sync = ExactSynchronizer[int, np.ndarray](self._emit_synced, max_size=5)
+
+
+    def _register_decoded(self, cb: Callable[[int, np.ndarray], None]) -> None:
         self._decoded_callbacks.append(cb)
 
-
-    def register_filtered(self, cb: Callable[[int, np.ndarray], Any]) -> None:
+    def _register_filtered(self, cb: Callable[[int, np.ndarray], None]) -> None:
         self._filtered_callbacks.append(cb)
 
-    
-    def emit(self, topic: str, stamp: int, array: np.ndarray) -> None:
-        try:
-            if topic == "decoded_topic":
-                self._decoded_queue.put_nowait((stamp, array))
-            elif topic == "filtered_topic":
-                self._filtered_queue.put_nowait((stamp, array))
-        except queue.Full:
-            pass # I currently just drop because of backlog
+    def _register_synced(self, cb: Callable[[int, np.ndarray, np.ndarray], None]) -> None:
+        self._sync_callbacks.append(cb)
 
+    def _emit_decoded(self, stamp_ns: int, array: np.ndarray) -> None:
+        self._sync.add_left(stamp_ns, array)
+        
+        for cb in self._decoded_callbacks:
+            cb(stamp_ns, array)
 
-    @override
-    def run(self) -> None:
-        while self._running.is_set():
-            self._drain_queue(self._decoded_queue, self._decoded_callbacks)
-            self._drain_queue(self._filtered_queue, self._filtered_callbacks)
+    def _emit_filtered(self, stamp_ns: int, array: np.ndarray) -> None:
+        self._sync.add_right(stamp_ns, array)
+        
+        for cb in self._filtered_callbacks:
+            cb(stamp_ns, array)
 
-
-    def _drain_queue(self, q: queue.Queue, callbacks: list[Callable[[int, np.ndarray], Any]]) -> None:
-        try:
-            stamp, arr = q.get(timeout=0.05)
-            for cb in callbacks:
-                try:
-                    cb(stamp, arr)
-                except Exception as e:
-                    print(f"[CallbackDispatcher] callback error: {e}")
-
-        except queue.Empty:
-            pass
-
-
-    def shutdown(self) -> None:
-        self._running.clear()
+    def _emit_synced(self, stamp_ns: int, decoded: np.ndarray, filtered: np.ndarray) -> None:
+        for cb in self._filtered_callbacks:
+            cb(stamp_ns, decoded, filtered)

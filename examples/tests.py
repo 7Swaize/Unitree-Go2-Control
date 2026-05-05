@@ -14,6 +14,7 @@ class Tests:
         self.controller = Go2Controller(hardware_type=HardwareType.VIRTUAL)
         self.controller.register_cleanup_callback(self.shutdown_callback)
 
+        self.controller.add_module(ModuleType.LIDAR)
         self.controller.add_module(ModuleType.AUDIO)
         self.controller.add_module(ModuleType.VIDEO, camera_source=CameraSourceFactory.create_camera_group({
             "sim": CameraSourceFactory.create_virtual_camera()
@@ -107,6 +108,9 @@ class Tests:
 
         tg.save()
 
+    def test_lidar(self):
+        pass
+
 
     def shutdown_callback(self):
         cv2.destroyAllWindows()
@@ -115,4 +119,4 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
-    tests.test_movement()
+    

@@ -196,21 +196,3 @@ class LidarDecoderNode(Node):
             points[:, 3] = intensity 
 
         self._bridge.send_decoded(stamp_ns, points)
-
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    try:
-        node = LidarDecoderNode()
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    except Exception as e:
-        print(f"Error running lidar processor: {e}")
-    finally:
-        rclpy.shutdown()
-
-
-if __name__ == "__main__":
-    main()

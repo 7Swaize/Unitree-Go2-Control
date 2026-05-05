@@ -137,7 +137,7 @@ def _register_all_default_modules():
         ModuleType.LIDAR,
         LIDARModule,
         "LIDAR Capture",
-        _requires_native_hardware=True
+        _requires_native_hardware=False
     ))
 
 

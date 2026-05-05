@@ -23,8 +23,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'lidar_decoder_node = lidar_processor.lidar_decoder_node:main',
-            'lidar_filter_node = lidar_processor.lidar_filter_node:main'  
+            'combined_lidar_node = lidar_processor.multi_node_launcher:main'
         ],
     },
 )
