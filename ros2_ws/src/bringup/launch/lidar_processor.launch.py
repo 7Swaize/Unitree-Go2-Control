@@ -22,11 +22,5 @@ def generate_launch_description():
             name='lidar_filter',
             parameters=[params_file],
             output='screen'
-        ),
-        Node(
-            package='lidar_processor',
-            executable='ros_bridge_node',
-            name='ros_bridge',
-            output='screen'
         )
     ])

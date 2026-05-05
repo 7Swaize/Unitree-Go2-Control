@@ -4,7 +4,7 @@ package_name = 'lidar_processor'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.1.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -13,10 +13,9 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='gsmst',
-    maintainer_email='rahejasachit@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='7Swaize',
+    description='ROS2 package for processing lidar data from Unitree Go2 robot',
+    license='Apache-2.0',
     extras_require={
         'test': [
             'pytest',
@@ -25,8 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'lidar_decoder_node = lidar_processor.lidar_decoder_node:main',
-            'lidar_filter_node = lidar_processor.lidar_filter_node:main',
-            'ros_bridge_node = lidar_processor.ros_bridge_node:main'  
+            'lidar_filter_node = lidar_processor.lidar_filter_node:main'  
         ],
     },
 )

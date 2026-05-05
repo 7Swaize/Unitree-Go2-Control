@@ -28,9 +28,9 @@ class TestLidarDecoderNode(unittest.TestCase):
 
             with patch('lidar_processor.lidar_decoder_node.Node.__init__', return_value=None):
                 node = LidarDecoderNode.__new__(LidarDecoderNode)
-                node.config = CollectionConfig(**self.config_params)
-                node.decoded_pointcloud_pub = Mock(publish=lambda msg: self.received_messages.append(msg))
-                node.pc_layout = None
+                node._config = CollectionConfig(**self.config_params)
+                node._decoded_pointcloud_pub = Mock(publish=lambda msg: self.received_messages.append(msg))
+                node._pc_layout = None
                 
                 node.get_logger = MagicMock(return_value=MagicMock(
                     info=lambda msg: print(msg, file=sys.stdout),
@@ -73,7 +73,7 @@ class TestLidarDecoderNode(unittest.TestCase):
         ], dtype=np.float32)
         cloud = self.create_mock_pointcloud2(xyz_data)
 
-        self.node.lidar_callback_optimized(cloud) if self.node.config.optimize_collection else self.node.lidar_callback_unoptimized(cloud)
+        self.node.lidar_callback_optimized(cloud) if self.node._config.optimize_collection else self.node.lidar_callback_unoptimized(cloud)
         
         self.assertGreater(len(self.received_messages), 0)
         filtered_msg: LidarDecoded = self.received_messages[0]
@@ -92,7 +92,7 @@ class TestLidarDecoderNode(unittest.TestCase):
         intensity_data = np.array([100.0, 200.0], dtype=np.float32)
         cloud = self.create_mock_pointcloud2(xyz_data, intensity_data)
 
-        self.node.lidar_callback_optimized(cloud) if self.node.config.optimize_collection else self.node.lidar_callback_unoptimized(cloud)
+        self.node.lidar_callback_optimized(cloud) if self.node._config.optimize_collection else self.node.lidar_callback_unoptimized(cloud)
 
         self.assertGreater(len(self.received_messages), 0)
         filtered_msg: LidarDecoded = self.received_messages[0]
@@ -111,7 +111,7 @@ class TestLidarDecoderNode(unittest.TestCase):
         intensity_data = np.array([], dtype=np.float32).reshape(0, 1)
         cloud = self.create_mock_pointcloud2(xyz_data, intensity_data)
 
-        self.node.lidar_callback_optimized(cloud) if self.node.config.optimize_collection else self.node.lidar_callback_unoptimized(cloud)
+        self.node.lidar_callback_optimized(cloud) if self.node._config.optimize_collection else self.node.lidar_callback_unoptimized(cloud)
 
         self.assertGreater(len(self.received_messages), 0)
         filtered_msg: LidarDecoded = self.received_messages[0]
