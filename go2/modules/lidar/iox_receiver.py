@@ -66,5 +66,5 @@ class IoxReceiver(threading.Thread):
                 )
 
 
-    def shutdown(self) -> None:
+    def _shutdown(self) -> None:
         self._stop_event.set()

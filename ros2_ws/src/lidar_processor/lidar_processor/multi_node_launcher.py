@@ -1,5 +1,5 @@
 import rclpy
-from rclpy.executors import SingleThreadedExecutor
+from rclpy.executors import SingleThreadedExecutor, ExternalShutdownException
 
 from .lidar_decoder_node import LidarDecoderNode
 from .lidar_filter_node import LidarFilterNode
@@ -17,7 +17,7 @@ def main(args=None):
 
     try:
         executor.spin()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     except Exception as e:
         print(f"Error running lidar processor: {e}")
@@ -25,4 +25,5 @@ def main(args=None):
         executor.shutdown()
         decoder_node.destroy_node()
         filter_node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()

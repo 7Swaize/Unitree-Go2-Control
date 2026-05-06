@@ -63,15 +63,17 @@ class LIDARModule(DogModule):
         if self._ros_proc and self._ros_proc.poll() is None:
             try:
                 if sys.platform == "win32":
-                    proc.send_signal(signal.CTRL_BREAK_EVENT)
+                    self._ros_proc.send_signal(signal.CTRL_BREAK_EVENT)
                 else:
-                    os.killpg(os.getpgid(proc.pid), signal.SIGINT)
+                    os.killpg(os.getpgid(self._ros_proc.pid), signal.SIGINT)
                 self._ros_proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                proc.terminate()
+                self._ros_proc.terminate()
                 self._ros_proc.wait(timeout=5)
 
         if self._iox_receiver:
-            self._iox_receiver.shutdown()
+            self._iox_receiver._shutdown()
             self._iox_receiver.join(timeout=2)
+
+        self._initialized = False
 

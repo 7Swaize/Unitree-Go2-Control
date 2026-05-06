@@ -119,4 +119,5 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
+    tests.controller.safe_shutdown()
     
