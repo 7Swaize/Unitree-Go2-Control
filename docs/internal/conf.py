@@ -23,7 +23,8 @@ extensions = [
 autodoc_mock_imports = [
     "pyrealsense2",
     "unitree_sdk2py",
-    "iceoryx2"
+    "iceoryx2",
+    "iceoryx_interfaces"
 ]
 
 # Autosummary settings
