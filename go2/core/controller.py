@@ -297,12 +297,20 @@ class Go2Controller:
             - Executes registered cleanup callbacks
             - Releases hardware resources
 
+        Important
+        ---------
+        Select modules depend on ROS2 nodes. These lifetime of these nodes must handled cleanly on process termination.
+        Therefore, it is **critical** that students **ALWAYS** call :meth:`safe_shutdown` to ensure proper shutdown of ROS2.
+        This called automatically on process crash (via `SIGINT` or `SIGTERM`). However, it is **fully** the 
+        user's responsibility to call this method upon normal (error free) script exit.
+        Failing to follow this can (**and probably will**) result in zombie ROS2 processes, unreleased resources, and UB.
+
         Notes
         -----
-        This method is **idempotent** and may be safely called multiple times.
+        - This method is **idempotent** and may be safely called multiple times.
         """
         print("\n[Controller] Starting safe shutdown...")
-            
+
         with self._shutdown_lock:
             if self._shutdown_event.is_set():
                 return

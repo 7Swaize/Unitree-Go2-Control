@@ -1,5 +1,5 @@
-LiDAR Control Module - NOT IMPLEMENTED
-======================================
+LiDAR Control Module
+====================
 
 Access LiDAR sensor data from the Unitree Go2 robot.
 

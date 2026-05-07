@@ -51,8 +51,7 @@ class VideoModule(DogModule):
         and should not be called directly by users.
 
         This method initializes the underlying camera and prepares
-        the streaming system. It is called automatically during
-        construction and does not need to be called by users.
+        the streaming system.
         """
         if self._initialized:
             return
