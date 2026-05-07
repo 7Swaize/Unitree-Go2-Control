@@ -6,11 +6,10 @@ from ...core.module import DogModule
 
 class AudioModule(DogModule):
     """
-    High-level text-to-speech interface for users. This is called internally,
-    and should not be accessed directly by users.
+    Users should not access or construct this class directly. 
+    Rather, they should access it through a :class:`~core.controller.Go2Controller` instance.
 
-    ``AudioModule`` allows users to easily play audio or speech
-    using simple text commands. It supports both **blocking** and **asynchronous** playback.
+    ``AudioModule`` supports both **blocking** and **asynchronous** playback.
 
     Notes
     -----

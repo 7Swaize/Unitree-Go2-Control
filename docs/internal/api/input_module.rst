@@ -1,10 +1,10 @@
 Controller Input Module
 =======================
 
-Handles remote controller input for the robot. This module can only function on the Unitree-Go2, with a correctly paired remote controller. 
+Handles remote controller input for the robot.
 
-Users should not access or construct this class directly.
-Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
+This model is really only functional and practical when on native hardware, paired with the official Unitree Go2 Controller.
+It doesn't do anything on virtual hardware.
 
 This module allows users to:
     - Access the current controller state
@@ -13,6 +13,7 @@ This module allows users to:
 
 Internally, it wraps the low-level Unitree SDK or controller parser, but users
 interact only with the high-level :class:`~modules.input.input_module.InputModule` interface.
+
 
 .. autoclass:: go2.modules.input.input_module.InputModule
    :members:

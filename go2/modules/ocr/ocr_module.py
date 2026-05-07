@@ -7,7 +7,10 @@ from ...core.module import DogModule
 
 
 class OCRModule(DogModule):
-    """Handles optical character recognition"""
+    """
+    Users should not access or construct this class directly.
+    Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
+    """
 
     def __init__(self) -> None:
         super().__init__("OCR")

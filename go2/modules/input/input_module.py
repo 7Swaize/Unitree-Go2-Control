@@ -10,15 +10,9 @@ from ...communication.dds import DDSTopics
 
 class InputModule(DogModule):
     """
-    High-level interface for handling controller input. 
-    This model is really only functional and practical, when on native hardware. It doesn't do anything on virtual hardware.
-
-    Attributes
-    ----------
-    use_sdk : bool
-        Whether to use the Unitree SDK for input.
+    Users should not access or construct this class directly.
+    Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
     """
-    
     def __init__(self) -> None:
         super().__init__("Input")
 

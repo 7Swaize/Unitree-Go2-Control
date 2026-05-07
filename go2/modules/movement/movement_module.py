@@ -7,7 +7,8 @@ from ...hardware.hardware_interface import HardwareInterface
 
 class MovementModule(DogModule):
     """
-    High-level movement control for the robot.
+    Users should not access or construct this class directly.
+    Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
 
     Parameters
     ----------

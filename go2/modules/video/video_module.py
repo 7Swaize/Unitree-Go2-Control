@@ -12,14 +12,12 @@ from .frame_result import FrameResult, MultiFrameResult
 
 class VideoModule(DogModule):
     """
-    High-level video interface for users.
-
+    Users should not access or construct this class directly.
+    Rather, they should access it through the :class:`~core.controller.Go2Controller` instance.
+    
     ``VideoModule`` provides a simple API for:
         - Accessing camera frames
         - Streaming video to a browser via WebRTC
-
-    Users should interact **only** with this class and should not
-    directly use camera sources, streamers, or threading utilities.
 
     Parameters
     ----------
