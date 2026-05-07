@@ -25,7 +25,7 @@ class LIDARModule(DogModule):
     Notes
     -----
     - This module launches ROS2 nodes.
-      It is **critical** that students **ALWAYS** call :meth:`~core.controller.Go2Controller.safe_shutdown` after normal (error free) script exit.
+      It is **critical** that students **ALWAYS** call :meth:`Go2Controller.safe_shutdown` after normal (error free) script exit.
     """
 
     def __init__(self) -> None:
