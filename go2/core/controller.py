@@ -302,8 +302,7 @@ class Go2Controller:
         This method is **idempotent** and may be safely called multiple times.
         """
         print("\n[Controller] Starting safe shutdown...")
-        self.movement.stop()
-        
+            
         with self._shutdown_lock:
             if self._shutdown_event.is_set():
                 return

@@ -86,6 +86,8 @@ class Tests:
         time.sleep(5)
         self.controller.movement.move(1)
         time.sleep(3)
+        self.controller.movement.stop()
+        time.sleep(2)
         self.controller.movement.rotate(4)
         time.sleep(5)
         self.controller.movement.stand_down()
@@ -108,8 +110,41 @@ class Tests:
 
         tg.save()
 
-    def test_lidar(self):
-        pass
+    def add_aruko_markers(self):
+        tg = TerrainGenerator()
+
+        tg.reset_to_base()
+
+        num_markers = 6
+        radius = 3.0  # distance from origin
+        height = 0.4  # lift slightly above ground
+        size = [0.2, 0.2, 0.02]
+
+        for i in range(num_markers):
+            angle = 2 * np.pi * i / num_markers
+
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            z = height
+
+            # direction from marker -> origin
+            yaw = np.degrees(np.arctan2(-y, -x))
+            euler = [0.0, 90.0, yaw]
+
+            tg.add_aruco_marker(
+                position=[x, y, z],
+                euler=euler,
+                size=size,
+                marker_num=i
+            )
+
+        tg.save()
+
+    def test_rotation(self):
+        self.controller.movement.stand_up()
+        time.sleep(5)
+        self.controller.movement.move(1)
+        time.sleep(5)
 
 
     def shutdown_callback(self):
@@ -119,5 +154,5 @@ class Tests:
 
 if __name__ == '__main__':
     tests = Tests()
+    tests.test_movement()
     tests.controller.safe_shutdown()
-    

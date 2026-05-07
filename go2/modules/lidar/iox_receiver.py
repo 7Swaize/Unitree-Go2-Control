@@ -26,11 +26,21 @@ class IoxReceiver(threading.Thread):
         self._decoded_service = self._node.service_builder(iox2.ServiceName.new(LidarQoS.TOPIC_ROS_LIDAR_DECODED)) \
                                     .publish_subscribe(iox2.Slice[ctypes.c_double]) \
                                     .user_header(LidarHeader_) \
+                                    .max_publishers(LidarQoS.MAX_PUBLISHERS) \
+                                    .max_subscribers(LidarQoS.MAX_SUBSCRIBERS) \
+                                    .subscriber_max_buffer_size(LidarQoS.SUBSCRIBER_MAX_BUFFER_SIZE) \
+                                    .subscriber_max_borrowed_samples(LidarQoS.SUBSCRIBER_MAX_BORROWED_SAMPLES) \
+                                    .history_size(LidarQoS.HISTORY_SIZE) \
                                     .open_or_create()
 
         self._filtered_service = self._node.service_builder(iox2.ServiceName.new(LidarQoS.TOPIC_ROS_LIDAR_FILTERED)) \
                                     .publish_subscribe(iox2.Slice[ctypes.c_double]) \
                                     .user_header(LidarHeader_) \
+                                    .max_publishers(LidarQoS.MAX_PUBLISHERS) \
+                                    .max_subscribers(LidarQoS.MAX_SUBSCRIBERS) \
+                                    .subscriber_max_buffer_size(LidarQoS.SUBSCRIBER_MAX_BUFFER_SIZE) \
+                                    .subscriber_max_borrowed_samples(LidarQoS.SUBSCRIBER_MAX_BORROWED_SAMPLES) \
+                                    .history_size(LidarQoS.HISTORY_SIZE) \
                                     .open_or_create()
 
         self._decoded_sub = self._decoded_service.subscriber_builder().create()
