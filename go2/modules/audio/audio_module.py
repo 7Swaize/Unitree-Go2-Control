@@ -6,10 +6,10 @@ from ...core.module import DogModule
 
 class AudioModule(DogModule):
     """
+    ``AudioModule`` supports both **blocking** and **asynchronous** playback.
+
     Users should not access or construct this class directly. 
     Rather, they should access it through a :class:`~core.controller.Go2Controller` instance.
-
-    ``AudioModule`` supports both **blocking** and **asynchronous** playback.
 
     Notes
     -----
