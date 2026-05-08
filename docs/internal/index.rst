@@ -1,5 +1,5 @@
-Go2-Control Documentation - Part of GSMST
-=================================================
+Go2-Control Documentation
+=========================
 
 
 .. toctree::

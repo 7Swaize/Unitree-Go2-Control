@@ -3,6 +3,7 @@ Public API Documentation
 
 This section contains the public API documentation for users working with the Unitree Go2 robot.
 
+
 Core
 ----
 
@@ -12,6 +13,7 @@ The entry point for all robot control.
    :maxdepth: 2
 
    core
+
 
 Default Modules
 ---------------
@@ -23,6 +25,7 @@ These modules are **automatically available** upon instantiating the controller.
 
    movement_module
    input_module
+
 
 Optional Modules
 ----------------
@@ -36,6 +39,7 @@ These modules must be **explicitly added** using :meth:`Go2Controller.add_module
    audio_module
    lidar_module
    ocr_module
+
 
 State Machine & Architecture
 -----------------------------
