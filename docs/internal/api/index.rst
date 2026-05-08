@@ -27,7 +27,7 @@ These modules are **automatically available** upon instantiating the controller.
 Optional Modules
 ----------------
 
-These modules must be **explicitly added** using ``controller.add_module()``.
+These modules must be **explicitly added** using :meth:`Go2Controller.add_module()`.
 
 .. toctree::
    :maxdepth: 2
