@@ -17,6 +17,6 @@ For SDK examples, see [here](examples/examples.md).
 
 API documentation can be found [here](https://go2-control.readthedocs.io/en/latest/).
 
-[FAQ](docs/FAQ.md)
+[FAQ](docs/public/FAQ.md)
 
 [Directory Structure](docs/public/repo_structure.md)
